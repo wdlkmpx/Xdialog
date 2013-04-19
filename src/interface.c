@@ -37,6 +37,9 @@ extern Xdialog_data Xdialog;
 extern gboolean dialog_compat;
 
 /* Fixed font loading and character size (in pixels) initialisation */
+#ifdef USE_GTK2
+static PangoFontDescription *fixed_pango_font;
+#endif
 
 static GdkFont *fixed_font;
 static gint xmult = XSIZE_MULT;
@@ -99,6 +102,13 @@ static void font_init(void)
 		}
 		gtk_widget_destroy(window);
 	}
+#ifdef USE_GTK2	
+	fixed_pango_font = pango_font_description_new ();
+	pango_font_description_set_family (fixed_pango_font, "mono");
+	pango_font_description_set_size (fixed_pango_font, 10 * PANGO_SCALE);
+#else
+	fixed_pango_font = 0;
+#endif
 }
 
 /* Custom text wrapping (the GTK+ one is buggy) */
@@ -551,11 +561,12 @@ static GtkWidget *set_scrollable_text(void)
 	gtk_box_pack_start (GTK_BOX(Xdialog.vbox), scrollwin, TRUE, TRUE, 0);
 
 	text = gtk_text_view_new();
-#if 0
-	/* TODO: implement fixed font style support... */
+
 	if (Xdialog.fixed_font) {
+		gtk_widget_modify_font(text, fixed_pango_font);
+
 	}
-#endif
+
 	gtk_widget_show(text);
 	gtk_container_add(GTK_CONTAINER (scrollwin), text);
 	return text;
