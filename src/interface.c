@@ -876,6 +876,7 @@ void create_progress(gchar *optarg, gint leading, gint maxdots)
 	GtkAdjustment *adj;
 	int ceiling, i;
 	unsigned char temp[2];
+	size_t rresult;
 
 	if (maxdots <= 0)
 		ceiling = 100;
@@ -914,12 +915,18 @@ void create_progress(gchar *optarg, gint leading, gint maxdots)
 
 	/* Skip the characters to be ignored on the input stream */
 	if (leading < 0) {
-		for (i=1; i < -leading; i++)
-			fread(temp, sizeof(char), 1, stdin);
+		for (i=1; i < -leading; i++) {
+			rresult = fread(temp, sizeof(char), 1, stdin);
+			if (rresult < 0)
+				break;
+		}
 	} else if (leading > 0) {
 		for (i=1; i < leading; i++) {
 			temp[0] = temp[1] = 0;
-			fread(temp, sizeof(unsigned char), 1, stdin);
+			rresult = fread(temp, sizeof(unsigned char), 1, stdin);
+			if (rresult < 0)
+				break;
+
 			if (temp[0] >= ' ' || temp[0] == '\n')
 				strcatsafe(Xdialog.label_text, temp, MAX_LABEL_LENGTH);
 		}
