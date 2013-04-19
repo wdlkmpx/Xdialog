@@ -1203,7 +1203,11 @@ gboolean fontsel_exit(GtkObject *fontsel, gpointer client_data)
 
 gboolean calendar_exit(gpointer object, gpointer data)
 {
+#ifdef USE_GTK2
+	guint day, month, year;
+#else
 	gint day, month, year;
+#endif
 
 	gtk_calendar_get_date(GTK_CALENDAR(Xdialog.widget1), &year, &month, &day);
 	fprintf(Xdialog.output, "%02d/%02d/%d\n", day, month+1, year);
