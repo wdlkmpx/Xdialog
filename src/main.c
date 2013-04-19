@@ -268,7 +268,7 @@ static void print_help_info(char *name, char *errmsg)
 #endif
 
 	fprintf(stderr, "%s: %s !\n", cmd, errmsg);
-	fprintf(stderr, msg);
+	fprintf(stderr, "%s", msg);
 
 	if (strlen(msg) == HELP_MSG_SIZE-1)
 		fprintf(stderr, "\n\nHelp message truncated, please re-compile "\
