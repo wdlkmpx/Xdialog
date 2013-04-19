@@ -928,7 +928,7 @@ void create_progress(gchar *optarg, gint leading, gint maxdots)
 				break;
 
 			if (temp[0] >= ' ' || temp[0] == '\n')
-				strcatsafe(Xdialog.label_text, temp, MAX_LABEL_LENGTH);
+				strcatsafe(Xdialog.label_text, (char*)temp, MAX_LABEL_LENGTH);
 		}
 		gtk_label_set_text(GTK_LABEL(label), Xdialog.label_text);
 	}
