@@ -1085,11 +1085,24 @@ void create_textbox(gchar *optarg, gboolean editable)
 	if (infile) {
 		char buffer[1024];
 		int nchars;
+		gsize bytes_read = 0;
+		gsize bytes_written = 0;
+		GError* error = 0;
+		gchar* utf8 = 0;
 
 		do {
 			nchars = fread(buffer, 1, 1024, infile);
 #ifdef USE_GTK2
-			gtk_text_buffer_insert_at_cursor(text_buffer, buffer, nchars);
+			utf8 = g_convert_with_fallback(buffer, nchars, "UTF-8", "ISO-8859-1", "\357\277\275", &bytes_read, &bytes_written, &error);
+			if (error == NULL)
+			{
+				gtk_text_buffer_insert_at_cursor(text_buffer, utf8, nchars);
+			}
+			else
+			{
+				printf("Error converting to UTF-8: GConvertError(%02x): %s", error->code, error->message);
+			}
+			g_free(utf8);
 #else
 			gtk_text_insert(text, NULL, NULL, NULL, buffer, nchars);
 #endif
