@@ -1145,6 +1145,13 @@ void create_textbox(gchar *optarg, gboolean editable)
 	gtk_text_set_editable(text, editable);
 #endif
 
+#ifdef USE_GTK2
+    // position the cursor on the first line
+    GtkTextIter firstLineIter;
+    gtk_text_buffer_get_start_iter(text_buffer, &firstLineIter);
+    gtk_text_buffer_place_cursor(text_buffer, &firstLineIter);
+#endif
+
 	if (dialog_compat && !editable)
 		Xdialog.cancel_button = FALSE;
 
