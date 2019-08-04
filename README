@@ -124,7 +124,7 @@ Xdialog v1.4.6, 15/12/00: Bug fixes and further development by Thierry Godefroy
   position) is now optional and defaults to 0.
 
 - "--menu" has been renamed as "--menubox" but you still may use "--menu"
-  because abreviated options are allowed.
+  because abbreviated options are allowed.
 
 - The tailbox  widget is displayed as soon as Xdialog is invoked (it used to
   appear only once 1024 characters were read from the input file).
