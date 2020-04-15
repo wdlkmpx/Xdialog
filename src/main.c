@@ -295,12 +295,7 @@ static gboolean is_true(const char *var_name)
 	if ((env_var = getenv(var_name)) == NULL)
 		return FALSE;
 
-#ifdef HAVE_STRCASECMP
 	return (!strcasecmp(env_var, "true") || !strcmp(env_var, "1"));
-#else
-	return (!strcmp(env_var, "true") || !strcmp(env_var, "True") ||
-		!strcmp(env_var, "TRUE") || !strcmp(env_var, "1"));
-#endif
 }
 
 /* An equivalent to the g_log_default_handler() function of glib, with
@@ -1159,13 +1154,7 @@ show_again:
 				if (list_size > 1)
 					print_help_info(argv[0], "incorrect number of parameters");
 				if (list_size)
-#ifdef HAVE_STRCASECMP
 					Xdialog.checked = !strcasecmp(argv[optind++], "on");
-#else
-					Xdialog.checked = !strcmp(argv[optind], "on") ||
-				                          !strcmp(argv[optind], "On") ||
-				                          !strcmp(argv[optind++], "ON");
-#endif
 				break;
 			case T_BEEP:		/* --beep option */
 				Xdialog.beep |= BEEP_BEFORE;

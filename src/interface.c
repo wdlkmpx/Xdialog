@@ -618,7 +618,6 @@ static GtkWidget *set_spin_button(GtkWidget *hbox, gint min, gint max, gint defl
 
 static int item_status(GtkWidget *item, char *status, char *tag)
 {
-#ifdef HAVE_STRCASECMP
 		if (!strcasecmp(status, "on") && strlen(tag) != 0)
 			return 1;
 
@@ -626,19 +625,6 @@ static int item_status(GtkWidget *item, char *status, char *tag)
 			gtk_widget_set_sensitive(item, FALSE);
 			return -1;
 		}
-#else
-		if ((!strcmp(status, "on") ||
-		     !strcmp(status, "On") ||
-		     !strcmp(status, "ON")) && strlen(tag) != 0)
-			return 1;
-
-		if (!strcmp(status, "unavailable") ||
-		    !strcmp(status, "Unavailable") ||
-		    !strcmp(status, "UNAVAILABLE") || strlen(tag) == 0) {
-			gtk_widget_set_sensitive(item, FALSE);
-			return -1;
-		}
-#endif
 		return 0;
 }
 
