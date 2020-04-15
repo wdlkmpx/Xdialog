@@ -275,8 +275,8 @@ static GtkWidget *set_label(gchar *label_text, gboolean expand)
 						    Xdialog.icon_file);
 		if (pixmap != NULL) {
 			icon = gtk_pixmap_new(pixmap, mask);
-			gdk_pixmap_unref(pixmap);
-			gdk_pixmap_unref(mask);
+			g_object_unref(pixmap);
+			g_object_unref(mask);
 			gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 2);
 			gtk_widget_show(icon);
 			icon_width = icon->requisition.width + 4;
@@ -525,10 +525,10 @@ static GtkWidget *set_scrolled_window(GtkBox *box, gint border_width, gint xsize
 	gtk_widget_show(scrolled_window);
 
 	if (Xdialog.list_height > 0)
-		gtk_widget_set_usize(scrolled_window, xsize > 0 ? xsize*xmult : -1,
+		gtk_widget_set_size_request(scrolled_window, xsize > 0 ? xsize*xmult : -1,
 				     Xdialog.list_height * (ymult + spacing));
 	else
-		gtk_widget_set_usize(scrolled_window, xsize > 0 ? xsize*xmult : -1,
+		gtk_widget_set_size_request(scrolled_window, xsize > 0 ? xsize*xmult : -1,
 				     MIN(gdk_screen_height() - 15 * ymult,
 					 list_size * (ymult + spacing)));
 
@@ -600,7 +600,7 @@ static GtkWidget *set_spin_button(GtkWidget *hbox, gint min, gint max, gint defl
 	spin = gtk_spin_button_new(adjust, 0.5, 0);
 	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(spin), TRUE);
 	gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(spin), TRUE);
-	gtk_widget_set_usize(spin, (digits+4)*xmult, -1);
+	gtk_widget_set_size_request(spin, (digits+4)*xmult, -1);
 	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
 	gtk_widget_show(spin);
 	if (separator != NULL && strlen(separator) != 0) {
@@ -824,7 +824,7 @@ void create_tailbox(gchar *optarg)
 	set_backtitle(FALSE);
 
 	Xdialog.widget1 = set_scrollable_text();
-	gtk_widget_set_usize(Xdialog.widget1, 40*xmult, 15*ymult);
+	gtk_widget_set_size_request(Xdialog.widget1, 40*xmult, 15*ymult);
 	gtk_widget_grab_focus(Xdialog.widget1);
 	g_signal_connect (G_OBJECT(Xdialog.widget1), "key_press_event",
 			   G_CALLBACK(tailbox_keypress), NULL);
@@ -989,11 +989,11 @@ void create_textbox(gchar *optarg, gboolean editable)
 	}
 	llen += 4;
 	if (Xdialog.fixed_font)
-		gtk_widget_set_usize(Xdialog.widget1,
+		gtk_widget_set_size_request(Xdialog.widget1,
 				     MIN(llen*ffxmult, gdk_screen_width()-4*ffxmult),
 				     MIN(lcnt*ffymult, gdk_screen_height()-10*ffymult));
 	else
-		gtk_widget_set_usize(Xdialog.widget1,
+		gtk_widget_set_size_request(Xdialog.widget1,
 				     MIN(llen*xmult, gdk_screen_width()-4*xmult),
 				     MIN(lcnt*ymult, gdk_screen_height()-10*ymult));
 
@@ -1627,7 +1627,7 @@ void create_filesel(gchar *optarg, gboolean dsel_flag)
            the auto-completed filename. Finally, disable the file operation
            buttons to keep only the "make new directory" one. */
 	if (dsel_flag) {
-		gtk_widget_hide_all(GTK_WIDGET(GTK_WIDGET(filesel->file_list)->parent));
+		gtk_widget_hide(GTK_WIDGET(GTK_WIDGET(filesel->file_list)->parent));
 		gtk_widget_hide(GTK_WIDGET(filesel->selection_entry));
 		gtk_file_selection_set_filename(filesel, "");
 		gtk_widget_set_sensitive(GTK_WIDGET(filesel->fileop_del_file), FALSE);
