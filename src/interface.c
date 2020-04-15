@@ -631,7 +631,7 @@ static int item_status(GtkWidget *item, char *status, char *tag)
 static void set_timeout(void)
 {
 	if (Xdialog.timeout > 0)
-		Xdialog.timer2 = gtk_timeout_add(Xdialog.timeout*1000, timeout_exit, NULL);
+		Xdialog.timer2 = g_timeout_add(Xdialog.timeout*1000, timeout_exit, NULL);
 }
 
 /*
@@ -689,9 +689,9 @@ void create_infobox(gchar *optarg, gint timeout)
 	Xdialog.new_label = Xdialog.check = FALSE;
 
 	if (timeout > 0)
-		Xdialog.timer = gtk_timeout_add(timeout, infobox_timeout_exit, NULL);
+		Xdialog.timer = g_timeout_add(timeout, infobox_timeout_exit, NULL);
 	else
-		Xdialog.timer = gtk_timeout_add(10, infobox_timeout, NULL);
+		Xdialog.timer = g_timeout_add(10, infobox_timeout, NULL);
 }
 
 
@@ -741,7 +741,7 @@ void create_gauge(gchar *optarg, gint percent)
 	Xdialog.new_label = Xdialog.check = FALSE;
 
 	/* Add a timer callback to update the value of the progress bar */
-	Xdialog.timer = gtk_timeout_add(10, gauge_timeout, NULL);
+	Xdialog.timer = g_timeout_add(10, gauge_timeout, NULL);
 }
 
 
@@ -813,7 +813,7 @@ void create_progress(gchar *optarg, gint leading, gint maxdots)
 	Xdialog.check = FALSE;
 
 	/* Add a timer callback to update the value of the progress bar */
-	Xdialog.timer = gtk_timeout_add(10, progress_timeout, NULL);
+	Xdialog.timer = g_timeout_add(10, progress_timeout, NULL);
 }
 
 
@@ -858,7 +858,7 @@ void create_tailbox(gchar *optarg)
 	if (Xdialog.buttons)
 		set_all_buttons(TRUE, Xdialog.ok_button);
 
-	Xdialog.timer = gtk_timeout_add(10, (GtkFunction) tailbox_timeout, NULL);
+	Xdialog.timer = g_timeout_add(10, (GSourceFunc) tailbox_timeout, NULL);
 
 	set_timeout();
 }
@@ -920,7 +920,7 @@ void create_logbox(gchar *optarg)
 	if (Xdialog.buttons)
 		set_all_buttons(FALSE, Xdialog.ok_button);
 
-	Xdialog.timer = gtk_timeout_add(10, (GtkFunction) logbox_timeout, NULL);
+	Xdialog.timer = g_timeout_add(10, (GSourceFunc) logbox_timeout, NULL);
 
 	set_timeout();
 }
@@ -1088,7 +1088,7 @@ void create_inputbox(gchar *optarg, gchar *options[], gint entries)
 	}
 
 	if (Xdialog.interval > 0)
-		Xdialog.timer = gtk_timeout_add(Xdialog.interval, inputbox_timeout, NULL);
+		Xdialog.timer = g_timeout_add(Xdialog.interval, inputbox_timeout, NULL);
 
 	set_timeout();
 }
@@ -1128,7 +1128,7 @@ void create_combobox(gchar *optarg, gchar *options[], gint list_size)
 	}
 
 	if (Xdialog.interval > 0)
-		Xdialog.timer = gtk_timeout_add(Xdialog.interval, inputbox_timeout, NULL);
+		Xdialog.timer = g_timeout_add(Xdialog.interval, inputbox_timeout, NULL);
 
 	set_timeout();
 }
@@ -1188,7 +1188,7 @@ void create_rangebox(gchar *optarg, gchar *options[], gint ranges)
 	gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(rangebox_exit), NULL);
 
 	if (Xdialog.interval > 0)
-		Xdialog.timer = gtk_timeout_add(Xdialog.interval, rangebox_timeout, NULL);
+		Xdialog.timer = g_timeout_add(Xdialog.interval, rangebox_timeout, NULL);
 
 	set_timeout();
 }
@@ -1233,7 +1233,7 @@ void create_spinbox(gchar *optarg, gchar *options[], gint spins)
 	gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(spinbox_exit), NULL);
 
 	if (Xdialog.interval > 0)
-		Xdialog.timer = gtk_timeout_add(Xdialog.interval, spinbox_timeout, NULL);
+		Xdialog.timer = g_timeout_add(Xdialog.interval, spinbox_timeout, NULL);
 
 	set_timeout();
 }
@@ -1304,7 +1304,7 @@ void create_itemlist(gchar *optarg, gint type, gchar *options[], gint list_size)
 	}
 
 	if (Xdialog.interval > 0)
-		Xdialog.timer = gtk_timeout_add(Xdialog.interval, itemlist_timeout, NULL);
+		Xdialog.timer = g_timeout_add(Xdialog.interval, itemlist_timeout, NULL);
 
 	set_timeout();
 }
@@ -1380,7 +1380,7 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 	sensitive_buttons();
 
 	if (Xdialog.interval > 0)
-		Xdialog.timer = gtk_timeout_add(Xdialog.interval, buildlist_timeout, NULL);
+		Xdialog.timer = g_timeout_add(Xdialog.interval, buildlist_timeout, NULL);
 
 	set_timeout();
 }
@@ -1478,7 +1478,7 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 	 * we need a timeout function to do so... It will run only once
 	 * of course !
 	 */
-	gtk_timeout_add(1, move_to_row_timeout, NULL);
+	g_timeout_add(1, move_to_row_timeout, NULL);
 
 	if (!Xdialog.tags)
 #if GTK_CLIST_BUG_WORK_AROUND
@@ -1510,7 +1510,7 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 	}
 
 	if (Xdialog.interval > 0)
-		Xdialog.timer = gtk_timeout_add(Xdialog.interval, menu_timeout, NULL);
+		Xdialog.timer = g_timeout_add(Xdialog.interval, menu_timeout, NULL);
 
 	set_timeout();
 }
@@ -1594,7 +1594,7 @@ void create_treeview(gchar *optarg, gchar *options[], gint list_size)
 	g_signal_connect(G_OBJECT(select), "changed", G_CALLBACK(cb_selection_changed), NULL);
 
 	if (Xdialog.interval > 0)
-		Xdialog.timer = gtk_timeout_add(Xdialog.interval, menu_timeout, NULL);
+		Xdialog.timer = g_timeout_add(Xdialog.interval, menu_timeout, NULL);
 
 	set_timeout();
 }
@@ -1906,7 +1906,7 @@ void create_calendar(gchar *optarg, gint day, gint month, gint year)
 			   GTK_SIGNAL_FUNC(exit_ok), NULL);
 
 	if (Xdialog.interval > 0)
-		Xdialog.timer = gtk_timeout_add(Xdialog.interval, calendar_timeout, NULL);
+		Xdialog.timer = g_timeout_add(Xdialog.interval, calendar_timeout, NULL);
 
 	set_timeout();
 }
@@ -1941,7 +1941,7 @@ void create_timebox(gchar *optarg, gint hours, gint minutes, gint seconds)
 	gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(timebox_exit), NULL);
 
 	if (Xdialog.interval > 0)
-		Xdialog.timer = gtk_timeout_add(Xdialog.interval, timebox_timeout, NULL);
+		Xdialog.timer = g_timeout_add(Xdialog.interval, timebox_timeout, NULL);
 
 	set_timeout();
 }
