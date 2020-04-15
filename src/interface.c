@@ -805,7 +805,7 @@ void create_progress(gchar *optarg, gint leading, gint maxdots)
 				break;
 
 			if (temp[0] >= ' ' || temp[0] == '\n')
-				strcatsafe(Xdialog.label_text, (char*)temp, MAX_LABEL_LENGTH);
+				strncat(Xdialog.label_text, (char*)temp, sizeof(Xdialog.label_text));
 		}
 		gtk_label_set_text(GTK_LABEL(label), Xdialog.label_text);
 	}
@@ -1035,10 +1035,10 @@ void create_inputbox(gchar *optarg, gchar *options[], gint entries)
 	if (entries > 1) {
 		set_separator(TRUE);
 		set_secondary_label(options[0], FALSE);
-		strcpysafe(deftext, options[1], MAX_INPUT_DEFAULT_LENGTH);
+		strncpy(deftext, options[1], sizeof(deftext));
 	} else {
 		if (options[0] != NULL)
-			strcpysafe(deftext, options[0], MAX_INPUT_DEFAULT_LENGTH);
+			strncpy(deftext, options[0], sizeof(deftext));
 		else
 			deftext[0] = 0;
 	}
@@ -1272,13 +1272,13 @@ void create_itemlist(gchar *optarg, gint type, gchar *options[], gint list_size)
 	gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(print_items), NULL);
 
 	for (i = 0;  i < list_size; i++) {
-		strcpysafe(Xdialog.array[i].tag, options[params*i], MAX_ITEM_LENGTH);
+		strncpy(Xdialog.array[i].tag, options[params*i], sizeof(Xdialog.array[i].tag) );
 		temp[0] = 0;
 		if (Xdialog.tags && strlen(options[params*i]) != 0) {
-			strcpysafe(temp, options[params*i], MAX_ITEM_LENGTH);
-			strcatsafe(temp, ": ", MAX_ITEM_LENGTH);
+			strncpy(temp, options[params*i], sizeof(temp));
+			strncat(temp, ": ", sizeof(temp));
 		}
-		strcatsafe(temp, options[params*i+1], MAX_ITEM_LENGTH);
+		strncat(temp, options[params*i+1], sizeof(temp));
 
 		if (type == CHECKLIST)
 			item = gtk_check_button_new_with_label(temp);
@@ -1339,8 +1339,8 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 
 	/* Put all parameters into an array and calculate the max item width */
 	for (i = 0;  i < list_size; i++) {
-		strcpysafe(Xdialog.array[i].tag, options[params*i], MAX_ITEM_LENGTH);
-		strcpysafe(Xdialog.array[i].name, options[params*i+1], MAX_ITEM_LENGTH);
+		strncpy(Xdialog.array[i].tag, options[params*i], sizeof(Xdialog.array[i].tag));
+		strncpy(Xdialog.array[i].name, options[params*i+1], sizeof(Xdialog.array[i].name));
 		if (strlen(Xdialog.array[i].name) > n)
 			n = strlen(Xdialog.array[i].name);
 		gtk_list_store_append(tree_list1, &tree_iter);
@@ -1423,11 +1423,11 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 	gtk_clist_set_shadow_type(clist, GTK_SHADOW_IN);
 
 	for (i = 0; i < list_size; i++) {
-		strcpysafe(Xdialog.array[i].tag, options[params*i], MAX_ITEM_LENGTH);
-		strcpysafe(Xdialog.array[i].name, options[params*i+1], MAX_ITEM_LENGTH);
-		if (Xdialog.tips == 1)
-			strcpysafe(Xdialog.array[i].tips, options[params*i+2], MAX_ITEM_LENGTH);
-
+		strncpy(Xdialog.array[i].tag, options[params*i], sizeof(Xdialog.array[i].tag));
+		strncpy(Xdialog.array[i].name, options[params*i+1], sizeof(Xdialog.array[i].name));
+		if (Xdialog.tips == 1) {
+			strncpy(Xdialog.array[i].tips, options[params*i+2], sizeof(Xdialog.array[i].tips));
+		}
 		rownum = gtk_clist_append(clist, null_row);
 
 		if (strlen(Xdialog.array[i].tag) == 0) {
@@ -1543,8 +1543,8 @@ void create_treeview(gchar *optarg, gchar *options[], gint list_size)
 	/* Fill the store with the data */
 	store = gtk_tree_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
 	for (i = 0 ; i < list_size ; i++) {
-		strcpysafe(Xdialog.array[i].tag, options[params*i], MAX_ITEM_LENGTH);
-		strcpysafe(Xdialog.array[i].name, options[params*i+1], MAX_ITEM_LENGTH);
+		strncpy(Xdialog.array[i].tag, options[params*i], sizeof(Xdialog.array[i].tag));
+		strncpy(Xdialog.array[i].name, options[params*i+1], sizeof(Xdialog.array[i].name));
 		Xdialog.array[i].state = 0;
 
 		depth = atoi(options[params*i+3]);

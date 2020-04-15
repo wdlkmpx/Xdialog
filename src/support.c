@@ -29,26 +29,6 @@ extern gboolean dialog_compat;
 
 /* Two useful functions to avoid buffer overflows... */
 
-void strcpysafe(char *dest, char *source, int destsize)
-{
-	if (strlen(source) < destsize)
-		strcpy(dest, source);
-	else {
-		strncpy(dest, source, destsize-1);
-		dest[destsize-1] = 0;
-	}
-}
-
-void strcatsafe(char *dest, char *source, int destsize)
-{
-	if (strlen(source)+strlen(dest) < destsize)
-		strcat(dest, source);
-	else {
-		strncat(dest, source, destsize-strlen(dest)-1);
-		dest[destsize-1] = 0;
-	}
-}
-
 #ifndef USE_SCANF
 /* Let's replaces scanf() with a non-blocking function based on read() calls...
    It may not compile on systems lacking BSD 4.3 mem*() functions and/or
@@ -100,7 +80,7 @@ void backslash_n_to_linefeed(char *s0, char *s, int max_len)
 {
 	char *tmp;
 
-	strcpysafe(s, s0, max_len);
+	strncpy(s, s0, max_len);
 
 	while (strstr(s, "\\n") != NULL) {
 		tmp = strstr(s, "\\n");
@@ -124,7 +104,7 @@ void trim_string(char *s0, char *s, int max_len)
 	char *p = s;
 	int has_newlines = 0;
 
-	strcpysafe(s, s0, max_len);
+	strncpy(s, s0, max_len);
 
 	if (strstr(s, "\\n"))
 		has_newlines = 1;

@@ -660,10 +660,10 @@ gboolean print_text(gpointer object, gpointer data)
 	
 	gtk_text_buffer_get_bounds(text_buffer, &start_iter, &end_iter);
 
-	strcpysafe(cmd, PRINTER_CMD, MAX_PRTCMD_LENGTH);
+	strncpy(cmd, PRINTER_CMD, sizeof(cmd));
 	if (strlen(Xdialog.printer) != 0) {
-		strcatsafe(cmd, " "PRINTER_CMD_OPTION, MAX_PRTCMD_LENGTH);
-		strcatsafe(cmd, Xdialog.printer, MAX_PRTCMD_LENGTH);
+		strncat(cmd, " "PRINTER_CMD_OPTION, sizeof(cmd));
+		strncat(cmd, Xdialog.printer, sizeof(cmd));
 	}
 
 	length = gtk_text_buffer_get_char_count(text_buffer);

@@ -249,11 +249,11 @@ static void print_help_info(char *name, char *errmsg)
 
 	strcpy(cmd, strlen(name) < 32 ? name : XDIALOG);
 
-	strcpysafe(msg, HELP_TEXT1, HELP_MSG_SIZE);
-	strcatsafe(msg, cmd, HELP_MSG_SIZE);
-	strcatsafe(msg, HELP_TEXT2, HELP_MSG_SIZE);
+	strncpy(msg, HELP_TEXT1, sizeof(msg));
+	strncat(msg, cmd, sizeof(msg));
+	strncat(msg, HELP_TEXT2, sizeof(msg));
 #ifdef USE_SCANF
-	strcatsafe(msg, HELP_TEXT3, HELP_MSG_SIZE);
+	strncat(msg, HELP_TEXT3, sizeof(msg));
 #endif
 
 	fprintf(stderr, "%s: %s !\n", cmd, errmsg);
@@ -263,8 +263,8 @@ static void print_help_info(char *name, char *errmsg)
 		fprintf(stderr, "\n\nHelp message truncated, please re-compile "\
 				"after increasing HELP_MSG_SIZE in main.c !\n");
 
-	strcpysafe(Xdialog.title, "Usage for ", MAX_TITLE_LENGTH);
-	strcatsafe(Xdialog.title, cmd, MAX_TITLE_LENGTH);
+	strncpy(Xdialog.title, "Usage for ", sizeof(Xdialog.title));
+	strncat(Xdialog.title, cmd, sizeof(Xdialog.title));
 	Xdialog.cancel_button = Xdialog.help = Xdialog.icon = Xdialog.check = FALSE;
 	if (!Xdialog.print) {
 		Xdialog.print = TRUE;
@@ -987,13 +987,13 @@ show_again:
 				break;
 		/* Common options */
 			case C_TITLE:		/* --title option */
-				strcpysafe(Xdialog.title, optarg, MAX_TITLE_LENGTH);
+				strncpy(Xdialog.title, optarg, sizeof(Xdialog.title));
 	  			break;
 			case C_BACKTITLE:	/* --backtitle option */
-				strcpysafe(Xdialog.backtitle, optarg, MAX_BACKTITLE_LENGTH);
+				strncpy(Xdialog.backtitle, optarg, sizeof(Xdialog.backtitle));
 				break;
 			case C_WMCLASS:		/* --wmclass option */
-				strcpysafe(Xdialog.wmclass, optarg, MAX_WMCLASS_LENGTH);
+				strncpy(Xdialog.wmclass, optarg, sizeof(Xdialog.wmclass));
 				break;
 			case C_SCREENCENTER:	/* --screen-center option */
 				Xdialog.placement = GTK_WIN_POS_CENTER;
@@ -1051,8 +1051,8 @@ show_again:
 					print_help_info(argv[0], "bad button style name");
 				break;
 			case C_RCFILE:		/* --rc-file option */
-				strcpysafe(Xdialog.rc_file, optarg,
-					   MAX_FILENAME_LENGTH);
+				strncpy(Xdialog.rc_file, optarg,
+					   sizeof(Xdialog.wmclass));
 				break;
 			case C_SEPARATOR:	/* --separator option */
 				if (!strcmp(optarg, "\\n"))
@@ -1107,14 +1107,14 @@ show_again:
 				Xdialog.tips = 1;
 				break;
 			case T_DEFAULTITEM:	/* --default-item option */
-				strcpysafe(Xdialog.default_item, optarg, MAX_ITEM_LENGTH);
+				strncpy(Xdialog.default_item, optarg, sizeof(Xdialog.default_item));
 				break;
 			case T_HELP:		/* --help option */
-				strcpysafe(help_text, optarg, MAX_LABEL_LENGTH);
+				strncpy(help_text, optarg, sizeof(help_text));
 				Xdialog.help = TRUE;
 				break;
 			case T_PRINT:		/* --print option */
-				strcpysafe(Xdialog.printer, optarg, MAX_PRTNAME_LENGTH);
+				strncpy(Xdialog.printer, optarg, sizeof(Xdialog.printer));
 				Xdialog.print = TRUE;
 				break;
 			case T_WIZARD:		/* --wizard option */
@@ -1124,13 +1124,13 @@ show_again:
 				Xdialog.default_no = TRUE;
 				break;
 			case T_OKLABEL:		/* --ok-label option */
-				strcpysafe(Xdialog.ok_label, optarg, MAX_BUTTON_LABEL_LENGTH);
+				strncpy(Xdialog.ok_label, optarg, sizeof(Xdialog.printer));
 				break;
 			case T_CANCELLABEL:		/* --ok-label option */
-				strcpysafe(Xdialog.cancel_label, optarg, MAX_BUTTON_LABEL_LENGTH);
+				strncpy(Xdialog.cancel_label, optarg, sizeof(Xdialog.cancel_label));
 				break;
 			case T_ICON:		/* --icon option */
-				strcpysafe(Xdialog.icon_file, optarg, MAX_FILENAME_LENGTH);
+				strncpy(Xdialog.icon_file, optarg, sizeof(Xdialog.icon_file));
 				Xdialog.icon = TRUE;
 				break;
 			case T_INTERVAL:	/* --interval option */
@@ -1148,7 +1148,7 @@ show_again:
 					print_help_info(argv[0], "bad timeout value");
 				break;
 			case T_CHECK:		/* --check option */
-				strcpysafe(Xdialog.check_label, optarg, MAX_LABEL_LENGTH);
+				strncpy(Xdialog.check_label, optarg, sizeof(Xdialog.check_label));
 				Xdialog.check = TRUE;
 				list_size = param_number(argc, argv, &optind);
 				if (list_size > 1)
