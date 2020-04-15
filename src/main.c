@@ -245,9 +245,7 @@ static void print_help_info(char *name, char *errmsg)
 {
 	gchar msg[HELP_MSG_SIZE];
 	gchar cmd[32];
-#ifdef USE_GTK2
 	GtkTextBuffer *text_buffer;
-#endif
 
 	strcpy(cmd, strlen(name) < 32 ? name : XDIALOG);
 
@@ -279,13 +277,8 @@ static void print_help_info(char *name, char *errmsg)
 	Xdialog.size_in_pixels = FALSE;
 	get_maxsize(&Xdialog.xsize, &Xdialog.ysize);
 	create_textbox("", FALSE);
-#ifdef USE_GTK2
 	text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(Xdialog.widget1));
 	gtk_text_buffer_insert_at_cursor(text_buffer, msg, strlen(msg));
-#else
-	gtk_text_insert(GTK_TEXT(Xdialog.widget1), NULL, NULL, NULL, msg,
-			strlen(msg));
-#endif
 	gtk_widget_show(Xdialog.window);
 	gtk_main();
 

@@ -18,7 +18,6 @@ AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_FUNCS(strcasecmp strstr getopt_long_only memchr memmove setlocale)
 
-CPPFLAGS="$CPPFLAGS -DUSE_GTK2"
 PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.0],[AC_MSG_NOTICE([Using GTK2])])
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)

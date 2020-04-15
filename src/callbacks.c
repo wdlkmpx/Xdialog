@@ -314,7 +314,6 @@ gboolean progress_timeout(gpointer data)
 
 /* tailbox and logbox callbacks */
 
-#ifdef USE_GTK2
 gboolean tailbox_timeout(gpointer data)
 {
 	gchar buffer[1024];
@@ -351,52 +350,6 @@ gboolean tailbox_timeout(gpointer data)
 
 	return TRUE;
 }
-#else
-gboolean tailbox_timeout(gpointer data)
-{
-	GtkAdjustment *adj;
-	gchar buffer[1024];
-	int nchars;
-	gboolean flag = FALSE;
-
-	adj = GTK_TEXT(Xdialog.widget1)->vadj;
-
-	if (Xdialog.file_init_size > 0)
-		gtk_text_freeze(GTK_TEXT(Xdialog.widget1));
-
-	do {
-		if (!empty_gtk_queue() && (Xdialog.file_init_size <= 0))
-			return FALSE;
-
-		nchars = fread(buffer, sizeof(gchar), 1024, Xdialog.file);
-
-		if (nchars == 0)
-			break;
-
-		if (Xdialog.file_init_size > 0) {
-			Xdialog.file_init_size -= nchars;
-			if (Xdialog.file_init_size <= 0)
-				flag = TRUE;
-		} else {
-			if (!Xdialog.smooth)
-				gtk_text_freeze(GTK_TEXT(Xdialog.widget1));
-		}
-
-		gtk_text_insert(GTK_TEXT(Xdialog.widget1), NULL, NULL,
-				NULL, buffer, nchars);
-
-		if ((!Xdialog.smooth || flag) && Xdialog.file_init_size <= 0) {
-			gtk_text_thaw(GTK_TEXT(Xdialog.widget1));
-			flag = FALSE;
-		}
-
-		gtk_adjustment_set_value(adj, adj->upper);
-
-	} while (nchars == 1024);
-
-	return TRUE;
-}
-#endif
 
 gint tailbox_keypress(GtkObject *text, GdkEventKey *event,
 		      gpointer data)
@@ -683,7 +636,6 @@ gboolean hide_passwords(GtkObject *button, gpointer data)
 
 /* editbox callback */
 
-#ifdef USE_GTK2
 gboolean editbox_ok(gpointer object, gpointer data)
 {
 	GtkTextIter start_iter, end_iter;
@@ -695,23 +647,9 @@ gboolean editbox_ok(gpointer object, gpointer data)
 
 	return TRUE;
 }
-#else
-gboolean editbox_ok(gpointer object, gpointer data)
-{
-	int length, i;
-
-	length = gtk_text_get_length(GTK_TEXT(Xdialog.widget1));
-	for (i = 0; i < length; i++)
-		fputc(GTK_TEXT_INDEX(GTK_TEXT(Xdialog.widget1), i),
-		      Xdialog.output);
-
-	return TRUE;
-}
-#endif
 
 /* The print button callback (used by editbox, textbox and tailbox) */
 
-#ifdef USE_GTK2
 gboolean print_text(gpointer object, gpointer data)
 {
 	gint length;
@@ -739,35 +677,6 @@ gboolean print_text(gpointer object, gpointer data)
 
 	return TRUE;
 }
-#else
-gboolean print_text(gpointer object, gpointer data)
-{
-	int length, i;
-	gchar * buffer;
-	char cmd[MAX_PRTCMD_LENGTH];
-	FILE * temp;
-
-	strcpysafe(cmd, PRINTER_CMD, MAX_PRTCMD_LENGTH);
-	if (strlen(Xdialog.printer) != 0) {
-		strcatsafe(cmd, " "PRINTER_CMD_OPTION, MAX_PRTCMD_LENGTH);
-		strcatsafe(cmd, Xdialog.printer, MAX_PRTCMD_LENGTH);
-	}
-
-	length = gtk_text_get_length(GTK_TEXT(Xdialog.widget1));
-	buffer = g_malloc((length+1)*sizeof(gchar));
-	for (i = 0; i < length; i++)
-		buffer[i] = GTK_TEXT_INDEX(GTK_TEXT(Xdialog.widget1), i);
-
-	temp = popen(cmd, "w");
-	if (temp != NULL) {
-		i = fwrite(buffer, sizeof(gchar), length, temp);
-		pclose(temp);
-	}
-	g_free(buffer);
-
-	return TRUE;
-}
-#endif
 
 /* rangebox callbacks */
 
@@ -905,7 +814,6 @@ gboolean print_selection(GtkButton *button, gpointer data)
 		return FALSE;
 }
 
-#ifdef USE_GTK2
 gboolean print_tree_selection(GtkButton *button, gpointer data)
 {
 	int i = 0;
@@ -917,7 +825,6 @@ gboolean print_tree_selection(GtkButton *button, gpointer data)
 	}
 	return FALSE;
 }
-#endif
 
 gboolean menu_timeout(gpointer data)
 {
@@ -933,7 +840,6 @@ gboolean move_to_row_timeout(gpointer data)
 	return FALSE;	
 }
 
-#ifdef USE_GTK2
 void cb_selection_changed(GtkObject *tree)
 {
 	GtkTreeIter tree_iter;
@@ -958,32 +864,12 @@ void cb_selection_changed(GtkObject *tree)
 	g_free(name);
 	g_free(tag);
 }
-#else
-void cb_selection_changed(GtkObject *tree)
-{
-	GList *list;
-	GtkWidget *item;
-	int i;
-
-	list = GTK_TREE_SELECTION(tree);
-	if (list != NULL) {
-		item = GTK_WIDGET(list->data);
-		for (i = 0 ; Xdialog.array[i].state != -1 ; i++) {
-			if (Xdialog.array[i].widget == item) {
-				Xdialog.array[0].state = i;
-				break;
-			}
-		}
-	}
-}
-#endif
 
 /* buildlist callbacks */
 
 /* the following function is to be called after each glist update so to
  * set the proper (in)sensitive status onto the Add/Remove buttons.
  */
-#ifdef USE_GTK2
 void sensitive_buttons(void)
 {
 	GtkTreeIter tree_iter;
@@ -1005,17 +891,7 @@ void sensitive_buttons(void)
 		gtk_widget_set_sensitive(Xdialog.widget4, FALSE);
 	}
 }
-#else
-void sensitive_buttons(void)
-{
-	gtk_widget_set_sensitive(Xdialog.widget3,
-				 g_list_length(GTK_LIST(Xdialog.widget1)->children) != 0);
-	gtk_widget_set_sensitive(Xdialog.widget4,
-				 g_list_length(GTK_LIST(Xdialog.widget2)->children) != 0);
-}
-#endif
 
-#ifdef USE_GTK2
 gboolean add_to_list(GtkButton *button, gpointer data)
 {
 	GtkTreeIter tree_iter1, tree_iter2;
@@ -1043,22 +919,7 @@ gboolean add_to_list(GtkButton *button, gpointer data)
 
 	return TRUE;
 }
-#else
-gboolean add_to_list(GtkButton *button, gpointer data)
-{
-	GList *selected;
 
-	selected = g_list_copy(GTK_LIST(Xdialog.widget1)->selection);
-	gtk_list_remove_items_no_unref(GTK_LIST(Xdialog.widget1), selected);
-	gtk_list_append_items(GTK_LIST(Xdialog.widget2), selected);
-
-	sensitive_buttons();
-
-	return TRUE;
-}
-#endif
-
-#ifdef USE_GTK2
 gboolean remove_from_list(GtkButton *button, gpointer data)
 {
 	GtkTreeIter tree_iter1, tree_iter2;
@@ -1085,22 +946,7 @@ gboolean remove_from_list(GtkButton *button, gpointer data)
 
 	return TRUE;
 }
-#else
-gboolean remove_from_list(GtkButton *button, gpointer data)
-{
-	GList *selected;
 
-	selected = g_list_copy(GTK_LIST(Xdialog.widget2)->selection);
-	gtk_list_remove_items_no_unref(GTK_LIST(Xdialog.widget2), selected);
-	gtk_list_append_items(GTK_LIST(Xdialog.widget1), selected);
-
-	sensitive_buttons();
-
-	return TRUE;
-}
-#endif
-
-#ifdef USE_GTK2
 gboolean print_list(GtkButton *button, gpointer data)
 {
 	GtkTreeModel *model;
@@ -1133,32 +979,6 @@ gboolean print_list(GtkButton *button, gpointer data)
 
 	return TRUE;
 }
-#else
-gboolean print_list(GtkButton *button, gpointer data)
-{
-	GList *children;
-	int i;
-	gboolean flag = FALSE;
-
-	children = GTK_LIST(Xdialog.widget2)->children;
-	while (children != NULL) {
-		for (i = 0 ; Xdialog.array[i].state != -1 ; i++) {
-			if (Xdialog.array[i].widget == children->data) {
-				if (flag)
-					fprintf(Xdialog.output, "%s", Xdialog.separator);
-				fprintf(Xdialog.output, "%s", Xdialog.array[i].tag);
-				flag = TRUE;
-				break;
-			}
-		}
-		children = g_list_next(children);
-	}
-	if (flag)
-		fprintf(Xdialog.output, "\n");
-
-	return TRUE;
-}
-#endif
 
 gboolean buildlist_timeout(gpointer data)
 {
@@ -1199,11 +1019,7 @@ gboolean fontsel_exit(GtkObject *fontsel, gpointer client_data)
 
 gboolean calendar_exit(gpointer object, gpointer data)
 {
-#ifdef USE_GTK2
 	guint day, month, year;
-#else
-	gint day, month, year;
-#endif
 
 	gtk_calendar_get_date(GTK_CALENDAR(Xdialog.widget1), &year, &month, &day);
 	fprintf(Xdialog.output, "%02d/%02d/%d\n", day, month+1, year);

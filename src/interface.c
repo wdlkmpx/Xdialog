@@ -19,23 +19,12 @@
 #include "callbacks.h"
 #include "support.h"
 
-#ifndef USE_GTK2
-#include "yes.xpm"
-#include "no.xpm"
-#include "help.xpm"
-#include "print.xpm"
-#include "next.xpm"
-#include "previous.xpm"
-#endif
-
 /* Global structure and variables */
 extern Xdialog_data Xdialog;
 extern gboolean dialog_compat;
 
 /* Fixed font loading and character size (in pixels) initialisation */
-#ifdef USE_GTK2
 static PangoFontDescription *fixed_pango_font;
-#endif
 
 static GdkFont *fixed_font;
 static gint xmult = XSIZE_MULT;
@@ -86,11 +75,7 @@ static void font_init(void)
 		style = window->style;
 		if (style != NULL) {
 			/* For proportionnal fonts, we use the average character width... */
-#ifdef USE_GTK2
 			font = gtk_style_get_font(style);
-#else
-			font = style->font;
-#endif
 			gdk_string_extents(font, ALPHANUM_CHARS, &lbearing,
 					   &rbearing, &width, &ascent, &descent);
 			xmult = width / 62;		/* 62 = strlen(ALPHANUM_CHARS) */
@@ -98,13 +83,9 @@ static void font_init(void)
 		}
 		gtk_widget_destroy(window);
 	}
-#ifdef USE_GTK2	
 	fixed_pango_font = pango_font_description_new ();
 	pango_font_description_set_family (fixed_pango_font, "mono");
 	pango_font_description_set_size (fixed_pango_font, 10 * PANGO_SCALE);
-#else
-	fixed_pango_font = 0;
-#endif
 }
 
 /* Custom text wrapping (the GTK+ one is buggy) */
@@ -114,11 +95,7 @@ static void wrap_text(gchar *str, gint reserved_width)
 	gint max_line_width, n = 0;
 	gchar *p = str, *last_space = NULL;
 	gchar tmp[MAX_LABEL_LENGTH];
-#ifdef USE_GTK2
 	GdkFont *current_font = gtk_style_get_font(Xdialog.window->style);
-#else
-	GdkFont *current_font = Xdialog.window->style->font;
-#endif
 
 	if (Xdialog.xsize != 0)
 		max_line_width = (Xdialog.size_in_pixels ? Xdialog.xsize :
@@ -372,20 +349,12 @@ static GtkWidget *set_button(gchar *default_text, gpointer buttonbox, gint event
 			     gboolean grab_default)
 {
 	GtkWidget *button;
-#ifdef USE_GTK2
 	gchar	  *stock_id = NULL;
-#else
-	GdkBitmap *mask;
-	GdkColor  transparent;
-	GdkPixmap *pixmap;
-	gchar	  **xpm = NULL;
-#endif
 	GtkWidget *icon;
 	GtkWidget *hbox;
 	GtkWidget *label;
 	gchar     *text = default_text;
 
-#ifdef USE_GTK2
 	if (Xdialog.buttons_style != TEXT_ONLY) {
 		if (!strcmp(text, OK) || !strcmp(text, YES))
 			stock_id = "gtk-ok";
@@ -400,22 +369,6 @@ static GtkWidget *set_button(gchar *default_text, gpointer buttonbox, gint event
 		else if (!strcmp(text, PREVIOUS) || !strcmp(text, REMOVE))
 			stock_id = "gtk-go-back";
 	}
-#else
-	if (Xdialog.buttons_style != TEXT_ONLY) {
-		if (!strcmp(text, OK) || !strcmp(text, YES))
-			xpm = yes_xpm;
-		else if (!strcmp(text, CANCEL) || !strcmp(text, NO))
-			xpm = no_xpm;
-		else if (!strcmp(text, HELP))
-			xpm = help_xpm;
-		else if (!strcmp(text, PRINT))
-			xpm = print_xpm;
-		else if (!strcmp(text, NEXT) || !strcmp(text, ADD))
-			xpm = next_xpm;
-		else if (!strcmp(text, PREVIOUS) || !strcmp(text, REMOVE))
-			xpm = previous_xpm;
-	}
-#endif
 
 	if (strlen(Xdialog.ok_label) != 0 && (!strcmp(text, OK) || !strcmp(text, YES)))
 		text = Xdialog.ok_label;
@@ -430,15 +383,7 @@ static GtkWidget *set_button(gchar *default_text, gpointer buttonbox, gint event
 		gtk_container_add(GTK_CONTAINER(button), hbox);
 		gtk_widget_show(hbox);
 
-#ifdef USE_GTK2
 		icon = gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_BUTTON);
-#else
-		pixmap = gdk_pixmap_create_from_xpm_d(Xdialog.window->window,
-						      &mask, &transparent, xpm);
-		icon = gtk_pixmap_new(pixmap, mask);
-		gdk_pixmap_unref(pixmap);
-		gdk_pixmap_unref(mask);
-#endif
 		gtk_container_add(GTK_CONTAINER(hbox), icon);
 		gtk_widget_show(icon);
 
@@ -546,7 +491,6 @@ static GtkWidget *set_all_buttons(gboolean print, gboolean ok)
 	return button_ok;
 }
 
-#ifdef USE_GTK2
 static GtkWidget *set_scrollable_text(void)
 {
 	GtkWidget *text;
@@ -567,38 +511,6 @@ static GtkWidget *set_scrollable_text(void)
 	gtk_container_add(GTK_CONTAINER (scrollwin), text);
 	return text;
 }
-#else
-static GtkWidget *set_scrollable_text(void)
-{
-	GtkWidget *hbox;
-	GtkWidget *text;
-	GtkWidget *vscrollbar;
-	GtkStyle  *style;
-
-	hbox = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start(Xdialog.vbox, hbox, TRUE, TRUE, xmult/2);
-	gtk_widget_show(hbox);
-  
-	text = gtk_text_new(NULL, NULL);
-	gtk_box_pack_start(GTK_BOX(hbox), text, TRUE, TRUE, 0);
-	if (Xdialog.fixed_font) {
-		style = gtk_style_new();
-	  	gdk_font_unref(style->font);
-		style->font = fixed_font;
-	 	gtk_widget_push_style(style);     
-	   	gtk_widget_set_style(text, style);
-	   	gtk_widget_pop_style();
-	}
-	gtk_widget_show(text);
-
-	/* Add a vertical scrollbar to the GtkText widget */
-	vscrollbar = gtk_vscrollbar_new(GTK_TEXT(text)->vadj);
-	gtk_box_pack_start(GTK_BOX(hbox), vscrollbar, FALSE, FALSE, 0);
-	gtk_widget_show(vscrollbar);
-
-	return text;
-}
-#endif
 
 static GtkWidget *set_scrolled_window(GtkBox *box, gint border_width, gint xsize,
 				      gint list_size, gint spacing)
@@ -623,7 +535,6 @@ static GtkWidget *set_scrolled_window(GtkBox *box, gint border_width, gint xsize
 	return scrolled_window;
 }
 
-#ifdef USE_GTK2
 static GtkWidget *set_scrolled_list(GtkWidget *box, gint xsize, gint list_size,
 				    gint spacing, GtkListStore *store)
 {
@@ -654,22 +565,6 @@ static GtkWidget *set_scrolled_list(GtkWidget *box, gint xsize, gint list_size,
 
 	return list;
 }
-#else
-static GtkWidget *set_scrolled_list(GtkWidget *box, gint xsize, gint list_size,
-				    gint spacing)
-{
-	GtkWidget *scrolled_window;
-	GtkWidget *list;
-
-	scrolled_window = set_scrolled_window(GTK_BOX(box), 0, xsize, list_size, spacing);
-	list = gtk_list_new();
-	gtk_widget_show(list);
-	gtk_list_set_selection_mode(GTK_LIST(list), GTK_SELECTION_MULTIPLE);
-	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window), list);
-
-	return list;
-}
-#endif
 
 static GtkObject *set_horizontal_slider(GtkBox *box, gint deflt, gint min, gint max)
 {
@@ -1047,12 +942,8 @@ void create_logbox(gchar *optarg)
 
 void create_textbox(gchar *optarg, gboolean editable)
 {
-#ifdef USE_GTK2
 	GtkTextView *text;
 	GtkTextBuffer *text_buffer;
-#else
-	GtkText *text;
-#endif
 	GtkWidget *button_ok = NULL;
 	FILE *infile;
 	gint i, n = 0, llen = 0, lcnt = 0;
@@ -1063,17 +954,10 @@ void create_textbox(gchar *optarg, gboolean editable)
 
 	Xdialog.widget1 = set_scrollable_text();
 	gtk_widget_grab_focus(Xdialog.widget1);
-#ifdef USE_GTK2
 	text = GTK_TEXT_VIEW(Xdialog.widget1);
 	text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
-#else
-	text = GTK_TEXT(Xdialog.widget1);
-#endif
 
 	/* Fill the GtkText with the text */
-#ifndef USE_GTK2
-	gtk_text_freeze(text);
-#endif
 	if (strcmp(optarg, "-") == 0)
 		infile = stdin;
 	else
@@ -1088,7 +972,6 @@ void create_textbox(gchar *optarg, gboolean editable)
 
 		do {
 			nchars = fread(buffer, 1, 1024, infile);
-#ifdef USE_GTK2
 			utf8 = g_convert_with_fallback(buffer, nchars, "UTF-8", "ISO-8859-1", "\357\277\275", &bytes_read, &bytes_written, &error);
 			if (error == NULL)
 			{
@@ -1099,9 +982,6 @@ void create_textbox(gchar *optarg, gboolean editable)
 				printf("Error converting to UTF-8: GConvertError(%02x): %s", error->code, error->message);
 			}
 			g_free(utf8);
-#else
-			gtk_text_insert(text, NULL, NULL, NULL, buffer, nchars);
-#endif
 
 			/* Calculate the maximum line length and lines count */
 			for (i = 0; i < nchars; i++)
@@ -1121,9 +1001,6 @@ void create_textbox(gchar *optarg, gboolean editable)
 		if (infile != stdin)
 			fclose(infile);
 	}
-#ifndef USE_GTK2
-	gtk_text_thaw(text);
-#endif
 	llen += 4;
 	if (Xdialog.fixed_font)
 		gtk_widget_set_usize(Xdialog.widget1,
@@ -1135,18 +1012,12 @@ void create_textbox(gchar *optarg, gboolean editable)
 				     MIN(lcnt*ymult, gdk_screen_height()-10*ymult));
 
 	/* Set the editable flag depending on what we want (text or edit box) */
-#ifdef USE_GTK2
 	gtk_text_view_set_editable(text, editable);
-#else
-	gtk_text_set_editable(text, editable);
-#endif
 
-#ifdef USE_GTK2
     // position the cursor on the first line
     GtkTextIter firstLineIter;
     gtk_text_buffer_get_start_iter(text_buffer, &firstLineIter);
     gtk_text_buffer_place_cursor(text_buffer, &firstLineIter);
-#endif
 
 	if (dialog_compat && !editable)
 		Xdialog.cancel_button = FALSE;
@@ -1188,11 +1059,6 @@ void create_inputbox(gchar *optarg, gchar *options[], gint entries)
 
 	Xdialog.widget1 = gtk_entry_new();
 	entry = GTK_ENTRY(Xdialog.widget1);
-#ifndef USE_GTK2
-	/* Would kill the entry of text in GTK2, so we enable it for GTK+ only. */
-	gtk_signal_connect(GTK_OBJECT(Xdialog.widget1), "key_press_event",
-			   GTK_SIGNAL_FUNC(input_keypress), NULL);
-#endif
 	gtk_entry_set_text(entry, deftext);
 	gtk_box_pack_start(Xdialog.vbox, Xdialog.widget1, TRUE, TRUE, 0);
 	gtk_widget_grab_focus(Xdialog.widget1);
@@ -1203,10 +1069,6 @@ void create_inputbox(gchar *optarg, gchar *options[], gint entries)
 
 		Xdialog.widget2 = gtk_entry_new();
 		entry = GTK_ENTRY(Xdialog.widget2);
-#ifndef USE_GTK2
-		gtk_signal_connect(GTK_OBJECT(Xdialog.widget2), "key_press_event",
-				   GTK_SIGNAL_FUNC(input_keypress), NULL);
-#endif
 		gtk_entry_set_text(entry, options[3]);
 		gtk_box_pack_start(Xdialog.vbox, Xdialog.widget2, TRUE, TRUE, 0);
 		gtk_widget_show(Xdialog.widget2);
@@ -1218,10 +1080,6 @@ void create_inputbox(gchar *optarg, gchar *options[], gint entries)
 
 		Xdialog.widget3 = gtk_entry_new();
 		entry = GTK_ENTRY(Xdialog.widget3);
-#ifndef USE_GTK2
-		gtk_signal_connect(GTK_OBJECT(Xdialog.widget3), "key_press_event",
-				   GTK_SIGNAL_FUNC(input_keypress), NULL);
-#endif
 		gtk_entry_set_text(entry, options[5]);
 		gtk_box_pack_start(Xdialog.vbox, Xdialog.widget3, TRUE, TRUE, 0);
 		gtk_widget_show(Xdialog.widget3);
@@ -1473,15 +1331,9 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 	GtkWidget *button_add;
 	GtkWidget *button_remove;
 	GtkWidget *button_ok;
-#ifdef USE_GTK2
 	GtkListStore *tree_list1;
 	GtkListStore *tree_list2;
 	GtkTreeIter tree_iter;
-#else
-	GList *glist1 = NULL;
-	GList *glist2 = NULL;
-	GtkWidget *item;
-#endif
 	GtkTooltips *tooltips = NULL;
 	gint i, n = 0;
 	int params = 3 + Xdialog.tips;
@@ -1496,10 +1348,8 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 	set_backtitle(TRUE);
 	set_label(optarg, FALSE);
 
-#ifdef USE_GTK2
 	tree_list1 = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
 	tree_list2 = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
-#endif
 
 	/* Put all parameters into an array and calculate the max item width */
 	for (i = 0;  i < list_size; i++) {
@@ -1507,23 +1357,10 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 		strcpysafe(Xdialog.array[i].name, options[params*i+1], MAX_ITEM_LENGTH);
 		if (strlen(Xdialog.array[i].name) > n)
 			n = strlen(Xdialog.array[i].name);
-#ifdef USE_GTK2
 		gtk_list_store_append(tree_list1, &tree_iter);
 		gtk_list_store_set(tree_list1, &tree_iter, 0,
 			Xdialog.array[i].name, 1, Xdialog.array[i].tag, -1);
 		/* TODO: tooltips support in GTK2 */
-#else
-		item = gtk_list_item_new_with_label(Xdialog.array[i].name);
-		gtk_widget_show(item);
-		Xdialog.array[i].widget = item;
-		if (item_status(item, options[params*i+2], Xdialog.array[i].tag) == 1)
-			glist2 = g_list_append(glist2, item);
-		else
-			glist1 = g_list_append(glist1, item);
-
-		if (Xdialog.tips == 1 && strlen(options[params*i+3]) > 0)
-			gtk_tooltips_set_tip(tooltips, item, (gchar *) options[params*i+3], NULL);
-#endif
 	}
 
 	/* Setup a hbox to hold the scrolled windows and the Add/Remove buttons */
@@ -1532,12 +1369,8 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 	gtk_box_pack_start(Xdialog.vbox, hbox, TRUE, TRUE, ymult/3);
 
 	/* Setup the first list into a scrolled window */
-#ifdef USE_GTK2
 	Xdialog.widget1 = set_scrolled_list(hbox, MAX(15, n), list_size, 4, tree_list1);
 	g_object_unref(G_OBJECT(tree_list1));
-#else
-	Xdialog.widget1 = set_scrolled_list(hbox, MAX(15, n), list_size, 4);
-#endif
 
 	/* Setup the Add/Remove buttons */
 	vbuttonbox = gtk_vbutton_box_new();
@@ -1552,20 +1385,11 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 			   GTK_SIGNAL_FUNC(remove_from_list), NULL);
 
 	/* Setup the second list into a scrolled window */
-#ifdef USE_GTK2
 	Xdialog.widget2 = set_scrolled_list(hbox, MAX(15, n), list_size, 4, tree_list2);
 	g_object_unref(G_OBJECT(tree_list2));
-#else
-	Xdialog.widget2 = set_scrolled_list(hbox, MAX(15, n), list_size, 4);
-#endif
 
 	button_ok = set_all_buttons(FALSE, TRUE);
 	gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(print_list), NULL);
-
-#ifndef USE_GTK2
-	gtk_list_append_items(GTK_LIST(Xdialog.widget1), glist1);
-	gtk_list_append_items(GTK_LIST(Xdialog.widget2), glist2);
-#endif
 
 	sensitive_buttons();
 
@@ -1705,7 +1529,6 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 	set_timeout();
 }
 
-#ifdef USE_GTK2
 /* TODO: implement tooltips support */
 void create_treeview(gchar *optarg, gchar *options[], gint list_size)
 {
@@ -1789,123 +1612,6 @@ void create_treeview(gchar *optarg, gchar *options[], gint list_size)
 
 	set_timeout();
 }
-#else
-void create_treeview(gchar *optarg, gchar *options[], gint list_size)
-{
-	GtkWidget *scrolled_window;
-	GtkWidget *button_ok;
-	GtkWidget *item;
-	GtkWidget *selected = NULL;
-	GtkTree *tree;
-	GtkTree *oldtree[MAX_TREE_DEPTH];
-	GtkWidget *subtree;
-	GtkTooltips *tooltips = NULL;
-	int depth = 0;
-	int level, i;
-	int params = 4 + Xdialog.tips;
-
-	if (Xdialog.tips == 1)
-		tooltips = gtk_tooltips_new();
-
-	Xdialog_array(list_size);
-
-	open_window();
-
-	set_backtitle(TRUE);
-	set_label(optarg, FALSE);
-
-	scrolled_window = set_scrolled_window(Xdialog.vbox, xmult/2, -1, list_size, 4);
-
-	Xdialog.widget1 = gtk_tree_new();
-	gtk_widget_show(Xdialog.widget1);
-	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window),
-					      Xdialog.widget1);
-	button_ok = set_all_buttons(FALSE, TRUE);
-	gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(print_selection), NULL);
-
-	tree = oldtree[0] = GTK_TREE(Xdialog.widget1);
-
-	gtk_tree_set_view_mode(tree, GTK_TREE_VIEW_ITEM);
-	gtk_tree_set_selection_mode(tree, GTK_SELECTION_BROWSE);
-
-	for (i = 0 ; i < list_size ; i++) {
-		strcpysafe(Xdialog.array[i].tag, options[params*i], MAX_ITEM_LENGTH);
-		strcpysafe(Xdialog.array[i].name, options[params*i+1], MAX_ITEM_LENGTH);
-		item = gtk_tree_item_new_with_label(Xdialog.array[i].name);
-		Xdialog.array[i].widget = item;
-
-		level = atoi(options[params*i+3]);
-		if (i > 0) {
-			if (atoi(options[params*(i-1)+3]) > level) {
-				depth = level;
-				tree = oldtree[level];
-			}
-		}
-
-		gtk_tree_append(tree, item);
-
-		if (i+1 < list_size) {
-			if (level < atoi(options[params*(i+1)+3])) {
-				if (atoi(options[params*(i+1)+3]) != level + 1) {
-					fprintf(stderr,
-						"Xdialog: You cannot increment the --treeview depth "\
-						"by more than one level each time !  Aborting...\n");
-						exit(255);
-				}
-				subtree = gtk_tree_new();
-				gtk_signal_connect(GTK_OBJECT(subtree), "button_press_event",
-						   GTK_SIGNAL_FUNC(double_click_event),
-						   GTK_WIDGET(button_ok));
-				gtk_tree_item_set_subtree(GTK_TREE_ITEM(item), subtree);
-				depth++;
-				if (depth > MAX_TREE_DEPTH) {
-					fprintf(stderr,
-						"Xdialog: Max allowed depth for "\
-						"--treeview is %d !  Aborting...\n",
-						MAX_TREE_DEPTH);
-						exit(255);
-				}
-				tree = GTK_TREE(subtree);
-				oldtree[depth] = tree;
-				gtk_tree_set_selection_mode(tree, GTK_SELECTION_BROWSE);
-			}
-		}
-
-		if (item_status(item, options[params*i+2], Xdialog.array[i].tag) == 1 && selected == NULL) {
-			selected = item;
-			Xdialog.array[0].state = i;
-		}
-
-		gtk_widget_show(item);
-
-		if (Xdialog.tips == 1 && strlen(options[params*i+4]) > 0)
-			gtk_tooltips_set_tip(tooltips, item, (gchar *) options[params*i+4], NULL);
-	}
-
-	/* FIX ME !
-	 * It looks like there is a bug in GTK+ (v1.2.6 to v1.2.10 at least...):
-	 * the following code don't work properly: the selection, although
-	 * triggering the selected item highlighting, is not taken into account
-	 * (and may actually trigger a core dump when selecting other items)...
-	 */
-#define GTK_TREE_ITEM_SELECT_BUG 1
-#if !GTK_TREE_ITEM_SELECT_BUG
-	if (selected != NULL)
-		gtk_tree_item_select(GTK_TREE_ITEM(selected));
-#endif
-
-	gtk_signal_connect(GTK_OBJECT(Xdialog.widget1), "selection_changed",
-			   GTK_SIGNAL_FUNC(cb_selection_changed), Xdialog.widget1);
-	gtk_signal_connect(GTK_OBJECT(Xdialog.widget1), "button_press_event",
-			   GTK_SIGNAL_FUNC(double_click_event), button_ok);
-
-	if (Xdialog.interval > 0)
-		Xdialog.timer = gtk_timeout_add(Xdialog.interval, menu_timeout, NULL);
-
-	set_timeout();
-}
-#endif
-
 
 void create_filesel(gchar *optarg, gboolean dsel_flag)
 {
@@ -2020,11 +1726,7 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	/* Create a color selector and update Xdialog structure accordingly */
 	Xdialog.window = gtk_color_selection_dialog_new(Xdialog.title);
 	colorsel = GTK_COLOR_SELECTION_DIALOG(Xdialog.window);
-#ifdef USE_GTK2
 	Xdialog.vbox = GTK_BOX(gtk_widget_get_ancestor(colorsel->colorsel, gtk_box_get_type()));
-#else
-	Xdialog.vbox = GTK_BOX(colorsel->main_vbox);
-#endif
 
 	/* We must realize the widget before moving it and creating the icon and
            buttons pixmaps...
