@@ -7,18 +7,9 @@
 #endif
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-#	include <stdlib.h>
-#	include <string.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#	include <unistd.h>
-#endif
-
-#ifdef ENABLE_NLS
-#	include <locale.h>
-#endif
-
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include <gtk/gtk.h>
 
 #ifdef HAVE_GETOPT_LONG_ONLY
@@ -633,15 +624,6 @@ int main(int argc, char *argv[])
 		/* End of options marker */
 		{0, 0, 0, 0}
 	};
-
-#ifdef ENABLE_NLS
-#ifndef HAVE_SETLOCALE
-#error setlocale() function unavailable, try: ./configure --disable-nls
-#endif
-	setlocale (LC_ALL, "");
-	bindtextdomain (PACKAGE, LOCALEDIR);
-	textdomain (PACKAGE);
-#endif
 
 	/* Check if the dialog high compatibility mode is requested */
 	dialog_compat = is_true(HIGH_DIALOG_COMPAT);

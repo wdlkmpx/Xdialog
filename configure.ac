@@ -1,48 +1,27 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(configure.in)
-
-PACKAGE=Xdialog
-VERSION=2.3.1
-AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE")
-AC_DEFINE_UNQUOTED(VERSION, "$VERSION")
-AC_SUBST(PACKAGE)
-AC_SUBST(VERSION)
-AM_INIT_AUTOMAKE(${PACKAGE}, ${VERSION})
+AC_INIT([Xdialog],[2.3.1])
+AM_INIT_AUTOMAKE([-Wall subdir-objects foreign silent-rules])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 AM_CONFIG_HEADER(config.h)
+AC_CONFIG_MACRO_DIR([m4])
 
-dnl Initialize libtool
-dnl AM_PROG_LIBTOOL
+AM_PROG_AR
+LT_INIT
 
 AC_ISC_POSIX
 AC_PROG_CC
 AM_PROG_CC_STDC
-AC_PROG_RANLIB
-AC_HEADER_STDC
 AC_CHECK_HEADERS(unistd.h)
 AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_FUNCS(strcasecmp strstr getopt_long_only memchr memmove setlocale)
 
-rm -f ./intl/libintl.h
-ALL_LINGUAS="fr de ru es hu pt_BR no_NO id nl it pl ca sv_SE"
-AM_GNU_GETTEXT([external])
-
-compile_for="gtk1"
-AC_ARG_WITH(gtk2,
-  [  --with-gtk2             Compiles for GTK2],[
-  compile_for="gtk2"
-  CPPFLAGS="$CPPFLAGS -DUSE_GTK2"
-  AC_MSG_RESULT(Compiling for GTK2)
-  ])
-if test "$compile_for" = "gtk2" ; then
-  AM_PATH_GTK_2_0(2.2.0, ,
-            AC_MSG_ERROR(Cannot find GTK2.))
-else
-  AM_PATH_GTK(1.2.0, ,
-            AC_MSG_ERROR(Cannot find GTK: Is gtk-config in path?))
-fi
+CPPFLAGS="$CPPFLAGS -DUSE_GTK2"
+PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.0],[AC_MSG_NOTICE([Using GTK2])])
+AC_SUBST(GTK_CFLAGS)
+AC_SUBST(GTK_LIBS)
 
 dnl Set PACKAGE_DATA_DIR in config.h.
 if test "x${datadir}" = 'x${prefix}/share'; then
@@ -59,27 +38,10 @@ dnl Set PACKAGE_SOURCE_DIR in config.h.
 packagesrcdir=`cd $srcdir && pwd`
 AC_DEFINE_UNQUOTED(PACKAGE_SOURCE_DIR, "${packagesrcdir}", [ ])
 
-dnl Use -Wall if we have gcc.
-if test "x$GCC" = "xyes"; then
-  case " $CFLAGS " in
-  *[[\ \	]-Wall[\ \	]]*) ;;
-  *) CFLAGS="$CFLAGS -Wall" ;;
-  esac
-  case " $CFLAGS " in
-  *[[\ \	]-s[\ \	]]*) ;;
-  *) CFLAGS="$CFLAGS -s" ;;
-  esac
-  case `gcc --version` in
-  2.95*|2.96*|2.97*)
-  case " $CFLAGS " in
-  *[[\ \	]-fno-omit-frame-pointer[\ \	]]*) ;;
-  *) CFLAGS="$CFLAGS -fno-omit-frame-pointer" ;;
-  esac
-  AC_MSG_RESULT(Buggy GCC version: compiling with -fno-omit-frame-pointer)
-  ;;
+case "$CC" in
+  gcc*) CPPFLAGS="$CPPFLAGS -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers" ;;
   *) ;;
-  esac
-fi
+esac
 
 AC_ARG_WITH(french-labels,
   [  --with-french-labels    Enables french labels in menus],[
@@ -126,4 +88,7 @@ AC_ARG_WITH(print-option,
   fi
   ])
 
-AC_OUTPUT(Makefile lib/Makefile src/Makefile po/Makefile.in doc/Makefile m4/Makefile )
+AC_OUTPUT(Makefile
+lib/Makefile
+src/Makefile
+doc/Makefile)

@@ -7,13 +7,9 @@
 #endif
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-#	include <stdlib.h>
-#	include <string.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#	include <unistd.h>
-#endif
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #ifndef USE_SCANF
 #	if defined(HAVE_ERRNO_H) && defined(HAVE_FCNTL_H) && defined(HAVE_MEMMOVE) && defined(HAVE_MEMCHR)

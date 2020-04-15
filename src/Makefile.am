@@ -3,7 +3,7 @@
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
 localedir = $(datadir)/locale
-INCLUDES = \
+AM_CPPFLAGS = \
 	-DLOCALEDIR=\"$(localedir)\" -I. -I../intl -I../lib \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	@GTK_CFLAGS@
@@ -16,5 +16,5 @@ Xdialog_SOURCES = \
 	callbacks.c callbacks.h \
 	support.c support.h
 
-LDADD = @LIBINTL@
+#LDADD = @LIBINTL@
 Xdialog_LDADD = $(LDADD) @GTK_LIBS@ -L../lib -lgetopt

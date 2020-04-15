@@ -7,13 +7,9 @@
 #endif
 
 #include <stdio.h>
-#ifdef STDC_HEADERS
-#	include <stdlib.h>
-#	include <string.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#	include <unistd.h>
-#endif
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include <sys/stat.h>
 
 #include <gdk/gdkkeysyms.h>

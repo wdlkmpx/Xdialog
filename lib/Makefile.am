@@ -3,7 +3,7 @@
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
 localedir = $(datadir)/locale
-INCLUDES = -DLOCALEDIR=\"$(localedir)\" -I.
+AM_CPPFLAGS = -DLOCALEDIR=\"$(localedir)\" -I.
 
 noinst_LIBRARIES = libgetopt.a
 
