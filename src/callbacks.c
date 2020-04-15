@@ -68,7 +68,7 @@ gboolean destroy_event(gpointer object, GdkEventAny *event, gpointer data)
  * function that will cleanup everything, destroy the top level window and
  * set the gtk main loop exit flag. They are used "as is" by most Xdialog
  * widgets but care must be taken that they are connected with the
- * gtk_signal_connect_after() function so that any other signal callbacks
+ * g_signal_connect_after() function so that any other signal callbacks
  * are executed BEFORE them (after them, the widget does not exists anymore).
  */
 gboolean exit_ok(gpointer object, gpointer data)
@@ -739,7 +739,7 @@ gint double_click_event(GtkObject *object, GdkEventButton *event,
 			gpointer data)
 {
 	if (event->type == GDK_2BUTTON_PRESS || event->type == GDK_3BUTTON_PRESS)
-		gtk_signal_emit_by_name(GTK_OBJECT(data), "clicked");
+		g_signal_emit_by_name (G_OBJECT(data), "clicked");
 
 	return FALSE;
 }

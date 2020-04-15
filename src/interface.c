@@ -174,10 +174,10 @@ static void open_window(void)
 				       Xdialog.wmclass);
 
 	/* Set default events handlers */
-	gtk_signal_connect(GTK_OBJECT(window), "destroy",
-			   GTK_SIGNAL_FUNC(destroy_event), NULL);
-	gtk_signal_connect(GTK_OBJECT(window), "delete_event",
-			   GTK_SIGNAL_FUNC(delete_event), NULL);
+	g_signal_connect (G_OBJECT(window), "destroy",
+			   G_CALLBACK(destroy_event), NULL);
+	g_signal_connect (G_OBJECT(window), "delete_event",
+			   G_CALLBACK(delete_event), NULL);
 
 	/* Set the window title */
 	gtk_window_set_title(GTK_WINDOW(window), Xdialog.title);
@@ -399,31 +399,31 @@ static GtkWidget *set_button(gchar *default_text, gpointer buttonbox, gint event
 
 	switch (event) {
 		case 0:
-			gtk_signal_connect_after(GTK_OBJECT(button), "clicked",
-						 GTK_SIGNAL_FUNC(exit_ok),
+			g_signal_connect_after(G_OBJECT(button), "clicked",
+						 G_CALLBACK(exit_ok),
 						 NULL);
 			break;
 		case 1:
-			gtk_signal_connect_after(GTK_OBJECT(button), "clicked",
-						 GTK_SIGNAL_FUNC(exit_cancel),
+			g_signal_connect_after(G_OBJECT(button), "clicked",
+						 G_CALLBACK(exit_cancel),
 						 NULL);
-			gtk_signal_connect_after(GTK_OBJECT(Xdialog.window), "key_press_event",
-						 GTK_SIGNAL_FUNC(exit_keypress), NULL);
+			g_signal_connect_after(G_OBJECT(Xdialog.window), "key_press_event",
+						 G_CALLBACK(exit_keypress), NULL);
 
 			break;
 		case 2:
-			gtk_signal_connect_after(GTK_OBJECT(button), "clicked",
-						 GTK_SIGNAL_FUNC(exit_help),
+			g_signal_connect_after(G_OBJECT(button), "clicked",
+						 G_CALLBACK(exit_help),
 						 NULL);
 			break;
 		case 3:
-			gtk_signal_connect_after(GTK_OBJECT(button), "clicked",
-						 GTK_SIGNAL_FUNC(exit_previous),
+			g_signal_connect_after(G_OBJECT(button), "clicked",
+						 G_CALLBACK(exit_previous),
 						 NULL);
 			break;
 		case 4:
-			gtk_signal_connect_after(GTK_OBJECT(button), "clicked",
-						 GTK_SIGNAL_FUNC(print_text),
+			g_signal_connect_after(G_OBJECT(button), "clicked",
+						 G_CALLBACK(print_text),
 						 NULL);
 			break;
 	}
@@ -462,8 +462,8 @@ static void set_check_button(GtkWidget *box)
 	if (Xdialog.checked)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
 
-	gtk_signal_connect(GTK_OBJECT(button), "toggled",
-			   GTK_SIGNAL_FUNC(checked), NULL);
+	g_signal_connect (G_OBJECT(button), "toggled",
+			   G_CALLBACK(checked), NULL);
 }
 
 static GtkWidget *set_all_buttons(gboolean print, gboolean ok)
@@ -826,8 +826,8 @@ void create_tailbox(gchar *optarg)
 	Xdialog.widget1 = set_scrollable_text();
 	gtk_widget_set_usize(Xdialog.widget1, 40*xmult, 15*ymult);
 	gtk_widget_grab_focus(Xdialog.widget1);
-	gtk_signal_connect(GTK_OBJECT(Xdialog.widget1), "key_press_event",
-			   GTK_SIGNAL_FUNC(tailbox_keypress), NULL);
+	g_signal_connect (G_OBJECT(Xdialog.widget1), "key_press_event",
+			   G_CALLBACK(tailbox_keypress), NULL);
 
 	if (strcmp(optarg, "-") == 0)
 		Xdialog.file = stdin;
@@ -891,8 +891,8 @@ void create_logbox(gchar *optarg)
 	 * and similar warnings with GTK+ v1.2.9 (and perhaps with previous versions as well)...
 	 */
 	gtk_clist_columns_autosize(clist);
-	gtk_signal_connect(GTK_OBJECT(Xdialog.widget1), "key_press_event",
-			   GTK_SIGNAL_FUNC(tailbox_keypress), NULL);
+	g_signal_connect (G_OBJECT(Xdialog.widget1), "key_press_event",
+			   G_CALLBACK(tailbox_keypress), NULL);
 	gtk_widget_show(Xdialog.widget1);
 	gtk_widget_grab_focus(Xdialog.widget1);
 
@@ -1013,8 +1013,8 @@ void create_textbox(gchar *optarg, gboolean editable)
 		button_ok = set_all_buttons(TRUE, TRUE);
 
 	if (editable)
-		gtk_signal_connect(GTK_OBJECT(button_ok), "clicked",
-				   GTK_SIGNAL_FUNC(editbox_ok), NULL);
+		g_signal_connect (G_OBJECT(button_ok), "clicked",
+				   G_CALLBACK(editbox_ok), NULL);
 
 	set_timeout();
 }
@@ -1077,14 +1077,14 @@ void create_inputbox(gchar *optarg, gchar *options[], gint entries)
 		hide_button = gtk_check_button_new_with_label(HIDE_TYPING);
 		gtk_box_pack_start(Xdialog.vbox, hide_button, TRUE, TRUE, 0);
 		gtk_widget_show(hide_button);
-		gtk_signal_connect(GTK_OBJECT(hide_button), "toggled",
-				   GTK_SIGNAL_FUNC(hide_passwords), NULL);
+		g_signal_connect (G_OBJECT(hide_button), "toggled",
+				   G_CALLBACK(hide_passwords), NULL);
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hide_button), TRUE);
 	}
 
 	if (Xdialog.buttons) {
 		button_ok = set_all_buttons(FALSE, TRUE);
-		gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(inputbox_ok), NULL);
+		g_signal_connect (G_OBJECT(button_ok), "clicked", G_CALLBACK(inputbox_ok), NULL);
 	}
 
 	if (Xdialog.interval > 0)
@@ -1112,19 +1112,19 @@ void create_combobox(gchar *optarg, gchar *options[], gint list_size)
 	gtk_box_pack_start(Xdialog.vbox, combo, TRUE, TRUE, 0);
 	gtk_widget_grab_focus(Xdialog.widget1);
 	gtk_widget_show(combo);
-	gtk_signal_connect(GTK_OBJECT(Xdialog.widget1), "key_press_event",
-			   GTK_SIGNAL_FUNC(input_keypress), NULL);
+	g_signal_connect (G_OBJECT(Xdialog.widget1), "key_press_event",
+			   G_CALLBACK(input_keypress), NULL);
 
 	/* Set the popdown strings */
 	for (i = 0; i < list_size; i++)
 		glist = g_list_append(glist, options[i]);
 	gtk_combo_set_popdown_strings(GTK_COMBO(combo), glist);
 
-	gtk_entry_set_editable(GTK_ENTRY(Xdialog.widget1), Xdialog.editable);
+	gtk_editable_set_editable (GTK_EDITABLE(Xdialog.widget1), Xdialog.editable);
 
 	if (Xdialog.buttons) {
 		button_ok = set_all_buttons(FALSE, TRUE);
-		gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(inputbox_ok), NULL);
+		g_signal_connect (G_OBJECT(button_ok), "clicked", G_CALLBACK(inputbox_ok), NULL);
 	}
 
 	if (Xdialog.interval > 0)
@@ -1185,7 +1185,7 @@ void create_rangebox(gchar *optarg, gchar *options[], gint ranges)
 	}
 
 	button_ok = set_all_buttons(FALSE, TRUE);
-	gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(rangebox_exit), NULL);
+	g_signal_connect (G_OBJECT(button_ok), "clicked", G_CALLBACK(rangebox_exit), NULL);
 
 	if (Xdialog.interval > 0)
 		Xdialog.timer = g_timeout_add(Xdialog.interval, rangebox_timeout, NULL);
@@ -1230,7 +1230,7 @@ void create_spinbox(gchar *optarg, gchar *options[], gint spins)
 
 	button_ok = set_all_buttons(FALSE, TRUE);
 
-	gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(spinbox_exit), NULL);
+	g_signal_connect (G_OBJECT(button_ok), "clicked", G_CALLBACK(spinbox_exit), NULL);
 
 	if (Xdialog.interval > 0)
 		Xdialog.timer = g_timeout_add(Xdialog.interval, spinbox_timeout, NULL);
@@ -1269,7 +1269,7 @@ void create_itemlist(gchar *optarg, gint type, gchar *options[], gint list_size)
 	gtk_widget_show(vbox);
 
 	button_ok = set_all_buttons(FALSE, TRUE);
-	gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(print_items), NULL);
+	g_signal_connect (G_OBJECT(button_ok), "clicked", G_CALLBACK(print_items), NULL);
 
 	for (i = 0;  i < list_size; i++) {
 		strncpy(Xdialog.array[i].tag, options[params*i], sizeof(Xdialog.array[i].tag) );
@@ -1292,11 +1292,11 @@ void create_itemlist(gchar *optarg, gint type, gchar *options[], gint list_size)
 		if (item_status(item, options[params*i+2], Xdialog.array[i].tag) == 1)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(item), TRUE);
 
-		gtk_signal_connect(GTK_OBJECT(item), "toggled",
-				   GTK_SIGNAL_FUNC(item_toggle), (gpointer)i);
-		gtk_signal_connect(GTK_OBJECT(item), "button_press_event",
-				   GTK_SIGNAL_FUNC(double_click_event), button_ok);
-		gtk_signal_emit_by_name(GTK_OBJECT(item), "toggled");
+		g_signal_connect (G_OBJECT(item), "toggled",
+				   G_CALLBACK(item_toggle), (gpointer)i);
+		g_signal_connect (G_OBJECT(item), "button_press_event",
+				   G_CALLBACK(double_click_event), button_ok);
+		g_signal_emit_by_name (G_OBJECT(item), "toggled");
 
 		if (Xdialog.tips == 1 && strlen(options[params*i+3]) > 0)
 			gtk_tooltips_set_tip(tooltips, item, (gchar *) options[params*i+3], NULL);
@@ -1364,18 +1364,18 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 	gtk_box_pack_start(GTK_BOX(hbox), vbuttonbox, FALSE, TRUE, 0);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(vbuttonbox), GTK_BUTTONBOX_SPREAD);
 	button_add = Xdialog.widget3 = set_button(ADD, vbuttonbox, -1, FALSE);
-	gtk_signal_connect(GTK_OBJECT(button_add), "clicked",
-			   GTK_SIGNAL_FUNC(add_to_list), NULL);
+	g_signal_connect (G_OBJECT(button_add), "clicked",
+			   G_CALLBACK(add_to_list), NULL);
 	button_remove = Xdialog.widget4 = set_button(REMOVE, vbuttonbox, -1, FALSE);
-	gtk_signal_connect(GTK_OBJECT(button_remove), "clicked",
-			   GTK_SIGNAL_FUNC(remove_from_list), NULL);
+	g_signal_connect (G_OBJECT(button_remove), "clicked",
+			   G_CALLBACK(remove_from_list), NULL);
 
 	/* Setup the second list into a scrolled window */
 	Xdialog.widget2 = set_scrolled_list(hbox, MAX(15, n), list_size, 4, tree_list2);
 	g_object_unref(G_OBJECT(tree_list2));
 
 	button_ok = set_all_buttons(FALSE, TRUE);
-	gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(print_list), NULL);
+	g_signal_connect (G_OBJECT(button_ok), "clicked", G_CALLBACK(print_list), NULL);
 
 	sensitive_buttons();
 
@@ -1489,13 +1489,13 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 
 	gtk_container_add(GTK_CONTAINER(scrolled_window), Xdialog.widget2);
 	gtk_widget_show(Xdialog.widget2);
-	gtk_signal_connect(GTK_OBJECT(Xdialog.widget2), "select_row",
-			   GTK_SIGNAL_FUNC(item_select), NULL);
+	g_signal_connect (G_OBJECT(Xdialog.widget2), "select_row",
+			   G_CALLBACK(item_select), NULL);
 
 	button_ok = set_all_buttons(FALSE, TRUE);
-	gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(print_selection), NULL);
-	gtk_signal_connect(GTK_OBJECT(Xdialog.widget2), "button_press_event",
-			   GTK_SIGNAL_FUNC(double_click_event), button_ok);
+	g_signal_connect (G_OBJECT(button_ok), "clicked", G_CALLBACK(print_selection), NULL);
+	g_signal_connect (G_OBJECT(Xdialog.widget2), "button_press_event",
+			   G_CALLBACK(double_click_event), button_ok);
 
 	if (Xdialog.tips == 1) {
 		hbox = gtk_hbox_new(FALSE, 0);
@@ -1586,7 +1586,7 @@ void create_treeview(gchar *optarg, gchar *options[], gint list_size)
 
 	/* Create and hookup the ok button */
 	button_ok = set_all_buttons(FALSE, TRUE);
-	gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(print_tree_selection), NULL);
+	g_signal_connect (G_OBJECT(button_ok), "clicked", G_CALLBACK(print_tree_selection), NULL);
 
 	/* Setup the selection handler */
 	select = gtk_tree_view_get_selection(GTK_TREE_VIEW(Xdialog.widget1));
@@ -1679,11 +1679,11 @@ void create_filesel(gchar *optarg, gboolean dsel_flag)
 		set_button(HELP, hbuttonbox, 2, FALSE);
 
 	/* Setup callbacks */
-	gtk_signal_connect(GTK_OBJECT(Xdialog.window), "destroy",
-			   GTK_SIGNAL_FUNC(destroy_event), NULL);
-	gtk_signal_connect(GTK_OBJECT(Xdialog.window), "delete_event",
-			   GTK_SIGNAL_FUNC(delete_event), NULL);
-	gtk_signal_connect(GTK_OBJECT(filesel->ok_button),
+	g_signal_connect (G_OBJECT(Xdialog.window), "destroy",
+			   G_CALLBACK(destroy_event), NULL);
+	g_signal_connect (G_OBJECT(Xdialog.window), "delete_event",
+			   G_CALLBACK(delete_event), NULL);
+	g_signal_connect (G_OBJECT(filesel->ok_button),
 			   "clicked", (GtkSignalFunc) filesel_exit, filesel);
 
 	/* Beep if requested */
@@ -1767,12 +1767,12 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	gtk_color_selection_set_color(GTK_COLOR_SELECTION(colorsel->colorsel), colors);
 
 	/* Setup callbacks */
-	gtk_signal_connect(GTK_OBJECT(Xdialog.window), "destroy",
-			   GTK_SIGNAL_FUNC(destroy_event), NULL);
-	gtk_signal_connect(GTK_OBJECT(Xdialog.window), "delete_event",
-			   GTK_SIGNAL_FUNC(delete_event), NULL);
-	gtk_signal_connect(GTK_OBJECT(colorsel->ok_button),
-			   "clicked", (GtkSignalFunc) colorsel_exit, GTK_OBJECT(colorsel->colorsel));
+	g_signal_connect (G_OBJECT(Xdialog.window), "destroy",
+			   G_CALLBACK(destroy_event), NULL);
+	g_signal_connect (G_OBJECT(Xdialog.window), "delete_event",
+			   G_CALLBACK(delete_event), NULL);
+	g_signal_connect (G_OBJECT(colorsel->ok_button),
+			   "clicked", (GtkSignalFunc) colorsel_exit, G_OBJECT(colorsel->colorsel));
 
 	/* Beep if requested */
 	if (Xdialog.beep & BEEP_BEFORE && Xdialog.exit_code != 2)
@@ -1851,11 +1851,11 @@ void create_fontsel(gchar *optarg)
 		set_button(HELP, hbuttonbox, 2, FALSE);
 
 	/* Setup callbacks */
-	gtk_signal_connect(GTK_OBJECT(Xdialog.window), "destroy",
-			   GTK_SIGNAL_FUNC(destroy_event), NULL);
-	gtk_signal_connect(GTK_OBJECT(Xdialog.window), "delete_event",
-			   GTK_SIGNAL_FUNC(delete_event), NULL);
-	gtk_signal_connect(GTK_OBJECT(fontsel->ok_button),
+	g_signal_connect (G_OBJECT(Xdialog.window), "destroy",
+			   G_CALLBACK(destroy_event), NULL);
+	g_signal_connect (G_OBJECT(Xdialog.window), "delete_event",
+			   G_CALLBACK(delete_event), NULL);
+	g_signal_connect (G_OBJECT(fontsel->ok_button),
 			   "clicked", (GtkSignalFunc) fontsel_exit, fontsel);
 
 	/* Beep if requested */
@@ -1899,11 +1899,11 @@ void create_calendar(gchar *optarg, gint day, gint month, gint year)
 	gtk_calendar_select_day(calendar, day);
 
 	button_ok = set_all_buttons(FALSE, TRUE);
-	gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(calendar_exit), NULL);
-	gtk_signal_connect(GTK_OBJECT(Xdialog.widget1), "day_selected_double_click",
-			   GTK_SIGNAL_FUNC(calendar_exit), NULL);
-	gtk_signal_connect_after(GTK_OBJECT(Xdialog.widget1), "day_selected_double_click",
-			   GTK_SIGNAL_FUNC(exit_ok), NULL);
+	g_signal_connect (G_OBJECT(button_ok), "clicked", G_CALLBACK(calendar_exit), NULL);
+	g_signal_connect (G_OBJECT(Xdialog.widget1), "day_selected_double_click",
+			   G_CALLBACK(calendar_exit), NULL);
+	g_signal_connect_after(G_OBJECT(Xdialog.widget1), "day_selected_double_click",
+			   G_CALLBACK(exit_ok), NULL);
 
 	if (Xdialog.interval > 0)
 		Xdialog.timer = g_timeout_add(Xdialog.interval, calendar_timeout, NULL);
@@ -1938,7 +1938,7 @@ void create_timebox(gchar *optarg, gint hours, gint minutes, gint seconds)
 	Xdialog.widget3 = set_spin_button(hbox, 0, 59, seconds,  2, NULL, FALSE);
 
 	button_ok = set_all_buttons(FALSE, TRUE);
-	gtk_signal_connect(GTK_OBJECT(button_ok), "clicked", GTK_SIGNAL_FUNC(timebox_exit), NULL);
+	g_signal_connect (G_OBJECT(button_ok), "clicked", G_CALLBACK(timebox_exit), NULL);
 
 	if (Xdialog.interval > 0)
 		Xdialog.timer = g_timeout_add(Xdialog.interval, timebox_timeout, NULL);
