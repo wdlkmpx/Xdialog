@@ -1739,6 +1739,7 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	GtkWidget *box;
 	GtkWidget *hbuttonbox;
 	GtkWidget *button;
+	GdkColor gcolor;
 	gboolean flag;
 
 	font_init();
@@ -1749,6 +1750,13 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	Xdialog.window = gtk_color_selection_dialog_new(Xdialog.title);
 	colorsel = GTK_COLOR_SELECTION_DIALOG(Xdialog.window);
 	Xdialog.vbox = GTK_BOX(gtk_widget_get_ancestor(colorsel->colorsel, gtk_box_get_type()));
+
+	gcolor.red   = colors[0] * 256;
+	gcolor.green = colors[1] * 256;
+	gcolor.blue  = colors[2] * 256;
+	gtk_color_selection_set_current_color (
+		GTK_COLOR_SELECTION (gtk_color_selection_dialog_get_color_selection (colorsel)),
+		&gcolor);
 
 	/* We must realize the widget before moving it and creating the icon and
            buttons pixmaps...
@@ -1800,15 +1808,13 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	if (Xdialog.help)
 		set_button(HELP, hbuttonbox, 2, FALSE);
 
-	gtk_color_selection_set_color(GTK_COLOR_SELECTION(colorsel->colorsel), colors);
-
 	/* Setup callbacks */
 	g_signal_connect (G_OBJECT(Xdialog.window), "destroy",
 			   G_CALLBACK(destroy_event), NULL);
 	g_signal_connect (G_OBJECT(Xdialog.window), "delete_event",
 			   G_CALLBACK(delete_event), NULL);
-	g_signal_connect (G_OBJECT(colorsel->ok_button),
-			   "clicked", (GtkSignalFunc) colorsel_exit, G_OBJECT(colorsel->colorsel));
+	g_signal_connect (G_OBJECT(colorsel->ok_button), "clicked",
+			   G_CALLBACK(colorsel_exit), G_OBJECT(colorsel->colorsel));
 
 	/* Beep if requested */
 	if (Xdialog.beep & BEEP_BEFORE && Xdialog.exit_code != 2)

@@ -1019,11 +1019,12 @@ gboolean dirsel_exit(GtkObject *filesel, gpointer client_data)
 /* colorsel callback */
 gboolean colorsel_exit(GtkObject *colorsel, gpointer client_data)
 {
-	gdouble colors[4];
-
-	gtk_color_selection_get_color(GTK_COLOR_SELECTION(client_data), colors);
+	GdkColor colors;
+	gtk_color_selection_get_current_color (
+			GTK_COLOR_SELECTION(client_data),
+			&colors);
 	fprintf(Xdialog.output, "%d %d %d\n",
-                (int) (255.0 * colors[0]), (int) (255.0 * colors[1]), (int) (255.0 * colors[2]));
+                colors.red / 256, colors.green / 256, colors.blue / 256);
 	return exit_ok(NULL, NULL);
 }
 

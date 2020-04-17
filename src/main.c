@@ -929,13 +929,14 @@ show_again:
 				get_box_size(argc, argv, &optind);
 				list_size = param_number(argc, argv, &optind);
 				if (list_size != 0) {
-					if (list_size != 3)
+					if (list_size != 3) {
 						print_help_info(argv[0], "incorrect number of parameters");
-					colors[0] = atoi(argv[optind++]) / 255.0;
-                                        colors[1] = atoi(argv[optind++]) / 255.0;
-                                        colors[2] = atoi(argv[optind++]) / 255.0;
-                                }  else {
-					colors[0] = colors[1] = colors[2] = 1.0;
+					}
+					colors[0] = atoi(argv[optind++]);
+					colors[1] = atoi(argv[optind++]);
+					colors[2] = atoi(argv[optind++]);
+				}  else {
+					colors[0] = colors[1] = colors[2] = 1;
 				}
 				create_colorsel(optarg, colors);
 				win = TRUE;
