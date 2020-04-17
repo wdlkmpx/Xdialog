@@ -256,7 +256,7 @@ static GtkWidget *set_label(gchar *label_text, gboolean expand)
 	GtkWidget *hbox;
 	GdkBitmap *mask;
 	GdkColor  transparent;
-	GdkPixmap *pixmap;
+	GdkPixbuf *pixbuf;
 	GtkWidget *icon;
 	gchar     text[MAX_LABEL_LENGTH];
 	int icon_width = 0;
@@ -265,13 +265,10 @@ static GtkWidget *set_label(gchar *label_text, gboolean expand)
 	gtk_box_pack_start(Xdialog.vbox, hbox, expand, TRUE, ymult/3);
 
 	if (Xdialog.icon) {
-		pixmap = gdk_pixmap_create_from_xpm(Xdialog.window->window,
-						    &mask, &transparent,
-						    Xdialog.icon_file);
-		if (pixmap != NULL) {
-			icon = gtk_pixmap_new(pixmap, mask);
-			g_object_unref(pixmap);
-			g_object_unref(mask);
+		pixbuf = gdk_pixbuf_new_from_file (Xdialog.icon_file, NULL);
+		if (pixbuf != NULL) {
+			icon = gtk_image_new_from_pixbuf (pixbuf);
+			g_object_unref(pixbuf);
 			gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 2);
 			gtk_widget_show(icon);
 			icon_width = icon->requisition.width + 4;
@@ -1662,7 +1659,7 @@ void create_filesel(gchar *optarg, gboolean dsel_flag)
 	/* If requested, add a check button into the filesel action area */
 	set_check_button(GTK_WIDGET(filesel->action_area));
 
-	/* We must realize the widget before moving it and creating the buttons pixmaps */
+	/* We must realize the widget before moving it and creating the buttons pixbufs */
 	gtk_widget_realize(Xdialog.window);
 
 	/* Set the window size and placement policy */
@@ -1748,7 +1745,7 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 		&gcolor);
 
 	/* We must realize the widget before moving it and creating the icon and
-           buttons pixmaps...
+           buttons pixbufs...
         */
 	gtk_widget_realize(Xdialog.window);
 
@@ -1843,7 +1840,7 @@ void create_fontsel(gchar *optarg)
 	/* If requested, add a check button into the fontsel action area */
 	set_check_button(fontsel->action_area);
 
-	/* We must realize the widget before moving it and creating the buttons pixmaps */
+	/* We must realize the widget before moving it and creating the buttons pixbufs */
 	gtk_widget_realize(Xdialog.window);
 
 	/* Set the window size and placement policy */
