@@ -426,8 +426,8 @@ static GtkWidget *set_button(gchar *default_text, gpointer buttonbox, gint event
 						 NULL);
 			break;
 		case 5:
-			gtk_signal_connect_after(GTK_OBJECT(button), "clicked",
-						 GTK_SIGNAL_FUNC(exit_extra),
+			g_signal_connect_after(G_OBJECT(button), "clicked",
+						 G_CALLBACK(exit_extra),
 						 NULL);
 			break;
 
@@ -1683,8 +1683,8 @@ void create_filesel(gchar *optarg, gboolean dsel_flag)
 	hbuttonbox = gtk_widget_get_ancestor(filesel->ok_button, gtk_hbutton_box_get_type());
 
 	/* Remove the fileselector buttons IOT put ours in place */
-	gtk_object_destroy(GTK_OBJECT(filesel->ok_button));
-	gtk_object_destroy(GTK_OBJECT(filesel->cancel_button));
+	gtk_widget_destroy(filesel->ok_button);
+	gtk_widget_destroy(filesel->cancel_button);
 
 	/* Setup our own buttons */
 	if (Xdialog.wizard)
@@ -1780,9 +1780,9 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	hbuttonbox = gtk_widget_get_ancestor(colorsel->ok_button, gtk_hbutton_box_get_type());
 
 	/* Remove the colour selector buttons IOT put ours in place */
-	gtk_object_destroy(GTK_OBJECT(colorsel->ok_button));
-	gtk_object_destroy(GTK_OBJECT(colorsel->cancel_button));
-	gtk_object_destroy(GTK_OBJECT(colorsel->help_button));
+	gtk_widget_destroy(colorsel->ok_button);
+	gtk_widget_destroy(colorsel->cancel_button);
+	gtk_widget_destroy(colorsel->help_button);
 
 	/* Setup our own buttons */
 	if (Xdialog.wizard)
@@ -1864,9 +1864,9 @@ void create_fontsel(gchar *optarg)
 	hbuttonbox = fontsel->action_area;
 
 	/* Remove the font selector buttons IOT put ours in place */
-	gtk_object_destroy(GTK_OBJECT(fontsel->ok_button));
-	gtk_object_destroy(GTK_OBJECT(fontsel->cancel_button));
-	gtk_object_destroy(GTK_OBJECT(fontsel->apply_button));
+	gtk_widget_destroy(fontsel->ok_button);
+	gtk_widget_destroy(fontsel->cancel_button);
+	gtk_widget_destroy(fontsel->apply_button);
 
 	/* Setup our own buttons */
 	if (Xdialog.wizard)
@@ -1898,7 +1898,7 @@ void create_fontsel(gchar *optarg)
 	g_signal_connect (G_OBJECT(Xdialog.window), "delete_event",
 			   G_CALLBACK(delete_event), NULL);
 	g_signal_connect (G_OBJECT(fontsel->ok_button),
-			   "clicked", (GtkSignalFunc) fontsel_exit, fontsel);
+			   "clicked", G_CALLBACK(fontsel_exit), fontsel);
 
 	/* Beep if requested */
 	if (Xdialog.beep & BEEP_BEFORE && Xdialog.exit_code != 2)
