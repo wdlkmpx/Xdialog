@@ -73,6 +73,8 @@ Transient options:\n\
   --check <label> [<status>]\n\
   --ok-label <label>\n\
   --cancel-label <label>\n\
+  --extra-button\n\
+  --extra-label <label>\n\
   --beep\n\
   --beep-after\n\
   --begin <Yorg> <Xorg>\n\
@@ -209,6 +211,7 @@ enum {
 	T_REVERSE,
 	T_KEEPCOLORS,
 	T_NOOK,
+	T_EXTRA,
 	T_NOCANCEL,
 	T_NOBUTTONS,
 	T_NOTAGS,
@@ -220,6 +223,7 @@ enum {
 	T_DEFAULTNO,
 	T_OKLABEL,
 	T_CANCELLABEL,
+	T_EXTRALABEL,
 	T_ICON,
 	T_INTERVAL,
 	T_TIMEOUT,
@@ -260,7 +264,11 @@ static void print_help_info(char *name, char *errmsg)
 
 	strncpy(Xdialog.title, "Usage for ", sizeof(Xdialog.title));
 	strncat(Xdialog.title, cmd, sizeof(Xdialog.title));
-	Xdialog.cancel_button = Xdialog.help = Xdialog.icon = Xdialog.check = FALSE;
+	Xdialog.cancel_button = FALSE;
+	Xdialog.help = FALSE;
+	Xdialog.icon = FALSE;
+	Xdialog.check = FALSE;
+	Xdialog.extra_button = FALSE;
 	if (!Xdialog.print) {
 		Xdialog.print = TRUE;
 		Xdialog.printer[0] = 0;
@@ -604,6 +612,9 @@ int main(int argc, char *argv[])
                 {"version",		0, 0, S_VERSION},
                 {"print-version",	0, 0, S_PRINTVERSION},
                 {"clear",		0, 0, S_CLEAR},
+		/* Nomius patch for extra button */
+                {"extra-button",		0, 0, T_EXTRA},
+                {"extra-label",	1, 0, T_EXTRALABEL},
 		/* End of options marker */
 		{0, 0, 0, 0}
 	};
@@ -645,7 +656,8 @@ int main(int argc, char *argv[])
 	Xdialog.buttons_style	= ICON_AND_TEXT;	/* Default buttons style (icon+text) */
 	Xdialog.buttons		= TRUE;			/* Display buttons as default */
 	Xdialog.ok_button	= TRUE;			/* Display "OK" button as default */
-	Xdialog.cancel_button	= TRUE;			/* Display "Cancel" button as default */
+	Xdialog.cancel_button	= TRUE;		/* Display "Cancel" button as default */
+	Xdialog.extra_button	= FALSE;	/* Don't Display "Extra" button as default */
 	Xdialog.tags		= TRUE;			/* Display tags before items in lists */
 #if 0	/* Not needed because of the memset: listed here as a reminder only... */
 	Xdialog.passwd		= 0;			/* Don't use passwd input as default */
@@ -885,7 +897,7 @@ show_again:
 			case B_BUILDLIST:	/* a build list */
 				get_box_size(argc, argv, &optind);
 				list_size = get_list_size(argc, argv, &optind,
-							  3 + Xdialog.tips, TRUE);
+							  3+Xdialog.tips, TRUE);
 				create_buildlist(optarg, argv+optind, list_size);
 				optind += (3+Xdialog.tips)*list_size;
 				win = TRUE;
@@ -1123,6 +1135,12 @@ show_again:
 			case T_CANCELLABEL:		/* --ok-label option */
 				strncpy(Xdialog.cancel_label, optarg, sizeof(Xdialog.cancel_label));
 				break;
+			case T_EXTRA:	/* --extra-button option */
+				Xdialog.extra_button = TRUE;
+				break;
+			case T_EXTRALABEL:		/* --extra-label option */
+				strncpy(Xdialog.extra_label, optarg, sizeof(Xdialog.extra_label));
+				break;
 			case T_ICON:		/* --icon option */
 				strncpy(Xdialog.icon_file, optarg, sizeof(Xdialog.icon_file));
 				Xdialog.icon = TRUE;
@@ -1258,6 +1276,7 @@ show_again:
 			Xdialog.default_item[0]	= 0;
 			Xdialog.ok_label[0]	= 0;
 			Xdialog.cancel_label[0]	= 0;
+			Xdialog.extra_label[0]	= 0;
 			Xdialog.ignore_eof	= FALSE;
 			Xdialog.smooth		= FALSE;
 		}

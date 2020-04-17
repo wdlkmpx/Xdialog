@@ -7,6 +7,8 @@ gboolean destroy_event(gpointer object, GdkEventAny *event, gpointer data);
 
 gboolean exit_ok(gpointer object, gpointer data);
 
+gboolean exit_extra(gpointer object, gpointer data);
+
 gboolean exit_cancel(gpointer object, gpointer data);
 
 gboolean exit_keypress(gpointer object, GdkEventKey *event, gpointer data);
@@ -89,6 +91,8 @@ gboolean print_list(GtkButton *button, gpointer data);
 gboolean buildlist_timeout(gpointer data);
 
 gboolean filesel_exit(GtkObject *filesel, gpointer client_data);
+
+gboolean dirsel_exit(GtkObject *filesel, gpointer client_data);
 
 gboolean colorsel_exit(GtkObject *colorsel, gpointer client_data);
 

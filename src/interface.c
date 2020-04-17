@@ -26,7 +26,7 @@ extern gboolean dialog_compat;
 /* Fixed font loading and character size (in pixels) initialisation */
 static PangoFontDescription *fixed_pango_font;
 
-static GdkFont *fixed_font;
+static PangoFontDescription *fixed_font;
 static gint xmult = XSIZE_MULT;
 static gint ymult = YSIZE_MULT;
 static gint ffxmult = XSIZE_MULT;
@@ -54,16 +54,11 @@ static void font_init(void)
 	GtkStyle  *style;
 	GdkFont *font;
 	gint width, ascent, descent, lbearing, rbearing;
-
-	fixed_font = gdk_font_load(FIXED_FONT);
-
-	if (fixed_font != NULL) {
-		gdk_string_extents(fixed_font, ALPHANUM_CHARS, &lbearing,
-				   &rbearing, &width, &ascent, &descent);
-		ffxmult = width / 62;			/* 62 = strlen(ALPHANUM_CHARS) */
-		ffymult = ascent + descent + 2;		/*  2 = spacing pixel lines */
-	}
-
+	/* fixed font support by 01micko */
+	fixed_font = pango_font_description_new ();
+	pango_font_description_set_family (fixed_font, FIXED_FONT);
+	pango_font_description_set_weight (fixed_font, PANGO_WEIGHT_MEDIUM);
+	pango_font_description_set_size (fixed_font, 10*PANGO_SCALE);
 	if (dialog_compat) {
 		xmult = ffxmult;
 		ymult = ffymult;
@@ -362,6 +357,8 @@ static GtkWidget *set_button(gchar *default_text, gpointer buttonbox, gint event
 			stock_id = "gtk-close";
 		else if (!strcmp(text, HELP))
 			stock_id = "gtk-help";
+		else if (!strcmp(text, EXTRA))
+			stock_id = "gtk-execute";
 		else if (!strcmp(text, PRINT))
 			stock_id = "gtk-print";
 		else if (!strcmp(text, NEXT) || !strcmp(text, ADD))
@@ -372,6 +369,8 @@ static GtkWidget *set_button(gchar *default_text, gpointer buttonbox, gint event
 
 	if (strlen(Xdialog.ok_label) != 0 && (!strcmp(text, OK) || !strcmp(text, YES)))
 		text = Xdialog.ok_label;
+	if (strlen(Xdialog.extra_label) != 0 && (!strcmp(text, EXTRA)))
+		text = Xdialog.extra_label;
 	else if (strlen(Xdialog.cancel_label) != 0 && (!strcmp(text, CANCEL) || !strcmp(text, NO)))
 		text = Xdialog.cancel_label;
 
@@ -426,9 +425,17 @@ static GtkWidget *set_button(gchar *default_text, gpointer buttonbox, gint event
 						 G_CALLBACK(print_text),
 						 NULL);
 			break;
+		case 5:
+			gtk_signal_connect_after(GTK_OBJECT(button), "clicked",
+						 GTK_SIGNAL_FUNC(exit_extra),
+						 NULL);
+			break;
+
 	}
-	if (grab_default)
+	if (grab_default) {
+		gtk_widget_set_can_default(button, TRUE);
 		gtk_widget_grab_default(button);
+	}
 
 	gtk_widget_show(button);
 
@@ -477,8 +484,13 @@ static GtkWidget *set_all_buttons(gboolean print, gboolean ok)
 
 	if (Xdialog.wizard)
 		set_button(PREVIOUS , hbuttonbox, 3, FALSE);
-	else if (ok)
-		button_ok = set_button(OK, hbuttonbox, 0, !Xdialog.default_no);
+	else {
+		if(Xdialog.extra_button)
+			button_ok = set_button(EXTRA, hbuttonbox, 5, !Xdialog.default_no);
+
+		if (ok)
+			button_ok = set_button(OK, hbuttonbox, 0, !Xdialog.default_no);
+	}
 	if (Xdialog.cancel_button)
 		set_button(CANCEL , hbuttonbox, 1, Xdialog.default_no && !Xdialog.wizard);
 	if (Xdialog.wizard)
@@ -496,6 +508,8 @@ static GtkWidget *set_scrollable_text(void)
 	GtkWidget *text;
 	GtkWidget *scrollwin;
 
+	GtkStyle  *style;
+
 	scrollwin = gtk_scrolled_window_new(NULL, NULL);
 	gtk_widget_show (scrollwin);
 	gtk_box_pack_start (GTK_BOX(Xdialog.vbox), scrollwin, TRUE, TRUE, 0);
@@ -503,8 +517,10 @@ static GtkWidget *set_scrollable_text(void)
 	text = gtk_text_view_new();
 
 	if (Xdialog.fixed_font) {
-		gtk_widget_modify_font(text, fixed_pango_font);
-
+		style = gtk_style_new();
+		style->font_desc = fixed_font;
+		gtk_widget_modify_font(text, style->font_desc);
+		//gtk_widget_modify_font(text, fixed_pango_font);
 	}
 
 	gtk_widget_show(text);
@@ -641,6 +657,7 @@ static void set_timeout(void)
 void create_msgbox(gchar *optarg, gboolean yesno)
 {
 	GtkWidget *hbuttonbox; 
+	GtkWidget *button;
 
 	open_window();
 
@@ -658,7 +675,9 @@ void create_msgbox(gchar *optarg, gboolean yesno)
 			set_button(NEXT, hbuttonbox, 0, TRUE);
 		} else {
 			set_button(YES, hbuttonbox, 0, !Xdialog.default_no);
-			set_button(NO , hbuttonbox, 1, Xdialog.default_no);
+			button = set_button(NO , hbuttonbox, 1, Xdialog.default_no);
+			if (Xdialog.default_no)
+				gtk_widget_grab_focus(button);
 		}
 	} else 
 		set_button(OK, hbuttonbox, 0, TRUE);
@@ -1106,19 +1125,25 @@ void create_combobox(gchar *optarg, gchar *options[], gint list_size)
 	set_backtitle(TRUE);
 	set_label(optarg, TRUE);
 
-	combo = gtk_combo_new();
-	Xdialog.widget1 = GTK_COMBO(combo)->entry;
+	combo = gtk_combo_box_entry_new_text(); 
+	Xdialog.widget1 = GTK_ENTRY (GTK_BIN (combo)->child);
 	Xdialog.widget2 = Xdialog.widget3 = NULL;
 	gtk_box_pack_start(Xdialog.vbox, combo, TRUE, TRUE, 0);
 	gtk_widget_grab_focus(Xdialog.widget1);
 	gtk_widget_show(combo);
+	//--- this is not needed???
 	g_signal_connect (G_OBJECT(Xdialog.widget1), "key_press_event",
 			   G_CALLBACK(input_keypress), NULL);
 
 	/* Set the popdown strings */
-	for (i = 0; i < list_size; i++)
-		glist = g_list_append(glist, options[i]);
-	gtk_combo_set_popdown_strings(GTK_COMBO(combo), glist);
+	for (i = 0; i < list_size; i++) {
+		gtk_combo_box_append_text(GTK_COMBO_BOX(combo), options[i]);
+	}
+
+	if (strlen(Xdialog.default_item) != 0) {
+		gtk_combo_box_prepend_text(GTK_COMBO_BOX(combo), Xdialog.default_item);
+		gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
+	}
 
 	gtk_editable_set_editable (GTK_EDITABLE(Xdialog.widget1), Xdialog.editable);
 
@@ -1401,6 +1426,7 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 	GtkCList *clist;
 	static gchar *null_row[] = {NULL, NULL};
 	gint rownum = 0;
+	gint n = 0; /* Dougal: use for max tag length */
 	gint first_selectable = -1;
 	int i;
 	int params = 2 + Xdialog.tips;
@@ -1440,6 +1466,8 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 			if ( first_selectable == -1 ) {
 				first_selectable = rownum;
 			}
+			if (strlen(Xdialog.array[i].tag) > n)
+			n = strlen(Xdialog.array[i].tag); /* Dougal:get max length for later */
 		}
 
 	/* FIX ME !
@@ -1466,7 +1494,11 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 	}
 
 	gtk_clist_columns_autosize(clist);
-
+	/* Dougal: This is a crude workaround for what seems like a GTK bug -- */
+	/*  1st column is too narrow after autoresize */
+	if ( n > 0 )
+		gtk_clist_set_column_width (clist, 0, n*9.5);
+	
 	/* Select the first selectable row as default if no other row is selected */
 	if (Xdialog.array[0].state < 0) {
 		if ( first_selectable >= 0 ) {
@@ -1486,7 +1518,7 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 #else
 		gtk_clist_set_column_visibility(clist, 0, FALSE);
 #endif
-
+	
 	gtk_container_add(GTK_CONTAINER(scrolled_window), Xdialog.widget2);
 	gtk_widget_show(Xdialog.widget2);
 	g_signal_connect (G_OBJECT(Xdialog.widget2), "select_row",
@@ -1683,8 +1715,12 @@ void create_filesel(gchar *optarg, gboolean dsel_flag)
 			   G_CALLBACK(destroy_event), NULL);
 	g_signal_connect (G_OBJECT(Xdialog.window), "delete_event",
 			   G_CALLBACK(delete_event), NULL);
-	g_signal_connect (G_OBJECT(filesel->ok_button),
-			   "clicked", (GtkSignalFunc) filesel_exit, filesel);
+	if (dsel_flag)
+		g_signal_connect (G_OBJECT(filesel->ok_button),
+			   "clicked", G_CALLBACK(dirsel_exit), filesel);
+	else
+		g_signal_connect (G_OBJECT(filesel->ok_button),
+			   "clicked", G_CALLBACK(filesel_exit), filesel);
 
 	/* Beep if requested */
 	if (Xdialog.beep & BEEP_BEFORE && Xdialog.exit_code != 2)
