@@ -16,7 +16,7 @@ AM_PROG_CC_STDC
 AC_CHECK_HEADERS(unistd.h)
 AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(fcntl.h)
-AC_CHECK_FUNCS(strstr memchr memmove setlocale)
+AC_CHECK_FUNCS(strcasecmp strstr getopt_long_only memchr memmove setlocale)
 
 PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.0],[AC_MSG_NOTICE([Using GTK2])])
 AC_SUBST(GTK_CFLAGS)
@@ -88,5 +88,6 @@ AC_ARG_WITH(print-option,
   ])
 
 AC_OUTPUT(Makefile
+lib/Makefile
 src/Makefile
 doc/Makefile)
