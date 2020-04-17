@@ -1271,13 +1271,9 @@ void create_itemlist(gchar *optarg, gint type, gchar *options[], gint list_size)
 	GtkWidget *button_ok;
 	GtkWidget *item;
 	GtkRadioButton *radio = NULL;
-	GtkTooltips *tooltips = NULL;
 	char temp[MAX_ITEM_LENGTH];
 	int i;
 	int params = 3 + Xdialog.tips;
-
-	if (Xdialog.tips == 1)
-		tooltips = gtk_tooltips_new();
 
 	Xdialog_array(list_size);
 
@@ -1323,8 +1319,9 @@ void create_itemlist(gchar *optarg, gint type, gchar *options[], gint list_size)
 				   G_CALLBACK(double_click_event), button_ok);
 		g_signal_emit_by_name (G_OBJECT(item), "toggled");
 
-		if (Xdialog.tips == 1 && strlen(options[params*i+3]) > 0)
-			gtk_tooltips_set_tip(tooltips, item, (gchar *) options[params*i+3], NULL);
+		if (Xdialog.tips == 1 && strlen(options[params*i+3]) > 0) {
+			gtk_widget_set_tooltip_text (item, (gchar *) options[params*i+3]);
+		}
 
 	}
 
@@ -1345,12 +1342,8 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 	GtkListStore *tree_list1;
 	GtkListStore *tree_list2;
 	GtkTreeIter tree_iter;
-	GtkTooltips *tooltips = NULL;
 	gint i, n = 0;
 	int params = 3 + Xdialog.tips;
-
-	if (Xdialog.tips == 1)
-		tooltips = gtk_tooltips_new();
 
 	Xdialog_array(list_size);
 
@@ -1557,13 +1550,9 @@ void create_treeview(gchar *optarg, gchar *options[], gint list_size)
 	GtkCellRenderer *renderer;
 	GtkTreeIter tree_iter[MAX_TREE_DEPTH];
 	GtkTreeSelection *select;
-/*	GtkTooltips *tooltips = NULL; */
 	int depth = 0;
 	int i;
 	int params = 4 + Xdialog.tips;
-
-/*	if (Xdialog.tips == 1)
-		tooltips = gtk_tooltips_new(); */
 
 	Xdialog_array(list_size);
 
