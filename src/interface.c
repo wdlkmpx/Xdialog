@@ -330,8 +330,10 @@ static GtkWidget *set_hbuttonbox(void)
 	return hbuttonbox;
 }
 
-static GtkWidget *set_button(gchar *default_text, gpointer buttonbox, gint event,
-			     gboolean grab_default)
+static GtkWidget *set_button(gchar *default_text,
+                             gpointer buttonbox,
+                             gint event,
+                             gboolean grab_default)
 {
 	GtkWidget *button;
 	gchar	  *stock_id = NULL;
@@ -663,6 +665,9 @@ void create_msgbox(gchar *optarg, gboolean yesno)
 			button = set_button(NO , hbuttonbox, 1, Xdialog.default_no);
 			if (Xdialog.default_no)
 				gtk_widget_grab_focus(button);
+		}
+		if (Xdialog.extra_button) {
+			set_button (EXTRA, hbuttonbox, 5, FALSE);
 		}
 	} else 
 		set_button(OK, hbuttonbox, 0, TRUE);
