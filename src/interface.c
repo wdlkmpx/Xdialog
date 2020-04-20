@@ -1406,7 +1406,12 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 	GtkTreeSelection *tree_sel;
 
 	GtkListStore *store;
-	store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
+
+	if (Xdialog.tips) { // --item-help
+		store = gtk_list_store_new (3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	} else {
+		store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
+	}
 	tree_model = GTK_TREE_MODEL (store);
 
 	treeview = GTK_TREE_VIEW (gtk_tree_view_new_with_model (tree_model));
@@ -1472,6 +1477,9 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 						0, Xdialog.array[i].tag,
 						1, Xdialog.array[i].name,
 						-1);
+		if (Xdialog.tips) {
+			gtk_list_store_set (store, &iter, 2, Xdialog.array[i].tips, -1);
+		}
 	}
 
 	GtkTreePath  *tpath = gtk_tree_path_new_from_indices (0, -1);
@@ -1498,6 +1506,8 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 		Xdialog.status_id = gtk_statusbar_get_context_id(GTK_STATUSBAR(status_bar), "tips");
 		gtk_statusbar_push(GTK_STATUSBAR(status_bar), Xdialog.status_id,
 				   Xdialog.array[0].tips);
+		g_signal_connect (G_OBJECT(tree_sel), "changed",
+				G_CALLBACK(on_menubox_tip_treeview_changed), status_bar);
 	}
 
 	set_timeout();

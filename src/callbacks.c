@@ -819,6 +819,21 @@ on_menubox_ok_click (GtkButton *button, gpointer data)
 	exit_ok (NULL, NULL);
 }
 
+void
+on_menubox_tip_treeview_changed (GtkTreeSelection *selection, gpointer data)
+{
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	gchar *tip;
+	gtk_tree_selection_get_selected(selection, &model, &iter);
+	gtk_tree_model_get (model, &iter, 2, &tip, -1);
+	if (tip) {
+		gtk_statusbar_pop(GTK_STATUSBAR(data), Xdialog.status_id);
+		gtk_statusbar_push(GTK_STATUSBAR(data), Xdialog.status_id, tip);
+		g_free(tip);
+	}
+}
+
 /* treeview callback */
 
 gboolean print_selection(GtkButton *button, gpointer data)
