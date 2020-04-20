@@ -1568,6 +1568,7 @@ void create_treeview(gchar *optarg, gchar *options[], gint list_size)
 
 	Xdialog.widget1 = gtk_tree_view_new_with_model(GTK_TREE_MODEL (store));
 	g_object_unref(G_OBJECT (store));
+	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (Xdialog.widget1), FALSE);
 
 	renderer = gtk_cell_renderer_text_new();
 
@@ -1586,9 +1587,6 @@ void create_treeview(gchar *optarg, gchar *options[], gint list_size)
 	select = gtk_tree_view_get_selection(GTK_TREE_VIEW(Xdialog.widget1));
 	gtk_tree_selection_set_mode(select, GTK_SELECTION_SINGLE);
 	g_signal_connect(G_OBJECT(select), "changed", G_CALLBACK(cb_selection_changed), NULL);
-
-	if (Xdialog.interval > 0)
-		Xdialog.timer = g_timeout_add(Xdialog.interval, menu_timeout, NULL);
 
 	set_timeout();
 }
