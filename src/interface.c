@@ -550,6 +550,7 @@ static GtkWidget *set_scrolled_list(GtkWidget *box, gint xsize, gint list_size,
 	scrolled_window = set_scrolled_window(GTK_BOX(box), 0, xsize,
 		list_size, spacing);
 	list = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (list), FALSE);
 
 	renderer = gtk_cell_renderer_text_new();
 	column = gtk_tree_view_column_new_with_attributes("", renderer, "text",
