@@ -1387,9 +1387,6 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 
 	sensitive_buttons();
 
-	if (Xdialog.interval > 0)
-		Xdialog.timer = g_timeout_add(Xdialog.interval, buildlist_timeout, NULL);
-
 	set_timeout();
 }
 

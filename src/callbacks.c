@@ -990,11 +990,6 @@ gboolean print_list(GtkButton *button, gpointer data)
 	return TRUE;
 }
 
-gboolean buildlist_timeout(gpointer data)
-{
-	return print_list(NULL, NULL);
-}
-
 /* fselect callback */
 gboolean filesel_exit(GtkWidget *filesel, gpointer client_data)
 {

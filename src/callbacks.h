@@ -84,8 +84,6 @@ gboolean remove_from_list(GtkButton *button, gpointer data);
 
 gboolean print_list(GtkButton *button, gpointer data);
 
-gboolean buildlist_timeout(gpointer data);
-
 gboolean filesel_exit(GtkWidget *filesel, gpointer client_data);
 
 gboolean dirsel_exit(GtkWidget *filesel, gpointer client_data);
