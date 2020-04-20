@@ -12,12 +12,8 @@
 #include <unistd.h>
 
 #ifndef USE_SCANF
-#	if defined(HAVE_ERRNO_H) && defined(HAVE_FCNTL_H) && defined(HAVE_MEMMOVE) && defined(HAVE_MEMCHR)
-#		include <errno.h>
-#		include <fcntl.h>
-#	else
-#		error errno.h, fcntl.h, memmove() and memchr() are needed by default: try to configure --with-scanf-calls instead...
-#	endif
+#	include <errno.h>
+#	include <fcntl.h>
 #endif
 #include <gtk/gtk.h>
 
@@ -73,7 +69,6 @@ int my_scanf(char *buffer)
 }
 #endif
 
-#ifdef HAVE_STRSTR
 /* "\n" to linefeed translation */
 
 void backslash_n_to_linefeed(char *s0, char *s, int max_len)
@@ -163,9 +158,6 @@ void trim_string(char *s0, char *s, int max_len)
 
 	*s = '\0';
 }
-#else
-#error strstr() function is needed by Xdialog !
-#endif
 
 /* Array allocation function */
 

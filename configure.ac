@@ -10,13 +10,8 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_PROG_AR
 LT_INIT
 
-AC_ISC_POSIX
 AC_PROG_CC
-AM_PROG_CC_STDC
-AC_CHECK_HEADERS(unistd.h)
-AC_CHECK_HEADERS(errno.h)
-AC_CHECK_HEADERS(fcntl.h)
-AC_CHECK_FUNCS(strcasecmp strstr getopt_long_only memchr memmove setlocale)
+AC_CHECK_FUNCS(getopt_long_only)
 
 AC_ARG_ENABLE(gtk3,
 AS_HELP_STRING([--enable-gtk3],[enable to use gtk-3.0 instead of gtk-2.0]),

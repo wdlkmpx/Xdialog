@@ -379,8 +379,6 @@ gint tailbox_keypress(GtkWidget *text, GdkEventKey *event,
 	return(TRUE);
 }
 
-#ifdef HAVE_STRSTR
-
 static void vt_to_gdk_color(gint color, GdkColor **fgcolor, GdkColor **bgcolor)
 {
 	static const GdkColor BLACK     = { 0, 0x0000, 0x0000, 0x0000 };
@@ -577,10 +575,6 @@ gboolean logbox_timeout(gpointer data)
 
 	return TRUE;
 }
-
-#else
-#error strstr() function is needed by Xdialog !
-#endif
 
 /* Here are the callback functions for the inputboxes and combobox (OK button
  * callback and entry RETURN/ENTER keypress callback).

@@ -360,7 +360,6 @@ static void g_log_xdialog_handler(const gchar *log_domain,
 
 /* Xsize, Ysize, Xorg and Yorg parameters */
 
-#ifdef HAVE_STRSTR
 static void get_box_size(int argc, char *argv[], int *optind)
 {
 	char *index, *index2 = NULL;
@@ -438,9 +437,6 @@ static void get_box_size(int argc, char *argv[], int *optind)
 		Xdialog.xorg = Xdialog.yorg = 0;
 	}
 }
-#else
-#error strstr() function is needed by Xdialog !
-#endif
 
 static int get_list_size(int argc, char *argv[], int *optind, int parameters,
 			 gboolean with_list_height)
