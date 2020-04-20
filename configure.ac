@@ -22,6 +22,11 @@ PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.0],[AC_MSG_NOTICE([Using GTK2])])
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 
+AC_ARG_ENABLE(gtk_warnings,
+	[  --enable-gtk-warnings   So you can see what is deprecated in GTK2...],
+	gtk_warnings=$enableval,
+	gtk_warnings='no')
+
 dnl Set PACKAGE_DATA_DIR in config.h.
 if test "x${datadir}" = 'x${prefix}/share'; then
   if test "x${prefix}" = "xNONE"; then
@@ -41,6 +46,10 @@ case "$CC" in
   gcc*) CPPFLAGS="$CPPFLAGS -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers" ;;
   *) ;;
 esac
+
+if test x"$gtk_warnings" = x"yes"; then
+   CPPFLAGS="$CPPFLAGS -DGDK_DISABLE_DEPRECATED -DGDK_PIXBUF_DISABLE_DEPRECATED -DGDK_PIXBUF_DISABLE_SINGLE_INCLUDES -DGTK_DISABLE_DEPRECATED -DGTK_DISABLE_SINGLE_INCLUDES"
+fi
 
 AC_ARG_WITH(french-labels,
   [  --with-french-labels    Enables french labels in menus],[
