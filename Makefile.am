@@ -2,7 +2,7 @@
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
-SUBDIRS = lib src doc
+SUBDIRS = src doc
 
 docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
 

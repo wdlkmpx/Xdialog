@@ -11,7 +11,6 @@ AM_PROG_AR
 LT_INIT
 
 AC_PROG_CC
-AC_CHECK_FUNCS(getopt_long_only)
 
 AC_ARG_ENABLE(gtk3,
 AS_HELP_STRING([--enable-gtk3],[enable to use gtk-3.0 instead of gtk-2.0]),
@@ -104,6 +103,5 @@ AC_ARG_WITH(print-option,
   ])
 
 AC_OUTPUT(Makefile
-lib/Makefile
 src/Makefile
 doc/Makefile)

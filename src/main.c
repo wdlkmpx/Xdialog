@@ -11,12 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <gtk/gtk.h>
-
-#ifdef HAVE_GETOPT_LONG_ONLY
-#	include <getopt.h>
-#else
-#	include "getopt.h"
-#endif
+#include <getopt.h>
 
 #include "interface.h"
 #include "support.h"
