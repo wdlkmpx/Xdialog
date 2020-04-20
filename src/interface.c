@@ -577,26 +577,26 @@ static GtkWidget *set_scrolled_list(GtkWidget *box, gint xsize, gint list_size,
 	return list;
 }
 
-static GtkObject *set_horizontal_slider(GtkBox *box, gint deflt, gint min, gint max)
+static GtkWidget *set_horizontal_slider(GtkBox *box, gint deflt, gint min, gint max)
 {
 	GtkWidget *align;
 	GtkAdjustment *adj;
 	GtkWidget *hscale;
-	GtkObject *slider;
+	GtkAdjustment *slider;
 
 	align = gtk_alignment_new(0.5, 0.5, 0.8, 0);
 	gtk_box_pack_start(box, align, FALSE, FALSE, 5);
 	gtk_widget_show(align);
 
 	/* Create an adjusment object to hold the range of the scale */
-	slider = gtk_adjustment_new(deflt, min, max, 1, 1, 0);
-	adj = GTK_ADJUSTMENT(slider);
+	slider = GTK_ADJUSTMENT (gtk_adjustment_new(deflt, min, max, 1, 1, 0));
+	adj = slider;
  	hscale = gtk_hscale_new(adj);
 	gtk_scale_set_digits(GTK_SCALE(hscale), 0);
 	gtk_container_add(GTK_CONTAINER(align), hscale);
 	gtk_widget_show(hscale);
 
-	return slider;
+	return ((GtkWidget *) slider);
 }
 
 static GtkWidget *set_spin_button(GtkWidget *hbox, gint min, gint max, gint deflt,

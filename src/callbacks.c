@@ -126,7 +126,7 @@ gboolean exit_previous(gpointer object, gpointer data)
 	return FALSE;
 }
 
-gboolean checked(GtkObject *button, gpointer data)
+gboolean checked(GtkWidget *button, gpointer data)
 {
 	Xdialog.checked = GTK_TOGGLE_BUTTON(button)->active;
 	return TRUE;
@@ -364,7 +364,7 @@ gboolean tailbox_timeout(gpointer data)
 	return TRUE;
 }
 
-gint tailbox_keypress(GtkObject *text, GdkEventKey *event,
+gint tailbox_keypress(GtkWidget *text, GdkEventKey *event,
 		      gpointer data)
 {
 	if (event->type == GDK_KEY_PRESS && (event->keyval == GDK_Return ||
@@ -606,7 +606,7 @@ gboolean inputbox_timeout(gpointer data)
 }
 
 
-gint input_keypress(GtkObject *entry, GdkEventKey *event, gpointer data)
+gint input_keypress(GtkWidget *entry, GdkEventKey *event, gpointer data)
 {
 	if (event->type == GDK_KEY_PRESS && (event->keyval == GDK_Return ||
 					     event->keyval == GDK_KP_Enter)) {
@@ -628,7 +628,7 @@ gint input_keypress(GtkObject *entry, GdkEventKey *event, gpointer data)
 	return TRUE;
 }
 
-gboolean hide_passwords(GtkObject *button, gpointer data)
+gboolean hide_passwords(GtkWidget *button, gpointer data)
 {
 	gint entries;
 	gboolean visible;
@@ -697,15 +697,15 @@ gboolean rangebox_exit(GtkButton *button, gpointer data)
 {
 	GtkAdjustment *adj;
 
-	adj = GTK_ADJUSTMENT((GtkObject *) Xdialog.widget1);
+	adj = GTK_ADJUSTMENT(Xdialog.widget1);
 	fprintf(Xdialog.output, "%d", (gint) adj->value);
 	if (Xdialog.widget2 != NULL) {
-		adj = GTK_ADJUSTMENT((GtkObject *) Xdialog.widget2);
+		adj = GTK_ADJUSTMENT(Xdialog.widget2);
 		fprintf(Xdialog.output, "%s%d", Xdialog.separator,
 			(gint) adj->value);
 	}
 	if (Xdialog.widget3 != NULL) {
-		adj = GTK_ADJUSTMENT((GtkObject *) Xdialog.widget3);
+		adj = GTK_ADJUSTMENT(Xdialog.widget3);
 		fprintf(Xdialog.output, "%s%d", Xdialog.separator,
 			(gint) adj->value);
 	}
@@ -748,7 +748,7 @@ gboolean spinbox_timeout(gpointer data)
 /* Double-click event is processed as a button click in menubox, radiolist and
  * checklist... The button widget is to be passed as "data".
  */
-gint double_click_event(GtkObject *object, GdkEventButton *event,
+gint double_click_event(GtkWidget *object, GdkEventButton *event,
 			gpointer data)
 {
 	if (event->type == GDK_2BUTTON_PRESS || event->type == GDK_3BUTTON_PRESS)
@@ -759,7 +759,7 @@ gint double_click_event(GtkObject *object, GdkEventButton *event,
 
 /* radiolist and checklist callbacks */
 
-void item_toggle(GtkObject *item, int i)
+void item_toggle(GtkWidget *item, int i)
 {
 	if (GTK_TOGGLE_BUTTON(item)->active) {
 		Xdialog.array[i].state = 1;
@@ -793,7 +793,7 @@ gboolean itemlist_timeout(gpointer data)
 
 /* menubox callback */
 
-void item_select(GtkObject *clist, gint row, gint column,
+void item_select(GtkWidget *clist, gint row, gint column,
 		 GdkEventButton *event, gpointer data)
 {
 	/* If the tag is empty, then this is an unavailable item:
@@ -853,7 +853,7 @@ gboolean move_to_row_timeout(gpointer data)
 	return FALSE;	
 }
 
-void cb_selection_changed(GtkObject *tree)
+void cb_selection_changed(GtkWidget *tree)
 {
 	GtkTreeIter tree_iter;
 	GtkTreeModel *model;
@@ -1001,7 +1001,7 @@ gboolean buildlist_timeout(gpointer data)
 }
 
 /* fselect callback */
-gboolean filesel_exit(GtkObject *filesel, gpointer client_data)
+gboolean filesel_exit(GtkWidget *filesel, gpointer client_data)
 {
 	fprintf(Xdialog.output, "%s\n",
 		gtk_file_selection_get_filename(GTK_FILE_SELECTION(client_data)));
@@ -1009,7 +1009,7 @@ gboolean filesel_exit(GtkObject *filesel, gpointer client_data)
 }
 
 /* dselect callback */
-gboolean dirsel_exit(GtkObject *filesel, gpointer client_data)
+gboolean dirsel_exit(GtkWidget *filesel, gpointer client_data)
 {
 	fprintf(Xdialog.output, "%s/\n",
 		gtk_file_selection_get_filename(GTK_FILE_SELECTION(client_data)));
@@ -1017,7 +1017,7 @@ gboolean dirsel_exit(GtkObject *filesel, gpointer client_data)
 }
 
 /* colorsel callback */
-gboolean colorsel_exit(GtkObject *colorsel, gpointer client_data)
+gboolean colorsel_exit(GtkWidget *colorsel, gpointer client_data)
 {
 	GdkColor colors;
 	gtk_color_selection_get_current_color (
@@ -1030,7 +1030,7 @@ gboolean colorsel_exit(GtkObject *colorsel, gpointer client_data)
 
 /* fontsel callback */
 
-gboolean fontsel_exit(GtkObject *fontsel, gpointer client_data)
+gboolean fontsel_exit(GtkWidget *fontsel, gpointer client_data)
 {
 	fprintf(Xdialog.output, "%s\n",
                 gtk_font_selection_dialog_get_font_name(GTK_FONT_SELECTION_DIALOG(client_data)));
