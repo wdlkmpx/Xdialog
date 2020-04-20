@@ -26,7 +26,6 @@ extern gboolean dialog_compat;
 /* Fixed font loading and character size (in pixels) initialisation */
 static PangoFontDescription *fixed_pango_font;
 
-static PangoFontDescription *fixed_font;
 static gint xmult = XSIZE_MULT;
 static gint ymult = YSIZE_MULT;
 static gint ffxmult = XSIZE_MULT;
@@ -53,12 +52,11 @@ static void font_init(void)
 	GtkWidget *window;
 	GtkStyle  *style;
 	GdkFont *font;
+	fixed_pango_font = pango_font_description_new ();
+	pango_font_description_set_family (fixed_pango_font, FIXED_FONT);
+	pango_font_description_set_weight (fixed_pango_font, PANGO_WEIGHT_MEDIUM);
+	pango_font_description_set_size (fixed_pango_font, 10 * PANGO_SCALE);
 	gint width, ascent, descent, lbearing, rbearing;
-	/* fixed font support by 01micko */
-	fixed_font = pango_font_description_new ();
-	pango_font_description_set_family (fixed_font, FIXED_FONT);
-	pango_font_description_set_weight (fixed_font, PANGO_WEIGHT_MEDIUM);
-	pango_font_description_set_size (fixed_font, 10*PANGO_SCALE);
 	if (dialog_compat) {
 		xmult = ffxmult;
 		ymult = ffymult;
@@ -78,9 +76,6 @@ static void font_init(void)
 		}
 		gtk_widget_destroy(window);
 	}
-	fixed_pango_font = pango_font_description_new ();
-	pango_font_description_set_family (fixed_pango_font, "mono");
-	pango_font_description_set_size (fixed_pango_font, 10 * PANGO_SCALE);
 }
 
 /* Custom text wrapping (the GTK+ one is buggy) */
@@ -503,8 +498,6 @@ static GtkWidget *set_scrollable_text(void)
 	GtkWidget *text;
 	GtkWidget *scrollwin;
 
-	GtkStyle  *style;
-
 	scrollwin = gtk_scrolled_window_new(NULL, NULL);
 	gtk_widget_show (scrollwin);
 	gtk_box_pack_start (GTK_BOX(Xdialog.vbox), scrollwin, TRUE, TRUE, 0);
@@ -512,10 +505,7 @@ static GtkWidget *set_scrollable_text(void)
 	text = gtk_text_view_new();
 
 	if (Xdialog.fixed_font) {
-		style = gtk_style_new();
-		style->font_desc = fixed_font;
-		gtk_widget_modify_font(text, style->font_desc);
-		//gtk_widget_modify_font(text, fixed_pango_font);
+		gtk_widget_modify_font(text, fixed_pango_font);
 	}
 
 	gtk_widget_show(text);
