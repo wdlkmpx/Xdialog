@@ -254,8 +254,6 @@ static GtkWidget *set_label(gchar *label_text, gboolean expand)
 {
 	GtkWidget *label;
 	GtkWidget *hbox;
-	GdkBitmap *mask;
-	GdkColor  transparent;
 	GdkPixbuf *pixbuf;
 	GtkWidget *icon;
 	gchar     text[MAX_LABEL_LENGTH];
@@ -555,7 +553,7 @@ static GtkWidget *set_scrolled_list(GtkWidget *box, gint xsize, gint list_size,
 	GtkWidget *list;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
-	GtkTreeSelection* selection;
+	//GtkTreeSelection* selection;
 
 	scrolled_window = set_scrolled_window(GTK_BOX(box), 0, xsize,
 		list_size, spacing);
@@ -567,7 +565,7 @@ static GtkWidget *set_scrolled_list(GtkWidget *box, gint xsize, gint list_size,
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
+	//selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
 	/* TODO: This seems to screw things up. At the moment it is not important
 	   to have multiple selections */
 	/* gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE); */
@@ -810,14 +808,14 @@ void create_progress(gchar *optarg, gint leading, gint maxdots)
 	if (leading < 0) {
 		for (i=1; i < -leading; i++) {
 			rresult = fread(temp, sizeof(char), 1, stdin);
-			if (rresult < 0)
+			if (rresult < 1 && feof(stdin))
 				break;
 		}
 	} else if (leading > 0) {
 		for (i=1; i < leading; i++) {
 			temp[0] = temp[1] = 0;
 			rresult = fread(temp, sizeof(unsigned char), 1, stdin);
-			if (rresult < 0)
+			if (rresult < 1 && feof(stdin))
 				break;
 
 			if (temp[0] >= ' ' || temp[0] == '\n')
@@ -1114,7 +1112,6 @@ void create_combobox(gchar *optarg, gchar *options[], gint list_size)
 {
 	GtkWidget *combo;
 	GtkWidget *button_ok = NULL;
-	GList *glist = NULL;
 	int i;
 
 	open_window();
@@ -1123,7 +1120,7 @@ void create_combobox(gchar *optarg, gchar *options[], gint list_size)
 	set_label(optarg, TRUE);
 
 	combo = gtk_combo_box_entry_new_text(); 
-	Xdialog.widget1 = GTK_ENTRY (GTK_BIN (combo)->child);
+	Xdialog.widget1 = gtk_bin_get_child (GTK_BIN (combo));
 	Xdialog.widget2 = Xdialog.widget3 = NULL;
 	gtk_box_pack_start(Xdialog.vbox, combo, TRUE, TRUE, 0);
 	gtk_widget_grab_focus(Xdialog.widget1);
@@ -1356,7 +1353,7 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 	for (i = 0;  i < list_size; i++) {
 		strncpy(Xdialog.array[i].tag, options[params*i], sizeof(Xdialog.array[i].tag));
 		strncpy(Xdialog.array[i].name, options[params*i+1], sizeof(Xdialog.array[i].name));
-		if (strlen(Xdialog.array[i].name) > n)
+		if ((gint) strlen(Xdialog.array[i].name) > n)
 			n = strlen(Xdialog.array[i].name);
 		gtk_list_store_append(tree_list1, &tree_iter);
 		gtk_list_store_set(tree_list1, &tree_iter, 0,
@@ -1416,7 +1413,7 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 	GtkCList *clist;
 	static gchar *null_row[] = {NULL, NULL};
 	gint rownum = 0;
-	gint n = 0; /* Dougal: use for max tag length */
+	guint n = 0; /* Dougal: use for max tag length */
 	gint first_selectable = -1;
 	int i;
 	int params = 2 + Xdialog.tips;
