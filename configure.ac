@@ -18,7 +18,19 @@ AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_FUNCS(strcasecmp strstr getopt_long_only memchr memmove setlocale)
 
-PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.0],[AC_MSG_NOTICE([Using GTK2])])
+AC_ARG_ENABLE(gtk3,
+AS_HELP_STRING([--enable-gtk3],[enable to use gtk-3.0 instead of gtk-2.0]),
+[case "${enableval}" in
+  yes)  enable_gtk3=yes ;;
+  no)   enable_gtk3=no ;;
+esac],[])
+
+if test "x$enable_gtk3" = "xyes" ; then
+  gtk_modules="gtk+-3.0 >= 3.0.0"
+else
+  gtk_modules="gtk+-2.0 >= 2.18.0"
+fi
+PKG_CHECK_MODULES(GTK, [$gtk_modules])
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 
