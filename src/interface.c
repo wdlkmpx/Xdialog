@@ -1708,7 +1708,8 @@ void create_filesel(gchar *optarg, gboolean dsel_flag)
 
 void create_colorsel(gchar *optarg, gdouble *colors)
 {
-	GtkColorSelectionDialog *colorsel;
+	GtkColorSelectionDialog *colorsel_dlg;
+	GtkColorSelection *colorsel;
 	GtkWidget *box;
 	GtkWidget *hbuttonbox;
 	GtkWidget *button;
@@ -1721,15 +1722,17 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 
 	/* Create a color selector and update Xdialog structure accordingly */
 	Xdialog.window = gtk_color_selection_dialog_new(Xdialog.title);
-	colorsel = GTK_COLOR_SELECTION_DIALOG(Xdialog.window);
-	Xdialog.vbox = GTK_BOX(gtk_widget_get_ancestor(colorsel->colorsel, gtk_box_get_type()));
+	colorsel_dlg = GTK_COLOR_SELECTION_DIALOG (Xdialog.window);
+	colorsel     = GTK_COLOR_SELECTION (gtk_color_selection_dialog_get_color_selection (colorsel_dlg));
+	Xdialog.vbox = GTK_BOX(gtk_widget_get_ancestor(colorsel_dlg->colorsel, gtk_box_get_type()));
 
 	gcolor.red   = colors[0] * 256;
 	gcolor.green = colors[1] * 256;
 	gcolor.blue  = colors[2] * 256;
-	gtk_color_selection_set_current_color (
-		GTK_COLOR_SELECTION (gtk_color_selection_dialog_get_color_selection (colorsel)),
-		&gcolor);
+	gtk_color_selection_set_current_color (colorsel, &gcolor);
+
+	//gtk_color_selection_set_has_opacity_control (colorsel, TRUE);
+	gtk_color_selection_set_has_palette (colorsel, TRUE);
 
 	/* We must realize the widget before moving it and creating the icon and
            buttons pixbufs...
@@ -1743,19 +1746,19 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	/* Set the backtitle */
 	set_backtitle(TRUE);
 
-	/* If requested, add a check button into the colorsel action area */
+	/* If requested, add a check button into the colorsel_dlg action area */
 	set_check_button(GTK_WIDGET(Xdialog.vbox));
 
 	/* Set the window size and placement policy */
 	set_window_size_and_placement();
 
 	/* Find the existing hbuttonbox pointer */
-	hbuttonbox = gtk_widget_get_ancestor(colorsel->ok_button, gtk_hbutton_box_get_type());
+	hbuttonbox = gtk_widget_get_ancestor(colorsel_dlg->ok_button, gtk_hbutton_box_get_type());
 
 	/* Remove the colour selector buttons IOT put ours in place */
-	gtk_widget_destroy(colorsel->ok_button);
-	gtk_widget_destroy(colorsel->cancel_button);
-	gtk_widget_destroy(colorsel->help_button);
+	gtk_widget_destroy(colorsel_dlg->ok_button);
+	gtk_widget_destroy(colorsel_dlg->cancel_button);
+	gtk_widget_destroy(colorsel_dlg->help_button);
 
 	/* Setup our own buttons */
 	if (Xdialog.wizard)
@@ -1764,19 +1767,19 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 		button = set_button(OK, hbuttonbox, 0, flag = !Xdialog.default_no);
 		if (flag)
 			gtk_widget_grab_focus(button);
-		colorsel->ok_button = button;
+		colorsel_dlg->ok_button = button;
 	}
 	if (Xdialog.cancel_button) {
 		button = set_button(CANCEL, hbuttonbox, 1,
 				    flag = Xdialog.default_no && !Xdialog.wizard);
 		if (flag)
 			gtk_widget_grab_focus(button);
-		colorsel->cancel_button = button;
+		colorsel_dlg->cancel_button = button;
 	}
 	if (Xdialog.wizard) {
 		button = set_button(NEXT, hbuttonbox, 0, TRUE);
 		gtk_widget_grab_focus(button);
-		colorsel->ok_button = button;
+		colorsel_dlg->ok_button = button;
 	}
 	if (Xdialog.help)
 		set_button(HELP, hbuttonbox, 2, FALSE);
@@ -1786,8 +1789,8 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 			   G_CALLBACK(destroy_event), NULL);
 	g_signal_connect (G_OBJECT(Xdialog.window), "delete_event",
 			   G_CALLBACK(delete_event), NULL);
-	g_signal_connect (G_OBJECT(colorsel->ok_button), "clicked",
-			   G_CALLBACK(colorsel_exit), G_OBJECT(colorsel->colorsel));
+	g_signal_connect (G_OBJECT(colorsel_dlg->ok_button), "clicked",
+			   G_CALLBACK(colorsel_exit), G_OBJECT(colorsel_dlg->colorsel));
 
 	/* Beep if requested */
 	if (Xdialog.beep & BEEP_BEFORE && Xdialog.exit_code != 2)

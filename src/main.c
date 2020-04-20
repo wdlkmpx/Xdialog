@@ -932,7 +932,7 @@ show_again:
 					colors[1] = atoi(argv[optind++]);
 					colors[2] = atoi(argv[optind++]);
 				}  else {
-					colors[0] = colors[1] = colors[2] = 1;
+					colors[0] = colors[1] = colors[2] = 0;
 				}
 				create_colorsel(optarg, colors);
 				win = TRUE;
