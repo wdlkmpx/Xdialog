@@ -1,7 +1,7 @@
-XDialog-GTK2-patches
-====================
+XDialog
+=======
+Simple GTK dialog app compatible with (c)dialog..
 
-Several patches for XDialog in GTK2, forking at Xdialog-2.3.1
-
-For information on what XDialog is at all, please refer to http://xdialog.free.fr/
-
+Documentation
+======
+see https://wdlkmpx.github.io/Xdialog/
