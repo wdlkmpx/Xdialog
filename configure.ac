@@ -104,4 +104,4 @@ AC_ARG_WITH(print-option,
 
 AC_OUTPUT(Makefile
 src/Makefile
-doc/Makefile)
+docs/Makefile)
