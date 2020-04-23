@@ -28,7 +28,6 @@
 <li><a href="#Q09">How to build dynamically a menu using Xdialog&nbsp;?</a>
 <li><a href="#Q10">I just compiled Xdialog but I sometimes get core dumps or segfaults with some menus: what's wrong with it&nbsp;?</a>
 <li><a href="#Q11">Why am I getting Gtk/Gdk/Glib messages mixed up with the results returned by Xdialog&nbsp;?&nbsp; Can I prevent that to happen&nbsp;?</a>
-<li><a href="#Q13">Why are fixed fonts broken when using --rc-file option and XDIALOG_HIGH_DIALOG_COMPAT mode under Mandrake/Mandriva&nbsp;?</a>
 </ol>
 <hr>
 <ol>
@@ -134,8 +133,7 @@ widget '*' style 'fixed_font'
 </pre>
 <hr>
 <h2><li><a name="Q08">How</a> to select hidden files/directories with the <a href="box.html#FSELECT">file</a>/<a href="box.html#DSELECT">directory</a> selector&nbsp;?</h2>
-<p align="justify">In the exact same way as with any software using the GTK+ file selector: type a &quot;.&quot; into the text entry field and then press the TAB key: the hidden files/directories will then be presented into the selector lists, allowing you to select one with the mouse.
-<p align="justify">Also, appending &quot;.*&quot; to the default directory name into the Xdialog command line, makes all the hidden file/directory names (and only them) to appear into the fselect/dselect widgets when poped up. E.g.:
+<p align="justify">In the exact same way as with any software using the GTK+ file selector: type a &quot;.&quot; into the text entry field: the hidden files/directories will then be presented into the selector lists, allowing you to select one with the mouse. Also hit CTRL+H to show/hide hidden files...
 <pre>
 Xdialog --fselect "/home/foo/.*" 0 0
 </pre>
@@ -145,10 +143,7 @@ Xdialog --fselect "/home/foo/.*" 0 0
 <br>&nbsp;
 <hr>
 <h2><li><a name="Q10">I</a> just compiled Xdialog but I sometimes get core dumps or segfaults with some menus: what's wrong with it&nbsp;?</h2>
-<p align="justify">There is currently no known bug in Xdialog code (and I use Xdialog on four different Linux systems without problem so far). But here are some hints on why it may fail to run on some systems:
-<p align="justify">a.- Xdialog can <b>theorically</b> be used with GTK+ v1.2.0 and upper but it has only been extensively tested with GTK+ v1.2.8 to v1.2.10: if you are using an older GTK+ version, please upgrade (some segfaults have been reported when using GTK+ v1.2.6 that disappeared once upgraded to GTK+ v1.2.8).
-<p align="justify">b.- GCC is a fine compiler, but GCC v2.95 is broken&nbsp;!&nbsp;&nbsp;It sometimes fails to notice that the stack has been tidied on return of self-tidying functions (mostly math functions)... As a result, compiling any program with the <b>-fomit-frame-pointer</b> flag may result in instable binaries (or even instable Linux kernel: I recompiled mine with <b>-fno-omit-frame-pointer</b> and some strange crashes I got in the past are now history !): If you compile Xdialog with this flag you <b>WILL</b> get into trouble... Please use the <b>-fno-omit-frame-pointer</b> flag when compiling Xdialog with gcc v2.95.x (as of Xdialog v1.5.0, the <b>configure</b> script takes care of adding automatically this compile option when a bugged gcc version is detected)&nbsp;!
-<p align="justify">If you meet the requirements above and still get segfaults with Xdialog, then this is probably a Xdialog bug that you should report to <a href="mailto:xdialog@free.fr">me</a>; please be precise and give example(s) of how to reproduce the bug (I am generally pretty quick to diagnoze/fix bugs provided they were properly reported).
+<p align="justify">Probably a bug that needs fixing..
 <br>&nbsp;
 </ul>
 <hr>
@@ -156,14 +151,9 @@ Xdialog --fselect "/home/foo/.*" 0 0
 <p align="justify">Because your GTK+ setup is badly configured... Most probably, you are lacking some fonts for your locale and/or your GTK theme is buggy... You should find out and fix it. This is <b>not</b> a Xdialog bug, please do not report it as such&nbsp;!&nbsp; For convenience and as a quick hack (to let you the time to fix your system later and yet let you use Xdialog), I adopted in v2.2.0 a slightly modified version of Debian's hack for v2.0.6: by setting the XDIALOG_NO_GMSGS environment variable to "TRUE", (or "1"), you may disable <u>all</u> messages sent by GTK/GDK/GLIB. Note, yet, that GNOME may still send such messages (including on stdout), and I did not find any way to divert them so far...
 <br>&nbsp;
 <hr>
-<h2><li><a name="Q13">Why</a> are fixed fonts broken when using --rc-file option and XDIALOG_HIGH_DIALOG_COMPAT mode under Mandrake/Mandriva&nbsp;?</h2>
-<p align="justify">Because, in their most recent distros (v10.2/LE2005 and probably others), Mandrake used two patches which are breaking some GTK+ functionality. One of the patch is allowing to update all already open GTK windows whenever a theme change occurs (who cares&nbsp;?... Do you change the theme every 5 minutes&nbsp;?... Can't you stand having temporarily unmatched window themes just after a change&nbsp;?), but overrides any custom gtkrc setting as a result. The other broken patch is supposed to "fix" locales problem (I didn't even notice there was any&nbsp;!), but breaks fonts matching as a result. To fix this problem, you may download from Xdialog's website the custom GTK+ packages I rebuilt.
-<br>&nbsp;
-<hr>
 <table border=0 width="100%"><tr>
 <td align="left"><a href="compatibility.html">previous</a><a name="BOTTOM">&nbsp;</a>&nbsp;<a href="authors.html">next</a>&nbsp;&nbsp;<a href="index.html">contents</a></td>
 <td align="right"><a href="#TOP">top</a></td>
 </tr></table>
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 </body>
 </html>

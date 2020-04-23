@@ -13,14 +13,10 @@
 <hr width=30%>
 </center>
 <p>&nbsp;
-<h2>dialog-compatible utilities:</h2>
-<p align="justify">There are a few <b>dialog</b> &quot;compatible&quot; utilities around, some of them just mimic <b>dialog</b>  without adding new features (e.g. <b>gdialog</b>), others add features and may differ in their syntax (<b>cdialog</b>, <b>wdialog</b>). I currently know about:
+<h2>dialog:</h2>
+<p align="justify">Dialog is an application used in shell scripts which displays text user interface widgets. It uses the curses or ncurses library. The latter provides users with the ability to use a mouse, e.g., in an xterm. Dialog was created by Savio Lam (first reported version 0.3 was in 1994).
 <ul>
-<p><li><a name="DIALOG"><b>dialog</b></a>: the original one (up to v0.3) which has been upgraded and declined in further versions by contributors (v0.4, v0.6a-0.6z, v0.7). AFAIK it is no more actively developed.
-<p><li><a name="CDIALOG"><b>cdialog</b></a>: a much improved version of dialog which is still developed. Its binary file may actually be named <b>cdialog</b> or <b>dialog</b>, but you may check the usage message printed for the &quot;ComeOn Dialog!&quot; string IOT find out if your &quot;dialog&quot; binary is in fact &quot;cdialog&quot;.  You may as well try: <pre>dialog --print-version</pre> which should report v0.9 or higher for cdialog.
-<p><li><a name="GDIALOG"><b>gdialog</b></a>: a Gnome utility that mimics closely <b>dialog</b> but that misses the new features of <b>cdialog</b>.
-<p><li><a name="WDIALOG"><b>wdialog</b></a> and <b>Wxdialog</b>: a set of utilities which aim is to provide an installation wizard for both UNIX console (using wdialog) and X11 (using Wxdialog). The Wxdialog code is based on the (rather unstable and now quite outdated) Xdialog v1.2.0 code. IMHO Wxdialog is rather pointless, given the features Xdialog provides (including the <a href="transient.html#WIZARD">wizard</a> mode, the <a href="box.html#INPUTBOX">multiple inputs boxes</a>, the <a href="box.html#PROGRESS">progress</a> report box, the <a href="transient.html#CHECK">check</a> button, etc)...
-<p><li><a name="WHIPTAIL"><b>whiptail</b></a>: a dialog clone which I heard about but that I never tested (IIRC it uses newt instead of ncurses).
+<p><li><a name="DIALOG">More information and downloads: <a href="https://invisible-island.net/dialog/">https://invisible-island.net/dialog/</a>
 </ul>
 <hr>
 <h2><a name="HIGH">Xdialog high compatibility mode</a>:</h2>
@@ -72,6 +68,5 @@ export XDIALOG_HIGH_DIALOG_COMPAT=true
 <td align="left"><a href="gtk.html">previous</a><a name="BOTTOM">&nbsp;</a>&nbsp;<a href="faq.html">next</a>&nbsp;&nbsp;<a href="index.html">contents</a></td>
 <td align="right"><a href="#TOP">top</a></td>
 </tr></table>
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 </body>
 </html>

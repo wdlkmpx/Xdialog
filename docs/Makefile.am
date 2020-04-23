@@ -4,18 +4,7 @@ docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
 
 CLEANFILES = Xdialog.1
 
-doc_DATA = authors.html \
-box.html \
-common.html \
-compatibility.html \
-faq.html \
-gtk.html \
-index.html \
-intro.html \
-special.html \
-syntax.html \
-transient.html \
-$(srcdir)/*.png
+doc_DATA = $(srcdir)/*.html $(srcdir)/*.png
 
 man_MANS = Xdialog.1
 
