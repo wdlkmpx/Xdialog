@@ -997,16 +997,10 @@ gboolean print_list(GtkButton *button, gpointer data)
 /* fselect callback */
 gboolean filesel_exit(GtkWidget *filesel, gpointer client_data)
 {
-	fprintf(Xdialog.output, "%s\n",
-		gtk_file_selection_get_filename(GTK_FILE_SELECTION(client_data)));
-	return exit_ok(NULL, NULL);
-}
-
-/* dselect callback */
-gboolean dirsel_exit(GtkWidget *filesel, gpointer client_data)
-{
-	fprintf(Xdialog.output, "%s/\n",
-		gtk_file_selection_get_filename(GTK_FILE_SELECTION(client_data)));
+	char *filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (client_data));
+	if (filename) {
+		fprintf(Xdialog.output, "%s\n", filename);
+	}
 	return exit_ok(NULL, NULL);
 }
 

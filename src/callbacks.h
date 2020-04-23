@@ -86,8 +86,6 @@ gboolean print_list(GtkButton *button, gpointer data);
 
 gboolean filesel_exit(GtkWidget *filesel, gpointer client_data);
 
-gboolean dirsel_exit(GtkWidget *filesel, gpointer client_data);
-
 gboolean colorsel_exit(GtkWidget *colorsel, gpointer client_data);
 
 gboolean fontsel_exit(GtkWidget *filesel, gpointer client_data);

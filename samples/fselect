@@ -1,6 +1,6 @@
 #!/bin/sh
 
-FILE=`Xdialog --stdout --title "Please choose a file" --fselect /home 0 0`
+FILE=`Xdialog --stdout --title "Please choose a file" --fselect "$HOME" 0 0`
 
 case $? in
 	0)

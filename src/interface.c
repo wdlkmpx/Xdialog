@@ -1584,58 +1584,72 @@ void create_treeview(gchar *optarg, gchar *options[], gint list_size)
 
 void create_filesel(gchar *optarg, gboolean dsel_flag)
 {
-	GtkFileSelection *filesel;
 	GtkWidget *hbuttonbox;
-	GtkWidget *button;
+	GtkWidget *button, *ok_button = NULL;
 	gboolean flag;
+	GtkFileChooser *filesel;
+	GtkFileChooserAction action;
 
 	font_init();
 
 	parse_rc_file();
 
+	if (dsel_flag) {
+		action = GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
+	} else {
+		action = GTK_FILE_CHOOSER_ACTION_OPEN;
+	}
+/*
+	gchar *ok_label, *cancel_label;
+	if (*Xdialog.ok_label) {
+		ok_label = Xdialog.ok_label;
+	} else {
+		ok_label = GTK_STOCK_OK;
+	}
+	if (*Xdialog.cancel_label) {
+		cancel_label = Xdialog.cancel_label;
+	} else {
+		cancel_label = GTK_STOCK_CANCEL;
+	}
+*/
 	/* Create a file selector and update Xdialog structure accordingly */
-	Xdialog.window = gtk_file_selection_new(Xdialog.title);
-	filesel = GTK_FILE_SELECTION(Xdialog.window);
-	Xdialog.vbox = GTK_BOX(filesel->main_vbox);
+	Xdialog.window = gtk_file_chooser_dialog_new (
+			Xdialog.title,
+			NULL,
+			action,
+//			ok_label,     GTK_RESPONSE_ACCEPT,
+//			cancel_label, GTK_RESPONSE_CANCEL,
+			NULL, NULL );
+
+	filesel = GTK_FILE_CHOOSER (Xdialog.window);
+	gtk_file_chooser_set_show_hidden (filesel, TRUE);
+	Xdialog.vbox = GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (filesel)));
 
 	/* Set the backtitle */
 	set_backtitle(TRUE);
 
 	/* Set the default filename */
-	gtk_file_selection_set_filename(filesel, optarg);
-	gtk_file_selection_complete(filesel, optarg);
 
-	/* If we want a directory selector, then hide the file list parent and
-           the file list entry field. Also clear the file selection to erase
-           the auto-completed filename. Finally, disable the file operation
-           buttons to keep only the "make new directory" one. */
 	if (dsel_flag) {
-		gtk_widget_hide(GTK_WIDGET(GTK_WIDGET(filesel->file_list)->parent));
-		gtk_widget_hide(GTK_WIDGET(filesel->selection_entry));
-		gtk_file_selection_set_filename(filesel, "");
-		gtk_widget_set_sensitive(GTK_WIDGET(filesel->fileop_del_file), FALSE);
-		gtk_widget_set_sensitive(GTK_WIDGET(filesel->fileop_ren_file), FALSE);
+		gtk_file_chooser_set_current_folder (filesel, optarg);
+	} else {
+		struct stat sb;
+		if (stat(optarg, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+			gtk_file_chooser_set_current_folder (filesel, optarg);
+		} else {
+			gtk_file_chooser_set_filename (filesel, optarg);
+		}
 	}
 
-	/* Hide fileops buttons if requested */
-	if (!Xdialog.buttons || dialog_compat)
-		gtk_file_selection_hide_fileop_buttons(filesel);
-
+	hbuttonbox = gtk_dialog_get_action_area (GTK_DIALOG (filesel));
 	/* If requested, add a check button into the filesel action area */
-	set_check_button(GTK_WIDGET(filesel->action_area));
+	set_check_button (hbuttonbox);
 
 	/* We must realize the widget before moving it and creating the buttons pixbufs */
 	gtk_widget_realize(Xdialog.window);
 
 	/* Set the window size and placement policy */
 	set_window_size_and_placement();
-
-	/* Find the existing hbuttonbox pointer */
-	hbuttonbox = gtk_widget_get_ancestor(filesel->ok_button, gtk_hbutton_box_get_type());
-
-	/* Remove the fileselector buttons IOT put ours in place */
-	gtk_widget_destroy(filesel->ok_button);
-	gtk_widget_destroy(filesel->cancel_button);
 
 	/* Setup our own buttons */
 	if (Xdialog.wizard)
@@ -1644,19 +1658,18 @@ void create_filesel(gchar *optarg, gboolean dsel_flag)
 		button = set_button(OK, hbuttonbox, 0, flag = !Xdialog.default_no);
 		if (flag)
 			gtk_widget_grab_focus(button);
-		filesel->ok_button = button;
+		ok_button = button;
 	}
 	if (Xdialog.cancel_button) {
 		button = set_button(CANCEL, hbuttonbox, 1,
 				    flag = Xdialog.default_no && !Xdialog.wizard);
 		if (flag)
 			gtk_widget_grab_focus(button);
-		filesel->cancel_button = button;
 	}
 	if (Xdialog.wizard) {
 		button = set_button(NEXT, hbuttonbox, 0, TRUE);
 		gtk_widget_grab_focus(button);
-		filesel->ok_button = button;
+		ok_button = button;
 	}
 	if (Xdialog.help)
 		set_button(HELP, hbuttonbox, 2, FALSE);
@@ -1666,13 +1679,10 @@ void create_filesel(gchar *optarg, gboolean dsel_flag)
 			   G_CALLBACK(destroy_event), NULL);
 	g_signal_connect (G_OBJECT(Xdialog.window), "delete_event",
 			   G_CALLBACK(delete_event), NULL);
-	if (dsel_flag)
-		g_signal_connect (G_OBJECT(filesel->ok_button),
-			   "clicked", G_CALLBACK(dirsel_exit), filesel);
-	else
-		g_signal_connect (G_OBJECT(filesel->ok_button),
-			   "clicked", G_CALLBACK(filesel_exit), filesel);
-
+	if (ok_button) {
+		g_signal_connect (G_OBJECT(ok_button), "clicked",
+				G_CALLBACK(filesel_exit), filesel);
+	}
 	/* Beep if requested */
 	if (Xdialog.beep & BEEP_BEFORE && Xdialog.exit_code != 2)
 		gdk_beep();
