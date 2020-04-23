@@ -28,7 +28,6 @@
 <li><a href="#Q09">How to build dynamically a menu using Xdialog&nbsp;?</a>
 <li><a href="#Q10">I just compiled Xdialog but I sometimes get core dumps or segfaults with some menus: what's wrong with it&nbsp;?</a>
 <li><a href="#Q11">Why am I getting Gtk/Gdk/Glib messages mixed up with the results returned by Xdialog&nbsp;?&nbsp; Can I prevent that to happen&nbsp;?</a>
-<li><a href="#Q12">Will you make a GTK2 version of Xdialog&nbsp;?</a>
 <li><a href="#Q13">Why are fixed fonts broken when using --rc-file option and XDIALOG_HIGH_DIALOG_COMPAT mode under Mandrake/Mandriva&nbsp;?</a>
 </ol>
 <hr>
@@ -155,11 +154,6 @@ Xdialog --fselect "/home/foo/.*" 0 0
 <hr>
 <h2><li><a name="Q11">Why</a> am I getting Gtk/Gdk/Glib messages mixed up with the results returned by Xdialog&nbsp;?&nbsp; Can I prevent that to happen&nbsp;?</h2>
 <p align="justify">Because your GTK+ setup is badly configured... Most probably, you are lacking some fonts for your locale and/or your GTK theme is buggy... You should find out and fix it. This is <b>not</b> a Xdialog bug, please do not report it as such&nbsp;!&nbsp; For convenience and as a quick hack (to let you the time to fix your system later and yet let you use Xdialog), I adopted in v2.2.0 a slightly modified version of Debian's hack for v2.0.6: by setting the XDIALOG_NO_GMSGS environment variable to "TRUE", (or "1"), you may disable <u>all</u> messages sent by GTK/GDK/GLIB. Note, yet, that GNOME may still send such messages (including on stdout), and I did not find any way to divert them so far...
-<br>&nbsp;
-<hr>
-<h2><li><a name="Q12">Will</a> you make a GTK2 version of Xdialog&nbsp;?</h2>
-<p align="justify">Well... The idea behind Xdialog was to need for as little dependencies as possible (it only needs for glib and gtk+ v1.2.10, beside the X11 server)... I therefore always rejected the idea to port it to GTK2, the latter needing for an insane number of libraries and being as well quite sluggish (beside, who needs for anti-aliased fonts in dialogs and menus&nbsp;?... Not me...). The only interest for such a port would be the UTF8 support (but here again, it is of little to no interest for most people, unless they live in a country such as China, Japan or Russia...). For all the above reasons, I never even tried to port Xdialog to GTK2, and I'm afraid I can't help you (I never had any interest in GTK2 itself either, and I keep using GTK+ v1.2.10 as it suits all my needs).
-<p align="justify">This said, someone did send me a patch to turn Xdialog into a GTK2 app. Of course, I reworked it so that the default is still to compile Xdialog against GTK1 (but you may try and compile it for GTK2, see the <a href="changelog.html">Change log</a>). The GTK2 port is still incomplete and buggy (problem with output of accented characters on systems using ISO charsets), so if you feel like taking over the burden to complete the port, I'll gladly include your patches into the next release...
 <br>&nbsp;
 <hr>
 <h2><li><a name="Q13">Why</a> are fixed fonts broken when using --rc-file option and XDIALOG_HIGH_DIALOG_COMPAT mode under Mandrake/Mandriva&nbsp;?</h2>

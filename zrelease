@@ -1,9 +1,14 @@
 #!/bin/sh
 
+# also update version in doc/index.html : line 12
+
 pkg=Xdialog
 ver=$(grep AC_INIT configure.ac  | cut -f 3 -d '[' | cut -f 1 -d ']')
 
 dir=${pkg}-${ver}
+
+sed -i "s|Xdialog v.*<|Xdialog v${ver} documentation<|" \
+	doc/index.html
 
 set -x
 

@@ -30,3 +30,4 @@ src/Xdialog
 ar-lib
 config.h.in~
 libtool
+Xdialog.1

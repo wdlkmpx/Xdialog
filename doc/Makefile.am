@@ -2,10 +2,7 @@
 
 docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
 
-CLEANFILES = index.html \
-compatibility.html \
-license.html \
-Xdialog.1
+CLEANFILES = Xdialog.1
 
 doc_DATA = authors.html \
 box.html \
@@ -21,17 +18,6 @@ transient.html \
 $(srcdir)/*.png
 
 man_MANS = Xdialog.1
-
-index.html: index.html.in
-	sed -e 's/%%version%%/$(VERSION)/' $(srcdir)/index.html.in >index.html
-
-compatibility.html: compatibility.html.in
-	sed -e 's/%%version%%/$(VERSION)/' \
-	    -e 's:%%datadir%%:$(datadir):' \
-	    $(srcdir)/compatibility.html.in >compatibility.html
-
-license.html: license.head $(top_srcdir)/COPYING license.tail
-	cat $(srcdir)/license.head $(top_srcdir)/COPYING $(srcdir)/license.tail >license.html
 
 Xdialog.1: Xdialog.man
 	sed -e 's/%%version%%/$(VERSION)/' \
