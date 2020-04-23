@@ -4,7 +4,6 @@ docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
 
 CLEANFILES = index.html \
 compatibility.html \
-changelog.html \
 license.html \
 Xdialog.1
 
@@ -30,12 +29,6 @@ compatibility.html: compatibility.html.in
 	sed -e 's/%%version%%/$(VERSION)/' \
 	    -e 's:%%datadir%%:$(datadir):' \
 	    $(srcdir)/compatibility.html.in >compatibility.html
-
-changelog.html: changelog.head $(top_srcdir)/ChangeLog changelog.tail
-	cat $(srcdir)/changelog.head >changelog.html
-	sed -e 's/</\&lt;/' -e 's/</\&lt;/' -e 's/</\&lt;/' \
-	    $(top_srcdir)/ChangeLog >>changelog.html
-	cat $(srcdir)/changelog.tail >>changelog	.html
 
 license.html: license.head $(top_srcdir)/COPYING license.tail
 	cat $(srcdir)/license.head $(top_srcdir)/COPYING $(srcdir)/license.tail >license.html
