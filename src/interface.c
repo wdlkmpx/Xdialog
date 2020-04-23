@@ -708,9 +708,7 @@ void create_infobox(gchar *optarg, gint timeout)
 void create_gauge(gchar *optarg, gint percent)
 {
 	GtkWidget *align;
-	GtkProgress *pbar;
-	GtkAdjustment *adj;
-	int value;
+	gdouble value;
 
 	if (percent < 0)
 		value = 0;
@@ -728,24 +726,19 @@ void create_gauge(gchar *optarg, gint percent)
 	gtk_box_pack_start(Xdialog.vbox, align, FALSE, FALSE, ymult/2);
 	gtk_widget_show(align);
 
-	/* Create an Adjusment object to hold the range of the progress bar */
-	adj = GTK_ADJUSTMENT(gtk_adjustment_new(0, 0, 100, 0, 0, 0));
-
 	/* Set up the progress bar */
-	Xdialog.widget1 = gtk_progress_bar_new_with_adjustment(adj);
-	pbar = GTK_PROGRESS(Xdialog.widget1);
+	Xdialog.widget1 = gtk_progress_bar_new ();
+
 	/* Set the start value and the range of the progress bar */
-	gtk_progress_configure(pbar, value, 0, 100);
-	/* Set the format of the string that can be displayed in the
-	 * trough of the progress bar:
-	 * %p - percentage
-	 * %v - value
-	 * %l - lower range value
-	 * %u - upper range value */
-	gtk_progress_set_format_string(pbar, "%p%%");
-	gtk_progress_set_show_text(pbar, TRUE);
 	gtk_container_add(GTK_CONTAINER(align), Xdialog.widget1);
 	gtk_widget_show(Xdialog.widget1);
+
+	// set initial %
+	char txt[20];
+	snprintf(txt, sizeof(txt), "%g%%", value); // 50%
+	gtk_progress_bar_set_text (GTK_PROGRESS_BAR (Xdialog.widget1), txt);
+	value = value / 100;
+	gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (Xdialog.widget1), value);
 
 	Xdialog.label_text[0] = 0;
 	Xdialog.new_label = Xdialog.check = FALSE;
