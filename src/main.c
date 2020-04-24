@@ -62,7 +62,7 @@ Transient options:\n\
   --no-tags\n\
   --item-help (if used, the {...} parameters are needed in menus/lists widgets)\n\
   --default-item <tag>\n\
-  --icon <xpm filename>\n\
+  --icon <filename>\n\
   --no-ok\n\
   --no-cancel\n\
   --no-buttons\n\

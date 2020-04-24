@@ -98,7 +98,7 @@ When this option is used, the <helpN> parameters of the \-\-menubox, \-\-checkli
 .IP 
 This option is for use with \-\-menubox.
 .TP 
-\fB\-\-icon\fR <xpm filename>
+\fB\-\-icon\fR <filename>
 .IP 
 This option is for use with any widget accepting a <text> parameter.
 .TP 
