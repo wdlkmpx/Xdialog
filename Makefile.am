@@ -4,10 +4,9 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 
 SUBDIRS = src docs
 
-docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
-
 CONFIG_CLEAN_FILES = ltmain.sh ltconfig autom4te.cache/*
 
+docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)/samples
 doc_DATA = $(srcdir)/samples/*
 
 ACLOCAL_AMFLAGS = -I m4
