@@ -2,7 +2,7 @@
 DIALOG=Xdialog
 
 $DIALOG --title "MESSAGE BOX" \
-	--icon ./warning.xpm \
+	--icon ./dialog-warning.png \
         --msgbox "Hi, this is a simple message box. You can use this to
 display any message you like. The box will remain until
 you press the ENTER key.

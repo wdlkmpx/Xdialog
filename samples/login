@@ -2,7 +2,7 @@
 
 LOGIN1=`Xdialog	--stdout --separator "|" \
 		--title "Login" --backtitle "System login" \
-		--icon ./no-entry.xpm --left --password \
+		--icon ./dialog-error.png --left --password \
 		--2inputsbox "Restricted access, authorized users only !\nPlease login..." 0 0 \
 			     "Your login name:" "root" \
 			     "Your password:" "" \

@@ -4,7 +4,7 @@ NAME=`Xdialog --stdout --wrap --title "Chain test" \
 	      --msgbox "This is a simple dialogs chaining demonstration" 0 0 \
 	      --buttons-style text --yesno "Continue ?" 0 0 \
 	      --buttons-style icon --inputbox "Please give me your name" 0 0 "" \
-	      --icon ./warning.xpm --rc-file ./bluebox.rc --buttons-style default \
+	      --icon ./dialog-warning.png --rc-file ./bluebox.rc --buttons-style default \
 	      --msgbox "End of demo..." 0 0`
 
 case $? in
