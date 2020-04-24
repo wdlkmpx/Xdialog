@@ -8,7 +8,7 @@ ver=$(grep AC_INIT configure.ac  | cut -f 3 -d '[' | cut -f 1 -d ']')
 dir=${pkg}-${ver}
 
 sed -i "s|Xdialog v.*<|Xdialog v${ver} documentation<|" \
-	doc/index.html
+	docs/index.html
 
 set -x
 
