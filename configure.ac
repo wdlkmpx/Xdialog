@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([Xdialog],[2.6.0w])
+AC_INIT([Xdialog],[2.6.0w+git])
 AM_INIT_AUTOMAKE([-Wall subdir-objects foreign silent-rules])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
