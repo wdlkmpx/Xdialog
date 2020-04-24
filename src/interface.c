@@ -357,26 +357,26 @@ static GtkWidget *set_button(gchar *default_text,
 			stock_id = "gtk-go-back";
 	}
 
-	if (strlen(Xdialog.ok_label) != 0 && (!strcmp(text, OK) || !strcmp(text, YES)))
+	if (*Xdialog.ok_label) {
 		text = Xdialog.ok_label;
-	if (strlen(Xdialog.extra_label) != 0 && (!strcmp(text, EXTRA)))
+	}
+	if (*Xdialog.extra_label) {
 		text = Xdialog.extra_label;
-	else if (strlen(Xdialog.cancel_label) != 0 && (!strcmp(text, CANCEL) || !strcmp(text, NO)))
+	}
+	if (*Xdialog.cancel_label) {
 		text = Xdialog.cancel_label;
-
-	if (Xdialog.buttons_style == TEXT_ONLY)
-		button = gtk_button_new_with_mnemonic (text);
-	else { /* buttons with icons */
-		button = gtk_button_new_with_mnemonic (NULL);
-		icon = gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_BUTTON);
-		gtk_button_set_image (GTK_BUTTON (button), icon);
-		if (Xdialog.buttons_style != ICON_ONLY) { /* icon + text */
-			gtk_button_set_label (GTK_BUTTON (button), text);
-		}
 	}
 
+	button = gtk_button_new_with_mnemonic (text);
+	if (Xdialog.buttons_style != TEXT_ONLY) {
+		/* buttons with icons */
+		icon = gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_BUTTON);
+		gtk_button_set_image (GTK_BUTTON (button), icon);
+		if (Xdialog.buttons_style == ICON_ONLY) {
+			gtk_button_set_label (GTK_BUTTON (button), NULL);
+		}
+	}
 	gtk_container_add(GTK_CONTAINER(buttonbox), button);
-	gtk_widget_set_can_default (button, TRUE);
 
 	switch (event) {
 		case 0:
@@ -394,26 +394,22 @@ static GtkWidget *set_button(gchar *default_text,
 			break;
 		case 2:
 			g_signal_connect_after(G_OBJECT(button), "clicked",
-						 G_CALLBACK(exit_help),
-						 NULL);
+						 G_CALLBACK(exit_help), NULL);
 			break;
 		case 3:
 			g_signal_connect_after(G_OBJECT(button), "clicked",
-						 G_CALLBACK(exit_previous),
-						 NULL);
+						 G_CALLBACK(exit_previous), NULL);
 			break;
 		case 4:
 			g_signal_connect_after(G_OBJECT(button), "clicked",
-						 G_CALLBACK(print_text),
-						 NULL);
+						 G_CALLBACK(print_text), NULL);
 			break;
 		case 5:
 			g_signal_connect_after(G_OBJECT(button), "clicked",
-						 G_CALLBACK(exit_extra),
-						 NULL);
+						 G_CALLBACK(exit_extra), NULL);
 			break;
-
 	}
+
 	if (grab_default) {
 		gtk_widget_set_can_default(button, TRUE);
 		gtk_widget_grab_default(button);
