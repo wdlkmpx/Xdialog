@@ -33,17 +33,6 @@ AC_ARG_ENABLE(gtk_warnings,
 	gtk_warnings=$enableval,
 	gtk_warnings='no')
 
-dnl Set PACKAGE_DATA_DIR in config.h.
-if test "x${datadir}" = 'x${prefix}/share'; then
-  if test "x${prefix}" = "xNONE"; then
-    AC_DEFINE_UNQUOTED(PACKAGE_DATA_DIR, "${ac_default_prefix}/share/${PACKAGE}", [ ])
-  else
-    AC_DEFINE_UNQUOTED(PACKAGE_DATA_DIR, "${prefix}/share/${PACKAGE}", [ ])
-  fi
-else
-  AC_DEFINE_UNQUOTED(PACKAGE_DATA_DIR, "${datadir}/${PACKAGE}", [ ])
-fi
-
 dnl Set PACKAGE_SOURCE_DIR in config.h.
 packagesrcdir=`cd $srcdir && pwd`
 AC_DEFINE_UNQUOTED(PACKAGE_SOURCE_DIR, "${packagesrcdir}", [ ])
@@ -56,12 +45,6 @@ esac
 if test x"$gtk_warnings" = x"yes"; then
    CPPFLAGS="$CPPFLAGS -DGDK_DISABLE_DEPRECATED -DGDK_PIXBUF_DISABLE_DEPRECATED -DGDK_PIXBUF_DISABLE_SINGLE_INCLUDES -DGTK_DISABLE_DEPRECATED -DGTK_DISABLE_SINGLE_INCLUDES"
 fi
-
-AC_ARG_WITH(french-labels,
-  [  --with-french-labels    Enables french labels in menus],[
-  CPPFLAGS="$CPPFLAGS -DFRENCH"
-  AC_MSG_RESULT(Compiling with french labels)
-  ])
 
 AC_ARG_WITH(fixed-font,
   [  --with-fixed-font=font_name

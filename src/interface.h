@@ -58,41 +58,22 @@
 #define _(s) s
 #endif
 
-#ifdef FRENCH				/* french translations without NLS */
-#	define OK "OK"
-#	define CANCEL "Annuler"
-#	define EXTRA "Supplémentaire"
-#	define YES "Oui"
-#	define NO "Non"
-#	define HELP "Aide"
-#	define PREVIOUS "Précédent"
-#	define NEXT "Suivant"
-#	define PRINT "Imprimer"
-#	define ADD "Ajouter"
-#	define REMOVE "Retirer"
-#	define TIME_FRAME_LABEL "Heures : Minutes : Secondes"
-#	define TIME_STAMP "Heure"
-#	define DATE_STAMP "Date - Heure"
-#	define LOG_MESSAGE "Message"
-#	define HIDE_TYPING "Masquer la saisie"
-#else
-#	define OK _("_OK")
-#	define EXTRA _("_Extra")
-#	define CANCEL _("_Cancel")
-#	define YES _("_Yes")
-#	define NO _("_No")
-#	define HELP _("_Help")
-#	define PREVIOUS _("_Previous")
-#	define NEXT _("_Next")
-#	define PRINT _("_Print")
-#	define ADD _("_Add")
-#	define REMOVE _("_Remove")
-#	define TIME_FRAME_LABEL _("Hours : Minutes : Seconds")
-#	define TIME_STAMP _("Time stamp")
-#	define DATE_STAMP _("Date - Time")
-#	define LOG_MESSAGE _("Log message")
-#	define HIDE_TYPING _("Hide typing")
-#endif
+#define OK _("_OK")
+#define EXTRA _("_Extra")
+#define CANCEL _("_Cancel")
+#define YES _("_Yes")
+#define NO _("_No")
+#define HELP _("_Help")
+#define PREVIOUS _("_Previous")
+#define NEXT _("_Next")
+#define PRINT _("_Print")
+#define ADD _("_Add")
+#define REMOVE _("_Remove")
+#define TIME_FRAME_LABEL _("Hours : Minutes : Seconds")
+#define TIME_STAMP _("Time stamp")
+#define DATE_STAMP _("Date - Time")
+#define LOG_MESSAGE _("Log message")
+#define HIDE_TYPING _("Hide typing")
 
 /* The following defines should not be changed. */
 
