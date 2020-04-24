@@ -338,8 +338,6 @@ static GtkWidget *set_button(gchar *default_text,
 	GtkWidget *button;
 	gchar	  *stock_id = NULL;
 	GtkWidget *icon;
-	GtkWidget *hbox;
-	GtkWidget *label;
 	gchar     *text = default_text;
 
 	if (Xdialog.buttons_style != TEXT_ONLY) {
@@ -367,26 +365,18 @@ static GtkWidget *set_button(gchar *default_text,
 		text = Xdialog.cancel_label;
 
 	if (Xdialog.buttons_style == TEXT_ONLY)
-		button = gtk_button_new_with_label(text);
-	else {			/* buttons with icons */
-		button = gtk_button_new();
-		hbox = gtk_hbox_new(FALSE, 2);
-		gtk_container_add(GTK_CONTAINER(button), hbox);
-		gtk_widget_show(hbox);
-
+		button = gtk_button_new_with_mnemonic (text);
+	else { /* buttons with icons */
+		button = gtk_button_new_with_mnemonic (NULL);
 		icon = gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_BUTTON);
-		gtk_container_add(GTK_CONTAINER(hbox), icon);
-		gtk_widget_show(icon);
-
-		if (Xdialog.buttons_style != ICON_ONLY) {	/* icons + text */
-			label = gtk_label_new(text);
-			gtk_container_add(GTK_CONTAINER(hbox), label);
-			gtk_widget_show(label);
+		gtk_button_set_image (GTK_BUTTON (button), icon);
+		if (Xdialog.buttons_style != ICON_ONLY) { /* icon + text */
+			gtk_button_set_label (GTK_BUTTON (button), text);
 		}
 	}
 
 	gtk_container_add(GTK_CONTAINER(buttonbox), button);
-	GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
+	gtk_widget_set_can_default (button, TRUE);
 
 	switch (event) {
 		case 0:
