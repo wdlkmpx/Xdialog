@@ -357,14 +357,29 @@ static GtkWidget *set_button(gchar *default_text,
 			stock_id = "gtk-go-back";
 	}
 
-	if (*Xdialog.ok_label) {
-		text = Xdialog.ok_label;
-	}
-	if (*Xdialog.extra_label) {
-		text = Xdialog.extra_label;
-	}
-	if (*Xdialog.cancel_label) {
-		text = Xdialog.cancel_label;
+
+	switch (event) {
+		case 0: // ok
+			if (*Xdialog.ok_label) {
+				text = Xdialog.ok_label;
+			}
+			break;
+		case 1: // cancel
+			if (*Xdialog.cancel_label) {
+				text = Xdialog.cancel_label;
+			}
+			break;
+		case 2: // help
+			break;
+		case 3: // previous
+			break;
+		case 4: // print
+			break;
+		case 5: // extra
+			if (*Xdialog.extra_label) {
+				text = Xdialog.extra_label;
+			}
+			break;
 	}
 
 	button = gtk_button_new_with_mnemonic (text);
@@ -379,12 +394,12 @@ static GtkWidget *set_button(gchar *default_text,
 	gtk_container_add(GTK_CONTAINER(buttonbox), button);
 
 	switch (event) {
-		case 0:
+		case 0: // ok
 			g_signal_connect_after(G_OBJECT(button), "clicked",
 						 G_CALLBACK(exit_ok),
 						 NULL);
 			break;
-		case 1:
+		case 1: // cancel
 			g_signal_connect_after(G_OBJECT(button), "clicked",
 						 G_CALLBACK(exit_cancel),
 						 NULL);
@@ -392,19 +407,19 @@ static GtkWidget *set_button(gchar *default_text,
 						 G_CALLBACK(exit_keypress), NULL);
 
 			break;
-		case 2:
+		case 2: // help
 			g_signal_connect_after(G_OBJECT(button), "clicked",
 						 G_CALLBACK(exit_help), NULL);
 			break;
-		case 3:
+		case 3: // previous
 			g_signal_connect_after(G_OBJECT(button), "clicked",
 						 G_CALLBACK(exit_previous), NULL);
 			break;
-		case 4:
+		case 4: // print
 			g_signal_connect_after(G_OBJECT(button), "clicked",
 						 G_CALLBACK(print_text), NULL);
 			break;
-		case 5:
+		case 5: // extra
 			g_signal_connect_after(G_OBJECT(button), "clicked",
 						 G_CALLBACK(exit_extra), NULL);
 			break;
