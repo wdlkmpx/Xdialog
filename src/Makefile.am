@@ -12,9 +12,10 @@ bin_PROGRAMS = Xdialog
 
 Xdialog_SOURCES = \
 	main.c \
-	interface.c interface.h yes.xpm no.xpm help.xpm print.xpm next.xpm previous.xpm \
+	interface.c interface.h \
 	callbacks.c callbacks.h \
-	support.c support.h
+	support.c support.h \
+	gtkcompat.c gtkcompat.h
 
 #LDADD = @LIBINTL@
 Xdialog_LDADD = $(LDADD) @GTK_LIBS@
