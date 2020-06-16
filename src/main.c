@@ -16,6 +16,7 @@
 #include "interface.h"
 #include "support.h"
 #include "time.h"
+#include "gtkcompat.h"
 
 /* A structure used to pass Xdialog parameters. */
 Xdialog_data Xdialog;

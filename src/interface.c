@@ -18,6 +18,7 @@
 #include "interface.h"
 #include "callbacks.h"
 #include "support.h"
+#include "gtkcompat.h"
 
 /* Global structure and variables */
 extern Xdialog_data Xdialog;
@@ -346,8 +347,6 @@ static GtkWidget *set_button(gchar *default_text,
 			stock_id = "gtk-close";
 		else if (!strcmp(text, HELP))
 			stock_id = "gtk-help";
-		else if (!strcmp(text, EXTRA))
-			stock_id = "gtk-execute";
 		else if (!strcmp(text, PRINT))
 			stock_id = "gtk-print";
 		else if (!strcmp(text, NEXT) || !strcmp(text, ADD))
@@ -355,7 +354,6 @@ static GtkWidget *set_button(gchar *default_text,
 		else if (!strcmp(text, PREVIOUS) || !strcmp(text, REMOVE))
 			stock_id = "gtk-go-back";
 	}
-
 
 	switch (event) {
 		case 0: // ok

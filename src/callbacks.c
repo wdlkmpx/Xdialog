@@ -18,6 +18,7 @@
 #include "callbacks.h"
 #include "interface.h"
 #include "support.h"
+#include "gtkcompat.h"
 
 extern Xdialog_data Xdialog;
 
