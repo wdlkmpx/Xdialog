@@ -175,16 +175,8 @@ static void open_window(void)
 
 	/* Set the internal border so that the child widgets do not
 	 * expand to the whole window (prettier) */
-	gtk_container_set_border_width(GTK_CONTAINER(window), xmult/2);
+	gtk_container_set_border_width (GTK_CONTAINER (window), 7);
 
-	/* Create the root vbox widget in which all other boxes will
-	 * be packed. By setting the "homogeneous" parameter to false,
-	 * we allow packing with either gtk_box_pack_start() or
-	 * gtk_box_pack_end() and disallow any automatic repartition
-	 * of additional space between the child boxes (each box may
-	 * therefore be set so to expand or not): this is VERY important
-	 * and should not be changed !
-	 */
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(window), vbox);
 	gtk_widget_show(vbox);
@@ -324,7 +316,8 @@ static GtkWidget *set_hbuttonbox(void)
 	GtkWidget *hbuttonbox;
 	hbuttonbox = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
 	gtk_box_pack_end(Xdialog.vbox, hbuttonbox, FALSE, FALSE, ymult/4);
- 	gtk_button_box_set_layout(GTK_BUTTON_BOX(hbuttonbox), GTK_BUTTONBOX_SPREAD);
+ 	gtk_button_box_set_layout (GTK_BUTTON_BOX(hbuttonbox), GTK_BUTTONBOX_END);
+ 	gtk_box_set_spacing (GTK_BOX (hbuttonbox), 7);
 	gtk_widget_show(hbuttonbox);
 
 	return hbuttonbox;
