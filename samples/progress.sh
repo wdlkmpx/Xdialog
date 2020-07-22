@@ -41,3 +41,28 @@ if [ "$?" = 255 ] ; then
 	echo ""
 	echo "Box closed !"
 fi
+
+#====================================================
+
+# Specify %
+(
+echo "10" ; sleep 1
+echo "20" ; sleep 1
+echo "30" ; sleep 1
+echo "40" ; sleep 1
+echo "10" ; sleep 1
+echo "50" ; sleep 1
+echo "70" ; sleep 1
+echo "80" ; sleep 1
+echo "90" ; sleep 1
+echo "95" ; sleep 1
+echo "100" ; sleep 1
+) |
+$DIALOG --title "PROGRESS %" \
+	--progress "" \
+	8 60
+
+if [ "$?" = 255 ] ; then
+	echo ""
+	echo "Box closed !"
+fi
