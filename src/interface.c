@@ -743,16 +743,18 @@ void create_progress(gchar *optarg, gint leading, gint maxdots)
 {
 	GtkWidget *label;
 	GtkWidget *align;
-	GtkProgress *pbar;
-	GtkAdjustment *adj;
-	int ceiling, i;
+	gdouble ceiling;
+	int i;
 	unsigned char temp[2];
 	size_t rresult;
 
 	if (maxdots <= 0)
-		ceiling = 100;
+		ceiling = 1.0;
 	else
-		ceiling = maxdots;
+		ceiling = (gdouble) maxdots;
+
+	/* convert to fractions - step */
+	Xdialog.progress_step = 1.0 / ceiling;
 
 	open_window();
 
@@ -765,24 +767,15 @@ void create_progress(gchar *optarg, gint leading, gint maxdots)
 	gtk_box_pack_start(Xdialog.vbox, align, FALSE, FALSE, ymult/2);
 	gtk_widget_show(align);
 
-	/* Create an Adjusment object to hold the range of the progress bar */
-	adj = GTK_ADJUSTMENT(gtk_adjustment_new(0, 0, 100, 0, 0, 0));
-
 	/* Set up the progress bar */
-	Xdialog.widget1 = gtk_progress_bar_new_with_adjustment(adj);
-	pbar = GTK_PROGRESS(Xdialog.widget1);
+	Xdialog.widget1 = gtk_progress_bar_new ();
 	/* Set the start value and the range of the progress bar */
-	gtk_progress_configure(pbar, 0, 0, ceiling);
-	/* Set the format of the string that can be displayed in the
-	 * trough of the progress bar:
-	 * %p - percentage
-	 * %v - value
-	 * %l - lower range value
-	 * %u - upper range value */
-	gtk_progress_set_format_string(pbar, "%p%%");
-	gtk_progress_set_show_text(pbar, TRUE);
 	gtk_container_add(GTK_CONTAINER(align), Xdialog.widget1);
 	gtk_widget_show(Xdialog.widget1);
+
+	// set initial %
+	gtk_progress_bar_set_text (GTK_PROGRESS_BAR (Xdialog.widget1), "0%");
+	gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (Xdialog.widget1), 0.0);
 
 	/* Skip the characters to be ignored on the input stream */
 	if (leading < 0) {
