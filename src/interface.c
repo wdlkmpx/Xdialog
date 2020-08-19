@@ -50,13 +50,14 @@ static void parse_rc_file(void)
 
 static void font_init(void)
 {
-	GtkWidget *window;
-	GtkStyle  *style;
-	GdkFont *font;
 	fixed_pango_font = pango_font_description_new ();
 	pango_font_description_set_family (fixed_pango_font, FIXED_FONT);
 	pango_font_description_set_weight (fixed_pango_font, PANGO_WEIGHT_MEDIUM);
 	pango_font_description_set_size (fixed_pango_font, 10 * PANGO_SCALE);
+#if GTK_MAJOR_VERSION == 2
+	GtkWidget *window;
+	GtkStyle  *style;
+	GdkFont *font;
 	gint width, ascent, descent, lbearing, rbearing;
 	if (dialog_compat) {
 		xmult = ffxmult;
@@ -77,6 +78,10 @@ static void font_init(void)
 		}
 		gtk_widget_destroy(window);
 	}
+#else
+	xmult = ffxmult;
+	ymult = ffymult;
+#endif
 }
 
 /* Custom text wrapping (the GTK+ one is buggy) */
@@ -86,7 +91,9 @@ static void wrap_text(gchar *str, gint reserved_width)
 	gint max_line_width, n = 0;
 	gchar *p = str, *last_space = NULL;
 	gchar tmp[MAX_LABEL_LENGTH];
+#if GTK_MAJOR_VERSION == 2
 	GdkFont *current_font = gtk_style_get_font(Xdialog.window->style);
+#endif
 
 	if (Xdialog.xsize != 0)
 		max_line_width = (Xdialog.size_in_pixels ? Xdialog.xsize :
@@ -102,10 +109,12 @@ static void wrap_text(gchar *str, gint reserved_width)
 		} else {
 			tmp[n++] = *p;
 			tmp[n] = 0;
+#if GTK_MAJOR_VERSION == 2
 			if (gdk_string_width(current_font, tmp) < max_line_width) {
 				if (*p == ' ')
 					last_space = p;
 			} else {
+#endif
 				if (last_space != NULL) {
 					*last_space = '\n';
 					p = last_space;
@@ -113,7 +122,9 @@ static void wrap_text(gchar *str, gint reserved_width)
 					last_space = NULL;
 				} else if (*p == ' ')
 					last_space = p;
+#if GTK_MAJOR_VERSION == 2
 			}
+#endif
 		}
 	} while (++p < str + strlen(str));
 }
@@ -133,8 +144,10 @@ static void set_window_size_and_placement(void)
 						    Xdialog.ysize*ymult);
 	}
 
+#if GTK_MAJOR_VERSION == 2
 	/* Allow the window to grow, shrink and auto-shrink */
 	gtk_window_set_policy(GTK_WINDOW(Xdialog.window), TRUE, TRUE, TRUE);
+#endif
 
 	/* Set the window placement policy */
 	if (Xdialog.set_origin)
@@ -176,8 +189,10 @@ static void open_window(void)
 	 * expand to the whole window (prettier) */
 	gtk_container_set_border_width (GTK_CONTAINER (window), 7);
 
+	/* main vbox */
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(window), vbox);
+	gtk_container_set_border_width (GTK_CONTAINER (vbox), 1);
 	gtk_widget_show(vbox);
 	Xdialog.vbox = GTK_BOX(vbox);
 
@@ -699,8 +714,8 @@ void create_infobox(gchar *optarg, gint timeout)
 
 void create_gauge(gchar *optarg, gint percent)
 {
-	GtkWidget *align;
 	gdouble value;
+	GtkWidget * hbox;
 
 	if (percent < 0)
 		value = 0;
@@ -713,16 +728,13 @@ void create_gauge(gchar *optarg, gint percent)
 
 	set_backtitle(TRUE);
 	Xdialog.widget2 = set_label(optarg, TRUE);
-
-	align = gtk_alignment_new(0.5, 0.5, 0.8, 0);
-	gtk_box_pack_start(Xdialog.vbox, align, FALSE, FALSE, ymult/2);
-	gtk_widget_show(align);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_box_pack_start (Xdialog.vbox, hbox, FALSE, TRUE, 0);
+	gtk_widget_show (hbox);
 
 	/* Set up the progress bar */
 	Xdialog.widget1 = gtk_progress_bar_new ();
-
-	/* Set the start value and the range of the progress bar */
-	gtk_container_add(GTK_CONTAINER(align), Xdialog.widget1);
+	gtk_box_pack_start (GTK_BOX (hbox), Xdialog.widget1, TRUE, TRUE, 10);
 	gtk_widget_show(Xdialog.widget1);
 
 	// set initial %
@@ -742,8 +754,7 @@ void create_gauge(gchar *optarg, gint percent)
 
 void create_progress(gchar *optarg, gint leading, gint maxdots)
 {
-	GtkWidget *label;
-	GtkWidget *align;
+	GtkWidget * label, * hbox;
 	gdouble ceiling;
 	int i;
 	unsigned char temp[2];
@@ -763,15 +774,13 @@ void create_progress(gchar *optarg, gint leading, gint maxdots)
 
 	trim_string(optarg, Xdialog.label_text, MAX_LABEL_LENGTH);
 	label = set_label(Xdialog.label_text, TRUE);
-
-	align = gtk_alignment_new(0.5, 0.5, 0.8, 0);
-	gtk_box_pack_start(Xdialog.vbox, align, FALSE, FALSE, ymult/2);
-	gtk_widget_show(align);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_box_pack_start (Xdialog.vbox, hbox, FALSE, TRUE, 0);
+	gtk_widget_show (hbox);
 
 	/* Set up the progress bar */
 	Xdialog.widget1 = gtk_progress_bar_new ();
-	/* Set the start value and the range of the progress bar */
-	gtk_container_add(GTK_CONTAINER(align), Xdialog.widget1);
+	gtk_box_pack_start (GTK_BOX (hbox), Xdialog.widget1, TRUE, TRUE, 10);
 	gtk_widget_show(Xdialog.widget1);
 
 	// set initial %
@@ -1723,6 +1732,7 @@ void create_filesel(gchar *optarg, gboolean dsel_flag)
 
 void create_colorsel(gchar *optarg, gdouble *colors)
 {
+#if GTK_MAJOR_VERSION == 2
 	GtkColorSelectionDialog *colorsel_dlg;
 	GtkColorSelection *colorsel;
 	GtkWidget *box, * label;
@@ -1817,11 +1827,13 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	Xdialog.exit_code = 255;
 
 	set_timeout();
+#endif
 }
 
 
 void create_fontsel(gchar *optarg)
 {
+#if GTK_MAJOR_VERSION == 2
 	GtkFontSelectionDialog *fontsel;
 	GtkWidget *hbuttonbox;
 	GtkWidget *button;
@@ -1901,6 +1913,7 @@ void create_fontsel(gchar *optarg)
 	Xdialog.exit_code = 255;
 
 	set_timeout();
+#endif
 }
 
 

@@ -8,6 +8,10 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 
+#if GTK_MAJOR_VERSION == 3
+#include <gdk/gdkkeysyms-compat.h>
+#endif
+
 #if !GTK_CHECK_VERSION (3, 0, 0)
 GtkWidget *gtk_box_new (GtkOrientation orientation, gint spacing) ;
 GtkWidget *gtk_button_box_new (GtkOrientation orientation);
