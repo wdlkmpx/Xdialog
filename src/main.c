@@ -80,7 +80,6 @@ Transient options:\n\
   --beep-after\n\
   --begin <Yorg> <Xorg>\n\
   --ignore-eof\n\
-  --smooth\n\
 \n\
 Box options:\n\
   --yesno	<text> <height> <width>\n\
@@ -640,7 +639,7 @@ int main(int argc, char *argv[])
 	Xdialog.set_origin	= FALSE;		/* Don't set window origin */
 	Xdialog.cr_wrap		= FALSE;		/* Don't wrap at linefeeds by default */
 	Xdialog.ignore_eof	= FALSE;		/* Don't ignore EOF in infobox/gauge */
-	Xdialog.smooth		= FALSE;		/* Don't use smooth (slow) scrolling  */
+	Xdialog.smooth		= FALSE;		/* logbox - ignored  */
 #endif
 	if (dialog_compat) {
 		Xdialog.justify	= GTK_JUSTIFY_LEFT;	/* Left justify messages as default */
@@ -1185,9 +1184,6 @@ show_again:
 				break;
 			case T_IGNOREEOF:	/* --ignore-eof option */
 				Xdialog.ignore_eof = TRUE;
-				break;
-			case T_SMOOTH:		/* --smooth option */
-				Xdialog.smooth = TRUE;
 				break;
 		/* Special options */
 			case S_PRINTMAXSIZE:	/* --print-maxsize option */

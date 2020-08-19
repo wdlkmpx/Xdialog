@@ -481,23 +481,20 @@ static GdkColor *old_bgcolor = NULL;
 
 gboolean logbox_timeout(gpointer data)
 {
-	GtkCList *clist = GTK_CLIST(Xdialog.widget1);
+	GtkTreeView  * tree  = GTK_TREE_VIEW (Xdialog.widget1);
+	GtkTreeModel * model = gtk_tree_view_get_model (tree);
+	GtkListStore * store = GTK_LIST_STORE (model);
+	GtkTreeIter iter;
+
 	GdkColor *fgcolor, *bgcolor;
 	gchar buffer[MAX_LABEL_LENGTH], *p;
-	static gchar *null_single_row[] = { NULL };
-	static gchar *null_double_row[] = { NULL, NULL };
-	gint rownum;
 	int color, len;
 	struct tm *localdate = NULL;
 	time_t curr_time;
-	gboolean flag = FALSE;
 
-	if (!Xdialog.smooth && (Xdialog.file_init_size > 0))
-		gtk_clist_freeze(clist);
-	else {
+	if (Xdialog.file_init_size <= 0)
 		if (!empty_gtk_queue())
 			return FALSE;
-	}
 
 	while (fgets(buffer, MAX_LABEL_LENGTH, Xdialog.file) != NULL) {
 
@@ -505,8 +502,6 @@ gboolean logbox_timeout(gpointer data)
 
 		if (Xdialog.file_init_size > 0) {
 			Xdialog.file_init_size -= len;
-			if (Xdialog.file_init_size <= 0)
-				flag = TRUE;
 		}
 
 		if ((len > 0) && (buffer[len - 1] == '\n'))
@@ -546,19 +541,23 @@ gboolean logbox_timeout(gpointer data)
 			remove_vt_sequences(buffer);
 		}
 
-		if (Xdialog.reverse)
-			rownum = gtk_clist_prepend(clist,
-						   Xdialog.time_stamp ? null_double_row : null_single_row);
-		else
-			rownum = gtk_clist_append(clist,
-						  Xdialog.time_stamp ? null_double_row : null_single_row);
-		gtk_clist_set_selectable(clist, rownum, FALSE);
-		if (fgcolor != NULL)
-			gtk_clist_set_foreground(clist, rownum, fgcolor);
-		if (bgcolor != NULL)
-			gtk_clist_set_background(clist, rownum, bgcolor);
-		if (Xdialog.time_stamp) {
-			gtk_clist_set_text(clist, rownum, 1, buffer);
+		if (Xdialog.reverse) {
+			gtk_list_store_prepend (store, &iter);
+		} else {
+			gtk_list_store_append (store, &iter);
+		}
+
+		if (fgcolor) {
+			gtk_list_store_set (store, &iter, LOGBOX_COL_FGCOLOR, fgcolor, -1);
+		}
+		if (bgcolor) {
+			gtk_list_store_set (store, &iter, LOGBOX_COL_BGCOLOR, bgcolor, -1);
+		}
+
+		gtk_list_store_set (store, &iter, LOGBOX_COL_TEXT, buffer, -1);
+
+		if (Xdialog.time_stamp)
+		{
 			if (Xdialog.date_stamp)
 				sprintf(buffer, "%02d/%02d/%d %02d:%02d:%02d ",
 					localdate->tm_mday, localdate->tm_mon+1, localdate->tm_year+1900,
@@ -566,27 +565,13 @@ gboolean logbox_timeout(gpointer data)
 			else
 				sprintf(buffer, "%02d:%02d:%02d",
 					localdate->tm_hour, localdate->tm_min, localdate->tm_sec);
-			gtk_clist_set_text(clist, rownum, 0, buffer);
-		} else
-			gtk_clist_set_text(clist, rownum, 0, buffer);
-		gtk_clist_columns_autosize(clist);
-
-		if ((Xdialog.file_init_size <= 0) || Xdialog.smooth) {
-			if (flag) {
-				gtk_clist_thaw(clist);
-				flag = FALSE;
-			}
-
-			if (Xdialog.reverse)
-				gtk_clist_moveto(clist, rownum, 0, 0.0, 0.0);
-			else
-				gtk_clist_moveto(clist, rownum, 0, 1.0, 0.0);
+			gtk_list_store_set (store, &iter, LOGBOX_COL_DATE, buffer, -1);
 		}
 
-		if (!empty_gtk_queue())
+		if (!empty_gtk_queue()) {
 			return FALSE;
+		}
 	}
-
 	return TRUE;
 }
 

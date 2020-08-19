@@ -854,33 +854,76 @@ void create_tailbox(gchar *optarg)
 
 void create_logbox(gchar *optarg)
 {
-	GtkCList *clist;
 	GtkWidget *scrolled_window;
-	gint xsize = 40;
+	gint xsize = 60;
 
 	open_window();
 
 	set_backtitle(FALSE);
 
-	Xdialog.widget1 = gtk_clist_new(Xdialog.time_stamp ? 2 : 1);
-	clist = GTK_CLIST(Xdialog.widget1);
-	gtk_clist_set_selection_mode(clist, GTK_SELECTION_SINGLE);
-	gtk_clist_set_shadow_type(clist, GTK_SHADOW_IN);
-	if (Xdialog.time_stamp) {
-		gtk_clist_set_column_title(clist, 0, Xdialog.date_stamp ? DATE_STAMP : TIME_STAMP);
-		gtk_clist_set_column_title(clist, 1, LOG_MESSAGE);
-		gtk_clist_column_title_passive(clist, 0);
-		gtk_clist_column_title_passive(clist, 1);
-		gtk_clist_column_titles_show(clist);
-		xsize = (Xdialog.date_stamp ? 59 : 48);
+	GtkTreeModel     *model;
+	GtkTreeView      *treeview;
+	GtkTreeSelection *tree_sel;
+
+	GtkListStore *store;
+	store = gtk_list_store_new (LOGBOX_NUM_COLS,
+	                            G_TYPE_STRING,
+	                            G_TYPE_STRING,
+	                            GDK_TYPE_COLOR,
+	                            GDK_TYPE_COLOR);
+	model = GTK_TREE_MODEL (store);
+
+	treeview = g_object_new (GTK_TYPE_TREE_VIEW,
+	                        "model", model, NULL);
+	g_object_unref (model);
+
+	tree_sel = gtk_tree_view_get_selection (treeview);
+	gtk_tree_selection_set_mode (tree_sel, GTK_SELECTION_NONE);
+
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *col0, *col1;
+
+	// col1
+	renderer = g_object_new (GTK_TYPE_CELL_RENDERER_TEXT, "xalign", 0.0, NULL);
+	col1 = g_object_new (GTK_TYPE_TREE_VIEW_COLUMN,
+	                     "title",     LOG_MESSAGE,
+	                     "resizable", TRUE,
+	                     "clickable", FALSE,
+	                     NULL);
+	gtk_tree_view_column_pack_start (col1, renderer, TRUE);
+	gtk_tree_view_column_set_attributes (col1, renderer,
+	                                     "text", LOGBOX_COL_TEXT,
+	                                     "background-gdk", LOGBOX_COL_BGCOLOR,
+	                                     "foreground-gdk", LOGBOX_COL_FGCOLOR,
+	                                     NULL);
+	gtk_tree_view_append_column (treeview, col1);
+
+	Xdialog.widget1 = GTK_WIDGET (treeview);
+	if (Xdialog.time_stamp)
+	{
+		// col0
+		renderer = g_object_new (GTK_TYPE_CELL_RENDERER_TEXT, "xalign", 0.0, NULL);
+		col0 = g_object_new (GTK_TYPE_TREE_VIEW_COLUMN,
+		                     "title",     Xdialog.date_stamp ? DATE_STAMP : TIME_STAMP,
+		                     "resizable", TRUE,
+		                     "clickable", FALSE,
+		                     "sizing",    GTK_TREE_VIEW_COLUMN_AUTOSIZE,
+		                     NULL);
+		gtk_tree_view_column_pack_start (col0, renderer, TRUE);
+		gtk_tree_view_column_set_attributes (col0, renderer,
+		                                     "text", LOGBOX_COL_DATE,
+		                                     "background-gdk", LOGBOX_COL_BGCOLOR,
+		                                     "foreground-gdk", LOGBOX_COL_FGCOLOR,
+		                                     NULL);
+		gtk_tree_view_insert_column (treeview, col0, 0);
+
+		xsize = 80;
+	} else {
+		gtk_tree_view_set_headers_visible (treeview, FALSE);
 	}
-	/* We need to call gtk_clist_columns_autosize IOT avoid
-	 * Gtk-WARNING **: gtk_widget_size_allocate(): attempt to allocate widget with width 41658 and height 1
-	 * and similar warnings with GTK+ v1.2.9 (and perhaps with previous versions as well)...
-	 */
-	gtk_clist_columns_autosize(clist);
+
 	g_signal_connect (G_OBJECT(Xdialog.widget1), "key_press_event",
-			   G_CALLBACK(tailbox_keypress), NULL);
+	                  G_CALLBACK(tailbox_keypress), NULL);
 	gtk_widget_show(Xdialog.widget1);
 	gtk_widget_grab_focus(Xdialog.widget1);
 

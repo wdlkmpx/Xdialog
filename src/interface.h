@@ -94,6 +94,15 @@
 #define BEEP_BEFORE 1
 #define BEEP_AFTER  2
 
+typedef enum
+{
+	LOGBOX_COL_DATE,
+	LOGBOX_COL_TEXT,
+	LOGBOX_COL_BGCOLOR,
+	LOGBOX_COL_FGCOLOR,
+	LOGBOX_NUM_COLS
+} LOGBOX_COL;
+
 /* Structure definitions. */
 
 typedef struct {
@@ -155,7 +164,7 @@ typedef struct	{
 	gboolean	reverse;				/* TRUE for reverse order in logbox */
 	gboolean	keep_colors;				/* TRUE to remember colors in logbox */
 	gboolean	ignore_eof;				/* TRUE to ignore EOF in infobox/gauge */
-	gboolean	smooth;					/* TRUE for smooth scrolling in tail/log */
+	gboolean	smooth;					/* logbox - ignored */
 	GtkWidget *	window;
 	GtkBox *	vbox;
 	GtkWidget *	widget1;
