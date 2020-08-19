@@ -29,25 +29,25 @@ touch $LOGFILE
 
 Xdialog --title "LOGBOX" $TIMESTAMP $REVERSE --logbox $LOGFILE 0 0 &
 
-echo "Normal text." >>$LOGFILE
-echo "Normal text." >>$LOGFILE
-echo "Normal text." >>$LOGFILE
+echo "Normal text 1." >>$LOGFILE
+echo "Normal text 2." >>$LOGFILE
+echo "Normal text 3." >>$LOGFILE
 sleep 1
-echo "Normal text." >>$LOGFILE
-echo "Normal text." >>$LOGFILE
-echo "Normal text." >>$LOGFILE
+echo "Normal text 4." >>$LOGFILE
+echo "Normal text 5." >>$LOGFILE
+echo "Normal text 6." >>$LOGFILE
 sleep 1
 echo -e "\\033[1;31mThis is a red foreground text." >>$LOGFILE
-echo "Normal text." >>$LOGFILE
-echo "Normal text." >>$LOGFILE
+echo "Normal text 7." >>$LOGFILE
+echo "Normal text 8." >>$LOGFILE
 echo -e "\\033[1;42mThis is a green background text." >>$LOGFILE
 sleep 1
-echo "Normal text." >>$LOGFILE
-echo "Normal text." >>$LOGFILE
+echo "Normal text 9." >>$LOGFILE
+echo "Normal text 10." >>$LOGFILE
 sleep 1
 echo -e "And now a blue text\\033[1;34;46m on cyan background." >>$LOGFILE
-echo "Normal text." >>$LOGFILE
-echo "Normal text." >>$LOGFILE
+echo "Normal text 11." >>$LOGFILE
+echo "Normal text 12." >>$LOGFILE
 sleep 2
 
 rm -f $LOGFILE
