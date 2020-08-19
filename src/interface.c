@@ -138,7 +138,7 @@ static void set_window_size_and_placement(void)
 
 	/* Set the window placement policy */
 	if (Xdialog.set_origin)
-		gdk_window_move(Xdialog.window->window,
+		gdk_window_move (gtk_widget_get_window (Xdialog.window),
 				Xdialog.xorg >= 0 ? (Xdialog.size_in_pixels ? Xdialog.xorg : Xdialog.xorg*xmult) :
 						    gdk_screen_width()  + Xdialog.xorg - Xdialog.xsize - 2*xmult,
 				Xdialog.yorg >= 0 ? (Xdialog.size_in_pixels ? Xdialog.yorg : Xdialog.yorg*ymult) :
@@ -161,8 +161,7 @@ static void open_window(void)
 	parse_rc_file();
 
 	if (Xdialog.wmclass[0] != 0)
-		gtk_window_set_wmclass(GTK_WINDOW(window), Xdialog.wmclass,
-				       Xdialog.wmclass);
+		gtk_window_set_role (GTK_WINDOW(window), Xdialog.wmclass);
 
 	/* Set default events handlers */
 	g_signal_connect (G_OBJECT(window), "destroy",
@@ -257,7 +256,9 @@ static GtkWidget *set_label(gchar *label_text, gboolean expand)
 			g_object_unref(pixbuf);
 			gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 2);
 			gtk_widget_show(icon);
-			icon_width = icon->requisition.width + 4;
+			GtkRequisition requisition;
+			gtk_widget_get_requisition (icon, &requisition);
+			icon_width = requisition.width + 4;
 		}
 	}
 
@@ -1092,11 +1093,7 @@ void create_combobox(gchar *optarg, gchar *options[], gint list_size)
 	set_backtitle(TRUE);
 	set_label(optarg, TRUE);
 
-#if GTK_CHECK_VERSION (2, 24, 0)
 	combo = gtk_combo_box_text_new_with_entry ();
-#else
-	combo = gtk_combo_box_entry_new_text(); 
-#endif
 	Xdialog.widget1 = gtk_bin_get_child (GTK_BIN (combo));
 	Xdialog.widget2 = Xdialog.widget3 = NULL;
 	gtk_box_pack_start(Xdialog.vbox, combo, TRUE, TRUE, 0);
@@ -1105,19 +1102,11 @@ void create_combobox(gchar *optarg, gchar *options[], gint list_size)
 
 	/* Set the popdown strings */
 	for (i = 0; i < list_size; i++) {
-#if GTK_CHECK_VERSION (2, 24, 0)
 		gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT(combo), options[i]);
-#else
-		gtk_combo_box_append_text (GTK_COMBO_BOX(combo), options[i]);
-#endif
 	}
 
 	if (strlen(Xdialog.default_item) != 0) {
-#if GTK_CHECK_VERSION (2, 24, 0)
 		gtk_combo_box_text_prepend_text (GTK_COMBO_BOX_TEXT(combo), Xdialog.default_item);
-#else
-		gtk_combo_box_prepend_text(GTK_COMBO_BOX(combo), Xdialog.default_item);
-#endif
 		gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
 	}
 
@@ -1599,12 +1588,12 @@ void create_filesel(gchar *optarg, gboolean dsel_flag)
 	if (*Xdialog.ok_label) {
 		ok_label = Xdialog.ok_label;
 	} else {
-		ok_label = GTK_STOCK_OK;
+		ok_label = "gtk-ok";
 	}
 	if (*Xdialog.cancel_label) {
 		cancel_label = Xdialog.cancel_label;
 	} else {
-		cancel_label = GTK_STOCK_CANCEL;
+		cancel_label = "gtk-cancel";
 	}
 */
 	/* Create a file selector and update Xdialog structure accordingly */
@@ -1693,7 +1682,7 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 {
 	GtkColorSelectionDialog *colorsel_dlg;
 	GtkColorSelection *colorsel;
-	GtkWidget *box;
+	GtkWidget *box, * label;
 	GtkWidget *hbuttonbox;
 	GtkWidget *button;
 	GdkColor gcolor;
@@ -1707,7 +1696,7 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	Xdialog.window = gtk_color_selection_dialog_new(Xdialog.title);
 	colorsel_dlg = GTK_COLOR_SELECTION_DIALOG (Xdialog.window);
 	colorsel     = GTK_COLOR_SELECTION (gtk_color_selection_dialog_get_color_selection (colorsel_dlg));
-	Xdialog.vbox = GTK_BOX(gtk_widget_get_ancestor(colorsel_dlg->colorsel, gtk_box_get_type()));
+	Xdialog.vbox = GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (Xdialog.window)));
 
 	gcolor.red   = colors[0] * 256;
 	gcolor.green = colors[1] * 256;
@@ -1723,7 +1712,8 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	gtk_widget_realize(Xdialog.window);
 
 	/* Set the text */
-	box = gtk_widget_get_ancestor(set_label(optarg, TRUE), gtk_box_get_type());
+	label = set_label(optarg, TRUE);
+	box = gtk_widget_get_parent (label);
 	gtk_box_reorder_child(Xdialog.vbox, box, 0);
 
 	/* Set the backtitle */
@@ -1736,7 +1726,8 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	set_window_size_and_placement();
 
 	/* Find the existing hbuttonbox pointer */
-	hbuttonbox = gtk_widget_get_ancestor(colorsel_dlg->ok_button, gtk_hbutton_box_get_type());
+	g_object_get (colorsel_dlg, "ok-button", &button, NULL);
+	hbuttonbox = gtk_widget_get_parent (button);
 
 	/* Remove the colour selector buttons IOT put ours in place */
 	gtk_widget_destroy(colorsel_dlg->ok_button);
@@ -1773,7 +1764,7 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	g_signal_connect (G_OBJECT(Xdialog.window), "delete_event",
 			   G_CALLBACK(delete_event), NULL);
 	g_signal_connect (G_OBJECT(colorsel_dlg->ok_button), "clicked",
-			   G_CALLBACK(colorsel_exit), G_OBJECT(colorsel_dlg->colorsel));
+			   G_CALLBACK(colorsel_exit), G_OBJECT(colorsel));
 
 	/* Beep if requested */
 	if (Xdialog.beep & BEEP_BEFORE && Xdialog.exit_code != 2)
@@ -1800,7 +1791,7 @@ void create_fontsel(gchar *optarg)
 	/* Create a font selector and update Xdialog structure accordingly */
 	Xdialog.window = gtk_font_selection_dialog_new(Xdialog.title);
 	fontsel = GTK_FONT_SELECTION_DIALOG(Xdialog.window);
-	Xdialog.vbox = GTK_BOX(fontsel->main_vbox);
+	Xdialog.vbox = GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (fontsel)));
 
 	/* Set the backtitle */
 	set_backtitle(FALSE);
@@ -1811,7 +1802,7 @@ void create_fontsel(gchar *optarg)
                                             "abcdefghijklmnopqrstuvwxyz 0123456789");
 
 	/* If requested, add a check button into the fontsel action area */
-	set_check_button(fontsel->action_area);
+	set_check_button (gtk_dialog_get_action_area (GTK_DIALOG (fontsel)));
 
 	/* We must realize the widget before moving it and creating the buttons pixbufs */
 	gtk_widget_realize(Xdialog.window);
@@ -1820,7 +1811,7 @@ void create_fontsel(gchar *optarg)
 	set_window_size_and_placement();
 
 	/* Find the existing hbuttonbox pointer */
-	hbuttonbox = fontsel->action_area;
+	hbuttonbox = gtk_dialog_get_action_area (GTK_DIALOG (fontsel));
 
 	/* Remove the font selector buttons IOT put ours in place */
 	gtk_widget_destroy(fontsel->ok_button);
