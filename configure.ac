@@ -3,11 +3,12 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT([Xdialog],[2.6.5w])
 AM_INIT_AUTOMAKE([-Wall subdir-objects foreign silent-rules])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+m4_ifdef([AM_MAINTAINER_MODE], [AM_MAINTAINER_MODE])
 
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_PROG_AR
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
 
 AC_PROG_CC
@@ -22,7 +23,7 @@ esac],[])
 if test "x$enable_gtk3" = "xyes" ; then
   gtk_modules="gtk+-3.0 >= 3.0.0"
 else
-  gtk_modules="gtk+-2.0 >= 2.18.0"
+  gtk_modules="gtk+-2.0 >= 2.14.0"
 fi
 PKG_CHECK_MODULES(GTK, [$gtk_modules])
 AC_SUBST(GTK_CFLAGS)
