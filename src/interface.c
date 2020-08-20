@@ -1683,14 +1683,11 @@ void create_filesel(gchar *optarg, gboolean dsel_flag)
 
 void create_colorsel(gchar *optarg, gdouble *colors)
 {
-#if GTK_MAJOR_VERSION == 2
 	GtkColorSelectionDialog *colorsel_dlg;
 	GtkColorSelection *colorsel;
 	GtkWidget *box, * label;
-	GtkWidget *hbuttonbox;
-	GtkWidget *button;
+	GtkWidget * ok_button, * cancel_button, * help_button;
 	GdkColor gcolor;
-	gboolean flag;
 
 	font_init();
 
@@ -1707,12 +1704,9 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	gcolor.blue  = colors[2] * 256;
 	gtk_color_selection_set_current_color (colorsel, &gcolor);
 
-	//gtk_color_selection_set_has_opacity_control (colorsel, TRUE);
 	gtk_color_selection_set_has_palette (colorsel, TRUE);
 
-	/* We must realize the widget before moving it and creating the icon and
-           buttons pixbufs...
-        */
+	/* We must realize the widget before moving it and creating the icon and buttons pixbufs... */
 	gtk_widget_realize(Xdialog.window);
 
 	/* Set the text */
@@ -1729,46 +1723,34 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	/* Set the window size and placement policy */
 	set_window_size_and_placement();
 
-	/* Find the existing hbuttonbox pointer */
-	g_object_get (colorsel_dlg, "ok-button", &button, NULL);
-	hbuttonbox = gtk_widget_get_parent (button);
+	g_object_get (colorsel_dlg, "ok-button", &ok_button, NULL);
+	g_object_get (colorsel_dlg, "cancel-button", &cancel_button, NULL);
+	g_object_get (colorsel_dlg, "help-button", &help_button, NULL);
+	if (Xdialog.default_no)
+		gtk_widget_grab_focus(cancel_button);
 
-	/* Remove the colour selector buttons IOT put ours in place */
-	gtk_widget_destroy(colorsel_dlg->ok_button);
-	gtk_widget_destroy(colorsel_dlg->cancel_button);
-	gtk_widget_destroy(colorsel_dlg->help_button);
-
-	/* Setup our own buttons */
-	if (Xdialog.wizard)
-		set_button(PREVIOUS , hbuttonbox, 3, FALSE);
-	else {
-		button = set_button(OK, hbuttonbox, 0, flag = !Xdialog.default_no);
-		if (flag)
-			gtk_widget_grab_focus(button);
-		colorsel_dlg->ok_button = button;
+	if (Xdialog.ok_label && *Xdialog.ok_label) {
+		gtk_button_set_label (GTK_BUTTON (ok_button), Xdialog.ok_label);
 	}
-	if (Xdialog.cancel_button) {
-		button = set_button(CANCEL, hbuttonbox, 1,
-				    flag = Xdialog.default_no && !Xdialog.wizard);
-		if (flag)
-			gtk_widget_grab_focus(button);
-		colorsel_dlg->cancel_button = button;
+	if (Xdialog.cancel_label && *Xdialog.cancel_label) {
+		gtk_button_set_label (GTK_BUTTON (cancel_button), Xdialog.cancel_label);
 	}
-	if (Xdialog.wizard) {
-		button = set_button(NEXT, hbuttonbox, 0, TRUE);
-		gtk_widget_grab_focus(button);
-		colorsel_dlg->ok_button = button;
-	}
-	if (Xdialog.help)
-		set_button(HELP, hbuttonbox, 2, FALSE);
 
 	/* Setup callbacks */
 	g_signal_connect (G_OBJECT(Xdialog.window), "destroy",
-			   G_CALLBACK(destroy_event), NULL);
+	                  G_CALLBACK(destroy_event), NULL);
 	g_signal_connect (G_OBJECT(Xdialog.window), "delete_event",
-			   G_CALLBACK(delete_event), NULL);
-	g_signal_connect (G_OBJECT(colorsel_dlg->ok_button), "clicked",
-			   G_CALLBACK(colorsel_exit), G_OBJECT(colorsel));
+	                  G_CALLBACK(delete_event), NULL);
+	g_signal_connect (G_OBJECT(ok_button), "clicked",
+	                  G_CALLBACK(colorsel_exit), G_OBJECT(colorsel));
+	g_signal_connect (G_OBJECT(cancel_button), "clicked",
+	                  G_CALLBACK(exit_cancel), NULL);
+	if (Xdialog.help) {
+		g_signal_connect (G_OBJECT(help_button), "clicked",
+		                  G_CALLBACK(exit_help), NULL);
+	} else {
+		gtk_widget_destroy (help_button);
+	}
 
 	/* Beep if requested */
 	if (Xdialog.beep & BEEP_BEFORE && Xdialog.exit_code != 2)
@@ -1778,7 +1760,6 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	Xdialog.exit_code = 255;
 
 	set_timeout();
-#endif
 }
 
 
