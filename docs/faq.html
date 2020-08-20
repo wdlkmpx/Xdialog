@@ -17,8 +17,7 @@
 <hr>
 <h2>FAQ contents:</h2>
 <ol>
-<li><a href="#Q01">Can I use Xdialog from a Perl script&nbsp;?</a>
-<li><a href="#Q02">How to recover the output of Xdialog in the Perl script then&nbsp;?</a>
+<li><a href="#Q02">How to recover the output of Xdialog in the Perl script?</a>
 <li><a href="#Q03">How to make Xdialog windows to appear at a given position (in absolute coordinates) on the screen&nbsp;?</a>
 <li><a href="#Q04">What are the ways to customize Xdialog windows look for a given script&nbsp;?</a>
 <li><a href="#Q05">How could I make the printer used by Xdialog user-dependant&nbsp;?</a>
@@ -27,15 +26,11 @@
 <li><a href="#Q08">How to select hidden files/directories with the file/directory selector&nbsp;?</a>
 <li><a href="#Q09">How to build dynamically a menu using Xdialog&nbsp;?</a>
 <li><a href="#Q10">I just compiled Xdialog but I sometimes get core dumps or segfaults with some menus: what's wrong with it&nbsp;?</a>
-<li><a href="#Q11">Why am I getting Gtk/Gdk/Glib messages mixed up with the results returned by Xdialog&nbsp;?&nbsp; Can I prevent that to happen&nbsp;?</a>
+<li><a href="#Q11">Why am I getting Gtk/Gdk/Glib messages mixed up with the results returned by Xdialog&nbsp;?&nbsp; Can I prevent that from happening?</a>
 </ol>
 <hr>
 <ol>
-<h2><li><a name="Q01">Can I use Xdialog from a Perl script&nbsp;?</a></h2>
-<p align="justify">Yes, in fact you can use Xdialog from any scripting language supporting external command calls.
-<br>&nbsp;
-<hr>
-<h2><li><a name="Q02">How to recover the output of Xdialog in the Perl script then&nbsp;?</a></h2>
+<h2><li><a name="Q02">How to recover the output of Xdialog in the Perl script?</a></h2>
 <p align="justify">I found three ways (but there are perhaps more; I'm not a Perl guru !):
 <p align="justify">a.- Using the "system" command (not the best way IMHO):
 <p align="justify">Just redirect the Xdialog output into a temp file, then use the "open" command to read the result, put it in a table and use it (here just printing it):
@@ -71,7 +66,7 @@ system("rm -f /tmp/my_temp_file");
 <hr>
 <h2><li><a name="Q03">How to make Xdialog windows to appear at a given position (in absolute coordinates) on the screen&nbsp;?</a></h2>
 <p align="justify">There are two ways but the result is not guaranteed as some window managers will simply ignore or override the GTK+ placement requirements and place the windows where they feel like.
-<p align="justify">a.- As of v2.0.0, Xdialog takes into account the origin coordinates given into a &quot;-geometry&quot;-like parameter; e.g. passing 240x120+150+80 as a size parameter to Xdialog will place its window (which size will be 240x120 pixels) at Xorg=150 and Yorg=80. In this example, you may as well let Xdialog auto-size by passing 0x0+150+80 instead. E.g;:
+<p align="justify">Xdialog takes into account the origin coordinates given into a &quot;-geometry&quot;-like parameter; e.g. passing 240x120+150+80 as a size parameter to Xdialog will place its window (which size will be 240x120 pixels) at Xorg=150 and Yorg=80. In this example, you may as well let Xdialog auto-size by passing 0x0+150+80 instead. E.g;:
 <pre>
 Xdialog --title ppp.log --tailbox /var/log/ppp.log 0x0+150+80
 </pre>
@@ -87,9 +82,9 @@ Xdialog --wmclass ppp_log_tailbox --title ppp.log --auto-placement \
 <p>a.- Windows decorations:
 <p align="justify">Through <a href="common.html#WMCLASS">--wmclass</a> option provided your window manager makes use of the wmclass name of the windows so to decorate them differently. The method is the same as in §3 (just use the Xdialog <a href="common.html#WMCLASS">--wmclass</a> option and RTFM of your window manager; hints: &quot;winoptions&quot; editing for IceWM, window manager option menu use for sawfish, &quot;.Xdefaults&quot; editing for twm/fvwm, etc...).
 <p>b.- GTK+ themes:
-<p align="justify">As of v1.4.6, Xdialog accepts a new <a href="common.html#RCFILE">--rc-file</a> option. Thanks to this feature Xdialog can be instructed to use a given GTK+ theme (which may therefore be different from the theme currently in use).
+<p align="justify">Xdialog accepts a new <a href="common.html#RCFILE">--rc-file</a> option. Thanks to this feature Xdialog can be instructed to use a given GTK+ theme (which may therefore be different from the theme currently in use).
 <p>c.- User defined icons:
-<p align="justify">As of v1.4.6, Xdialog accepts the new <a href="transient.html#ICON">--icon</a> option that will make a user defined icon (in XPM format only) to appear on the left of the <a href="syntax.html#TEXT">&lt;text&gt;</a> (for the Xdialog box options using this parameter, the box options without a <a href="syntax.html#TEXT">&lt;text&gt;</a> parameter in their syntax are not taking the <a href="transient.html#ICON">--icon</a> option into account).
+<p align="justify">Xdialog accepts the new <a href="transient.html#ICON">--icon</a> option that will make a user defined icon to appear on the left of the <a href="syntax.html#TEXT">&lt;text&gt;</a> (for the Xdialog box options using this parameter, the box options without a <a href="syntax.html#TEXT">&lt;text&gt;</a> parameter in their syntax are not taking the <a href="transient.html#ICON">--icon</a> option into account).
 <br>&nbsp;
 <hr>
 <h2><li><a name="Q05">How could I make the printer used by Xdialog user-dependant&nbsp;?</a></h2>
@@ -147,8 +142,8 @@ Xdialog --fselect "/home/foo/.*" 0 0
 <br>&nbsp;
 </ul>
 <hr>
-<h2><li><a name="Q11">Why</a> am I getting Gtk/Gdk/Glib messages mixed up with the results returned by Xdialog&nbsp;?&nbsp; Can I prevent that to happen&nbsp;?</h2>
-<p align="justify">Because your GTK+ setup is badly configured... Most probably, you are lacking some fonts for your locale and/or your GTK theme is buggy... You should find out and fix it. This is <b>not</b> a Xdialog bug, please do not report it as such&nbsp;!&nbsp; For convenience and as a quick hack (to let you the time to fix your system later and yet let you use Xdialog), I adopted in v2.2.0 a slightly modified version of Debian's hack for v2.0.6: by setting the XDIALOG_NO_GMSGS environment variable to "TRUE", (or "1"), you may disable <u>all</u> messages sent by GTK/GDK/GLIB. Note, yet, that GNOME may still send such messages (including on stdout), and I did not find any way to divert them so far...
+<h2><li><a name="Q11">Why</a> am I getting Gtk/Gdk/Glib messages mixed up with the results returned by Xdialog&nbsp;?&nbsp; Can I prevent that from happening?</h2>
+<p align="justify">Most probably, you are lacking some fonts for your locale and/or your GTK theme is buggy... You should find out and fix it. This is <b>not</b> a Xdialog bug, please do not report it as such&nbsp;!&nbsp; For convenience and as a quick hack (to let you the time to fix your system later and yet let you use Xdialog). By setting the XDIALOG_NO_GMSGS environment variable to "TRUE", (or "1"), you may disable <u>all</u> messages sent by GTK/GDK/GLIB. Note, yet, that GNOME may still send such messages (including on stdout)..
 <br>&nbsp;
 <hr>
 <table border=0 width="100%"><tr>
