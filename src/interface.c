@@ -1765,31 +1765,28 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 
 void create_fontsel(gchar *optarg)
 {
-#if GTK_MAJOR_VERSION == 2
-	GtkFontSelectionDialog *fontsel;
-	GtkWidget *hbuttonbox;
-	GtkWidget *button;
-	gboolean flag;
+	GtkFontSelectionDialog *fontsel_dlg;
+	GtkFontSelection * fontsel;
+	GtkWidget * ok_button, * cancel_button;
 
 	font_init();
-
 	parse_rc_file();
 
 	/* Create a font selector and update Xdialog structure accordingly */
-	Xdialog.window = gtk_font_selection_dialog_new(Xdialog.title);
-	fontsel = GTK_FONT_SELECTION_DIALOG(Xdialog.window);
-	Xdialog.vbox = GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (fontsel)));
+	fontsel_dlg = GTK_FONT_SELECTION_DIALOG (gtk_font_selection_dialog_new (Xdialog.title));
+	fontsel = GTK_FONT_SELECTION (gtk_font_selection_dialog_get_font_selection (fontsel_dlg));
+	Xdialog.vbox = GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (fontsel_dlg)));
+	Xdialog.window = GTK_WIDGET (fontsel_dlg);
 
 	/* Set the backtitle */
 	set_backtitle(FALSE);
 
 	/* Set the default font name */
-	gtk_font_selection_set_font_name(GTK_FONT_SELECTION(fontsel->fontsel), optarg);
-	gtk_font_selection_set_preview_text(GTK_FONT_SELECTION(fontsel->fontsel),
-                                            "abcdefghijklmnopqrstuvwxyz 0123456789");
+	gtk_font_selection_set_font_name (fontsel, optarg);
+	gtk_font_selection_set_preview_text(fontsel, "abcdefghijklmnopqrstuvwxyz 0123456789");
 
 	/* If requested, add a check button into the fontsel action area */
-	set_check_button (gtk_dialog_get_action_area (GTK_DIALOG (fontsel)));
+	set_check_button (gtk_dialog_get_action_area (GTK_DIALOG (fontsel_dlg)));
 
 	/* We must realize the widget before moving it and creating the buttons pixbufs */
 	gtk_widget_realize(Xdialog.window);
@@ -1797,45 +1794,30 @@ void create_fontsel(gchar *optarg)
 	/* Set the window size and placement policy */
 	set_window_size_and_placement();
 
-	/* Find the existing hbuttonbox pointer */
-	hbuttonbox = gtk_dialog_get_action_area (GTK_DIALOG (fontsel));
+	ok_button = gtk_font_selection_dialog_get_ok_button (fontsel_dlg);
+	cancel_button = gtk_font_selection_dialog_get_cancel_button (fontsel_dlg);
+	if (Xdialog.default_no)
+		gtk_widget_grab_focus(cancel_button);
 
-	/* Remove the font selector buttons IOT put ours in place */
-	gtk_widget_destroy(fontsel->ok_button);
-	gtk_widget_destroy(fontsel->cancel_button);
-	gtk_widget_destroy(fontsel->apply_button);
-
-	/* Setup our own buttons */
-	if (Xdialog.wizard)
-		set_button(PREVIOUS , hbuttonbox, 3, FALSE);
-	else {
-		button = set_button(OK, hbuttonbox, 0, flag = !Xdialog.default_no);
-		if (flag)
-			gtk_widget_grab_focus(button);
-		fontsel->ok_button = button;
+	if (Xdialog.ok_label && *Xdialog.ok_label) {
+		gtk_button_set_label (GTK_BUTTON (ok_button), Xdialog.ok_label);
 	}
-	if (Xdialog.cancel_button) {
-		button = set_button(CANCEL, hbuttonbox, 1,
-				    flag = Xdialog.default_no && !Xdialog.wizard);
-		if (flag)
-			gtk_widget_grab_focus(button);
-		fontsel->cancel_button = button;
+	if (Xdialog.cancel_label && *Xdialog.cancel_label) {
+		gtk_button_set_label (GTK_BUTTON (cancel_button), Xdialog.cancel_label);
 	}
-	if (Xdialog.wizard) {
-		button = set_button(NEXT, hbuttonbox, 0, TRUE);
-		gtk_widget_grab_focus(button);
-		fontsel->ok_button = button;
-	}
-	if (Xdialog.help)
-		set_button(HELP, hbuttonbox, 2, FALSE);
+#if GTK_MAJOR_VERSION == 2
+	gtk_widget_destroy (fontsel_dlg->apply_button);
+#endif
 
 	/* Setup callbacks */
 	g_signal_connect (G_OBJECT(Xdialog.window), "destroy",
-			   G_CALLBACK(destroy_event), NULL);
+	                  G_CALLBACK(destroy_event), NULL);
 	g_signal_connect (G_OBJECT(Xdialog.window), "delete_event",
-			   G_CALLBACK(delete_event), NULL);
-	g_signal_connect (G_OBJECT(fontsel->ok_button),
-			   "clicked", G_CALLBACK(fontsel_exit), fontsel);
+	                  G_CALLBACK(delete_event), NULL);
+	g_signal_connect (G_OBJECT(ok_button),
+	                  "clicked", G_CALLBACK(fontsel_exit), fontsel_dlg);
+	g_signal_connect (G_OBJECT(cancel_button),
+	                  "clicked", G_CALLBACK(exit_cancel), fontsel_dlg);
 
 	/* Beep if requested */
 	if (Xdialog.beep & BEEP_BEFORE && Xdialog.exit_code != 2)
@@ -1845,7 +1827,6 @@ void create_fontsel(gchar *optarg)
 	Xdialog.exit_code = 255;
 
 	set_timeout();
-#endif
 }
 
 

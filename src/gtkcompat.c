@@ -244,28 +244,3 @@ gtk_menu_item_get_label (GtkMenuItem *menu_item)
 
 #endif
 
-
-/* ================================================== */
-/*                   GTK < 2.14                      */
-/* ================================================== */
-
-#if ! GTK_CHECK_VERSION (2, 14, 0)
-
-GtkWidget * gtk_dialog_get_action_area (GtkDialog *dialog) {
-	return (dialog->action_area);
-}
-
-GtkWidget * gtk_dialog_get_content_area (GtkDialog *dialog) {
-	return (dialog->vbox);
-}
-
-GdkWindow * gtk_widget_get_window (GtkWidget *widget) {
-	return (widget->window);
-}
-
-GtkWidget * gtk_window_get_default_widget (GtkWindow *window) {
-	return (window->default_widget);
-}
-
-#endif
-

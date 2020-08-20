@@ -132,6 +132,7 @@ typedef struct _GtkComboBoxPrivate GtkComboBoxTextPrivate;
 #if ! GTK_CHECK_VERSION (2, 22, 0)
 gboolean gtk_window_has_group (GtkWindow *window);
 GtkWidget * gtk_window_group_get_current_grab (GtkWindowGroup *window_group);
+#define gtk_font_selection_dialog_get_font_selection(fsd)(GTK_FONT_SELECTION_DIALOG(fsd)->fontsel)
 #endif
 
 
@@ -182,10 +183,10 @@ const gchar * gtk_menu_item_get_label (GtkMenuItem *menu_item);
 
 // GTK < 2.14
 #if ! GTK_CHECK_VERSION (2, 14, 0)
-GtkWidget * gtk_dialog_get_action_area (GtkDialog *dialog);
-GtkWidget * gtk_dialog_get_content_area (GtkDialog *dialog);
-GdkWindow * gtk_widget_get_window (GtkWidget *widget);
-GtkWidget * gtk_window_get_default_widget (GtkWindow *window);
+#define gtk_dialog_get_action_area(dialog)    (GTK_DIALOG(dialog)->action_area)
+#define gtk_dialog_get_content_area(dialog)   (GTK_DIALOG(dialog)->vbox)
+#define gtk_widget_get_window(widget)         (GTK_WIDGET(widget)->window)
+#define gtk_window_get_default_widget(window) (GTK_WINDOW(window)->default_widget)
 #endif
 
 
