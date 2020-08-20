@@ -193,7 +193,6 @@ static void open_window(void)
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(window), vbox);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
-	gtk_widget_show(vbox);
 	Xdialog.vbox = GTK_BOX(vbox);
 
 	gtk_widget_realize(Xdialog.window);
@@ -216,7 +215,6 @@ static GtkWidget *set_separator(gboolean from_start)
 		gtk_box_pack_start(Xdialog.vbox, separator, FALSE, TRUE, ymult/3);
 	else
 		gtk_box_pack_end(Xdialog.vbox, separator, FALSE, TRUE, ymult/3);
-	gtk_widget_show(separator);
 
 	return separator;
 }
@@ -244,8 +242,6 @@ static void set_backtitle(gboolean sep_flag)
 	gtk_box_reorder_child(Xdialog.vbox, hbox, 0);
 	label = gtk_label_new(backtitle);
 	gtk_container_add(GTK_CONTAINER(hbox), label);
-	gtk_widget_show(hbox);
-	gtk_widget_show(label);
 	if (sep_flag) {
 		separator = set_separator(TRUE);
 		gtk_box_reorder_child(Xdialog.vbox, separator, 1);
@@ -270,7 +266,6 @@ static GtkWidget *set_label(gchar *label_text, gboolean expand)
 			icon = gtk_image_new_from_pixbuf (pixbuf);
 			g_object_unref(pixbuf);
 			gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 2);
-			gtk_widget_show(icon);
 			GtkRequisition requisition;
 			gtk_widget_get_requisition (icon, &requisition);
 			icon_width = requisition.width + 4;
@@ -290,9 +285,6 @@ static GtkWidget *set_label(gchar *label_text, gboolean expand)
 	gtk_label_set_justify(GTK_LABEL(label), Xdialog.justify);
 
 	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, ymult/3);
-
-	gtk_widget_show(hbox);
-	gtk_widget_show(label);
 
 	return label;
 }
@@ -322,7 +314,6 @@ static GtkWidget *set_secondary_label(gchar *label_text, gboolean expand)
 	}
 
 	gtk_box_pack_start(Xdialog.vbox, label, expand, TRUE, ymult/3);
-	gtk_widget_show(label);
 
 	return label;
 }
@@ -334,8 +325,6 @@ static GtkWidget *set_hbuttonbox(void)
 	gtk_box_pack_end(Xdialog.vbox, hbuttonbox, FALSE, FALSE, ymult/4);
  	gtk_button_box_set_layout (GTK_BUTTON_BOX(hbuttonbox), GTK_BUTTONBOX_END);
  	gtk_box_set_spacing (GTK_BOX (hbuttonbox), 7);
-	gtk_widget_show(hbuttonbox);
-
 	return hbuttonbox;
 }
 
@@ -436,8 +425,6 @@ static GtkWidget *set_button(gchar *default_text,
 		gtk_widget_grab_default(button);
 	}
 
-	gtk_widget_show(button);
-
 	return button;
 }
 
@@ -456,14 +443,12 @@ static void set_check_button(GtkWidget *box)
 		set_separator(FALSE);
 		hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 		gtk_box_pack_end(Xdialog.vbox, hbox, FALSE, FALSE, 0);
-		gtk_widget_show(hbox);
 		set_separator(FALSE);
 	} else
 		hbox = box;
 
 	button = gtk_check_button_new_with_label(check_label);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
-	gtk_widget_show(button);
 
 	if (Xdialog.checked)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
@@ -508,7 +493,6 @@ static GtkWidget *set_scrollable_text(void)
 	GtkWidget *scrollwin;
 
 	scrollwin = gtk_scrolled_window_new(NULL, NULL);
-	gtk_widget_show (scrollwin);
 	gtk_box_pack_start (GTK_BOX(Xdialog.vbox), scrollwin, TRUE, TRUE, 0);
 
 	text = gtk_text_view_new();
@@ -517,7 +501,6 @@ static GtkWidget *set_scrollable_text(void)
 		gtk_widget_modify_font(text, fixed_pango_font);
 	}
 
-	gtk_widget_show(text);
 	gtk_container_add(GTK_CONTAINER (scrollwin), text);
 	return text;
 }
@@ -532,7 +515,6 @@ static GtkWidget *set_scrolled_window(GtkBox *box, gint border_width, gint xsize
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_box_pack_start(box, scrolled_window, TRUE, TRUE, 0);
-	gtk_widget_show(scrolled_window);
 
 	if (Xdialog.list_height > 0)
 		gtk_widget_set_size_request(scrolled_window, xsize > 0 ? xsize*xmult : -1,
@@ -552,7 +534,6 @@ static GtkWidget *set_scrolled_list(GtkWidget *box, gint xsize, gint list_size,
 	GtkWidget *list;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
-	//GtkTreeSelection* selection;
 
 	scrolled_window = set_scrolled_window(GTK_BOX(box), 0, xsize,
 		list_size, spacing);
@@ -565,12 +546,6 @@ static GtkWidget *set_scrolled_list(GtkWidget *box, gint xsize, gint list_size,
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 
-	//selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
-	/* TODO: This seems to screw things up. At the moment it is not important
-	   to have multiple selections */
-	/* gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE); */
-
-	gtk_widget_show(list);
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window),
 		list);
 
@@ -586,7 +561,6 @@ static GtkWidget *set_horizontal_slider(GtkBox *box, gint deflt, gint min, gint 
 
 	align = gtk_alignment_new(0.5, 0.5, 0.8, 0);
 	gtk_box_pack_start(box, align, FALSE, FALSE, 5);
-	gtk_widget_show(align);
 
 	/* Create an adjusment object to hold the range of the scale */
 	slider = GTK_ADJUSTMENT (gtk_adjustment_new(deflt, min, max, 1, 1, 0));
@@ -594,7 +568,6 @@ static GtkWidget *set_horizontal_slider(GtkBox *box, gint deflt, gint min, gint 
  	hscale = gtk_scale_new (GTK_ORIENTATION_HORIZONTAL, adj);
 	gtk_scale_set_digits(GTK_SCALE(hscale), 0);
 	gtk_container_add(GTK_CONTAINER(align), hscale);
-	gtk_widget_show(hscale);
 
 	return ((GtkWidget *) slider);
 }
@@ -613,7 +586,6 @@ static GtkWidget *set_spin_button(GtkWidget *hbox, gint min, gint max, gint defl
 	gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(spin), TRUE);
 	gtk_widget_set_size_request(spin, (digits+4)*xmult, -1);
 	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
-	gtk_widget_show(spin);
 	if (separator != NULL && strlen(separator) != 0) {
 		label = gtk_label_new(separator);
 		if (align_left) {
@@ -621,7 +593,6 @@ static GtkWidget *set_spin_button(GtkWidget *hbox, gint min, gint max, gint defl
 			gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
 		}
 		gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, xmult);
-		gtk_widget_show(label);
 	}
 
 	return spin;
@@ -730,12 +701,10 @@ void create_gauge(gchar *optarg, gint percent)
 	Xdialog.widget2 = set_label(optarg, TRUE);
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_pack_start (Xdialog.vbox, hbox, FALSE, TRUE, 0);
-	gtk_widget_show (hbox);
 
 	/* Set up the progress bar */
 	Xdialog.widget1 = gtk_progress_bar_new ();
 	gtk_box_pack_start (GTK_BOX (hbox), Xdialog.widget1, TRUE, TRUE, 10);
-	gtk_widget_show(Xdialog.widget1);
 
 	// set initial %
 	char txt[20];
@@ -776,12 +745,10 @@ void create_progress(gchar *optarg, gint leading, gint maxdots)
 	label = set_label(Xdialog.label_text, TRUE);
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_pack_start (Xdialog.vbox, hbox, FALSE, TRUE, 0);
-	gtk_widget_show (hbox);
 
 	/* Set up the progress bar */
 	Xdialog.widget1 = gtk_progress_bar_new ();
 	gtk_box_pack_start (GTK_BOX (hbox), Xdialog.widget1, TRUE, TRUE, 10);
-	gtk_widget_show(Xdialog.widget1);
 
 	// set initial %
 	gtk_progress_bar_set_text (GTK_PROGRESS_BAR (Xdialog.widget1), "0%");
@@ -933,7 +900,6 @@ void create_logbox(gchar *optarg)
 
 	g_signal_connect (G_OBJECT(Xdialog.widget1), "key_press_event",
 	                  G_CALLBACK(tailbox_keypress), NULL);
-	gtk_widget_show(Xdialog.widget1);
 	gtk_widget_grab_focus(Xdialog.widget1);
 
 	scrolled_window = set_scrolled_window(Xdialog.vbox, xmult/2, xsize, 12, 2);
@@ -1088,7 +1054,6 @@ void create_inputbox(gchar *optarg, gchar *options[], gint entries)
 	gtk_entry_set_text(entry, deftext);
 	gtk_box_pack_start(Xdialog.vbox, Xdialog.widget1, TRUE, TRUE, 0);
 	gtk_widget_grab_focus(Xdialog.widget1);
-	gtk_widget_show(Xdialog.widget1);
 
 	if (entries > 1) {
 		set_secondary_label(options[2], FALSE);
@@ -1097,7 +1062,6 @@ void create_inputbox(gchar *optarg, gchar *options[], gint entries)
 		entry = GTK_ENTRY(Xdialog.widget2);
 		gtk_entry_set_text(entry, options[3]);
 		gtk_box_pack_start(Xdialog.vbox, Xdialog.widget2, TRUE, TRUE, 0);
-		gtk_widget_show(Xdialog.widget2);
 	} else
 		Xdialog.widget2 = NULL;
 
@@ -1108,7 +1072,6 @@ void create_inputbox(gchar *optarg, gchar *options[], gint entries)
 		entry = GTK_ENTRY(Xdialog.widget3);
 		gtk_entry_set_text(entry, options[5]);
 		gtk_box_pack_start(Xdialog.vbox, Xdialog.widget3, TRUE, TRUE, 0);
-		gtk_widget_show(Xdialog.widget3);
 	} else
 		Xdialog.widget3 = NULL;
 
@@ -1116,7 +1079,6 @@ void create_inputbox(gchar *optarg, gchar *options[], gint entries)
             (Xdialog.passwd > 10 && Xdialog.passwd <= entries + 10)) {
 		hide_button = gtk_check_button_new_with_label(HIDE_TYPING);
 		gtk_box_pack_start(Xdialog.vbox, hide_button, TRUE, TRUE, 0);
-		gtk_widget_show(hide_button);
 		g_signal_connect (G_OBJECT(hide_button), "toggled",
 				   G_CALLBACK(hide_passwords), NULL);
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hide_button), TRUE);
@@ -1150,7 +1112,6 @@ void create_combobox(gchar *optarg, gchar *options[], gint list_size)
 	Xdialog.widget2 = Xdialog.widget3 = NULL;
 	gtk_box_pack_start(Xdialog.vbox, combo, TRUE, TRUE, 0);
 	gtk_widget_grab_focus(Xdialog.widget1);
-	gtk_widget_show(combo);
 
 	/* Set the popdown strings */
 	for (i = 0; i < list_size; i++) {
@@ -1249,14 +1210,12 @@ void create_spinbox(gchar *optarg, gchar *options[], gint spins)
 
 	frame = gtk_frame_new(NULL);
 	gtk_box_pack_start(Xdialog.vbox, frame, TRUE, TRUE, ymult/2);
-	gtk_widget_show(frame);
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_set_homogeneous (GTK_BOX(hbox), TRUE);
 
 	gtk_container_add(GTK_CONTAINER(frame), hbox);
 	gtk_container_set_border_width(GTK_CONTAINER(hbox), ymult);
-	gtk_widget_show(hbox);
 
 	Xdialog.widget1 = set_spin_button(hbox, atoi(options[0]), atoi(options[1]), atoi(options[2]),
 					  strlen(options[1]), options[3], TRUE);
@@ -1306,7 +1265,6 @@ void create_itemlist(gchar *optarg, gint type, gchar *options[], gint list_size)
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, xmult);
 	gtk_container_set_border_width(GTK_CONTAINER(vbox), xmult);
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window), vbox);
-	gtk_widget_show(vbox);
 
 	button_ok = set_all_buttons(FALSE, TRUE);
 	g_signal_connect (G_OBJECT(button_ok), "clicked", G_CALLBACK(print_items), NULL);
@@ -1327,7 +1285,6 @@ void create_itemlist(gchar *optarg, gint type, gchar *options[], gint list_size)
 			radio = GTK_RADIO_BUTTON(item);
 		}
 		gtk_box_pack_start(GTK_BOX(vbox), item, FALSE, FALSE, 0);
-		gtk_widget_show(item);
 
 		if (item_status(item, options[params*i+2], Xdialog.array[i].tag) == 1)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(item), TRUE);
@@ -1388,7 +1345,6 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 
 	/* Setup a hbox to hold the scrolled windows and the Add/Remove buttons */
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-	gtk_widget_show(hbox);
 	gtk_box_pack_start(Xdialog.vbox, hbox, TRUE, TRUE, ymult/3);
 
 	/* Setup the first list into a scrolled window */
@@ -1397,7 +1353,6 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 
 	/* Setup the Add/Remove buttons */
 	vbuttonbox = gtk_button_box_new (GTK_ORIENTATION_VERTICAL);
-	gtk_widget_show(vbuttonbox);
 	gtk_box_pack_start(GTK_BOX(hbox), vbuttonbox, FALSE, TRUE, 0);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(vbuttonbox), GTK_BUTTONBOX_SPREAD);
 	button_add = Xdialog.widget3 = set_button(ADD, vbuttonbox, -1, FALSE);
@@ -1517,7 +1472,6 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 				G_CALLBACK(on_menubox_treeview_row_activated_cb), NULL);
 
 	gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(treeview));
-	gtk_widget_show(GTK_WIDGET(treeview));
 
 	button_ok = set_all_buttons(FALSE, TRUE);
 	g_signal_connect (G_OBJECT(button_ok), "clicked",
@@ -1526,10 +1480,8 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 	if (Xdialog.tips == 1) {
 		hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 		gtk_box_pack_end(Xdialog.vbox, hbox, FALSE, FALSE, 0);
-		gtk_widget_show(hbox);
 		status_bar = Xdialog.widget1 = gtk_statusbar_new();
 		gtk_container_add(GTK_CONTAINER(hbox), status_bar);
-		gtk_widget_show(status_bar);
 		Xdialog.status_id = gtk_statusbar_get_context_id(GTK_STATUSBAR(status_bar), "tips");
 		gtk_statusbar_push(GTK_STATUSBAR(status_bar), Xdialog.status_id,
 				   Xdialog.array[0].tips);
@@ -1603,7 +1555,6 @@ void create_treeview(gchar *optarg, gchar *options[], gint list_size)
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(Xdialog.widget1), column);
 
-	gtk_widget_show(Xdialog.widget1);
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window), Xdialog.widget1);
 
 	/* Create and hookup the ok button */
@@ -1933,7 +1884,6 @@ void create_calendar(gchar *optarg, gint day, gint month, gint year)
 
 	Xdialog.widget1 = gtk_calendar_new();
 	gtk_box_pack_start(Xdialog.vbox, Xdialog.widget1, TRUE, TRUE, 5);
-	gtk_widget_show(Xdialog.widget1);
 
 	calendar = GTK_CALENDAR(Xdialog.widget1);
 	gtk_calendar_set_display_options(calendar, flags);
@@ -1969,12 +1919,10 @@ void create_timebox(gchar *optarg, gint hours, gint minutes, gint seconds)
 	frame = gtk_frame_new(TIME_FRAME_LABEL);
 	gtk_frame_set_label_align(GTK_FRAME(frame), 0.5, 0.5);
 	gtk_box_pack_start(Xdialog.vbox, frame, TRUE, TRUE, ymult);
-	gtk_widget_show(frame);
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_container_add(GTK_CONTAINER(frame), hbox);
 	gtk_container_set_border_width(GTK_CONTAINER(hbox), ymult);
-	gtk_widget_show(hbox);
 
 	Xdialog.widget1 = set_spin_button(hbox, 0, 23, hours, 2, ":",  FALSE);
 	Xdialog.widget2 = set_spin_button(hbox, 0, 59, minutes,  2, ":",  FALSE);

@@ -282,7 +282,7 @@ static void print_help_info(char *name, char *errmsg)
 	create_textbox("", FALSE);
 	text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(Xdialog.widget1));
 	gtk_text_buffer_insert_at_cursor(text_buffer, msg, strlen(msg));
-	gtk_widget_show(Xdialog.window);
+	gtk_widget_show_all (Xdialog.window);
 	gtk_main();
 
 	exit(255);
@@ -1202,7 +1202,7 @@ show_again:
 				continue;	/* don't try to open a window, skip to next option */
 		}
 		if (win) {
-			gtk_widget_show(Xdialog.window);
+			gtk_widget_show_all (Xdialog.window);
 			gtk_main();
 
 			switch (Xdialog.exit_code) {
@@ -1225,7 +1225,7 @@ show_again:
 					timeout_tmp = Xdialog.timeout;
 					Xdialog.timeout = 0;
 					create_msgbox(help_text, FALSE);
-					gtk_widget_show(Xdialog.window);
+					gtk_widget_show_all (Xdialog.window);
 					gtk_main();
 					if (Xdialog.exit_code != 0)
 						return Xdialog.exit_code;
