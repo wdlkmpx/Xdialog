@@ -998,6 +998,7 @@ gboolean filesel_exit(GtkWidget *filesel, gpointer client_data)
 	char *filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (client_data));
 	if (filename) {
 		fprintf(Xdialog.output, "%s\n", filename);
+		g_free (filename);
 	}
 	return exit_ok(NULL, NULL);
 }
