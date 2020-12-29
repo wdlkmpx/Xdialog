@@ -14,8 +14,7 @@ Xdialog_SOURCES = \
 	main.c \
 	interface.c interface.h \
 	callbacks.c callbacks.h \
-	support.c support.h \
-	gtkcompat.c gtkcompat.h
+	support.c support.h
 
 #LDADD = @LIBINTL@
 Xdialog_LDADD = $(LDADD) @GTK_LIBS@
