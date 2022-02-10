@@ -9,7 +9,6 @@ AM_CONFIG_HEADER(config.h)
 AC_CONFIG_MACRO_DIR([m4])
 
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
-LT_INIT
 
 AC_PROG_CC
 
