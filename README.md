@@ -9,3 +9,8 @@ Requirements
 Documentation
 ======
 see https://wdlkmpx.github.io/Xdialog/
+
+Bugs
+=====
+The <status> parameters are not taken into account by the treeview widget.
+
