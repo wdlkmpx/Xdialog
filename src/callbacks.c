@@ -405,60 +405,24 @@ static void vt_to_gdk_color(gint color, GdkColor **fgcolor, GdkColor **bgcolor)
 	static const GdkColor WHITE     = { 0, 0xffff, 0xffff, 0xffff };
 
 	switch (color) {
-		case 30:
-			*fgcolor = (GdkColor *) &BLACK;
-			break;
-		case 31:
-			*fgcolor = (GdkColor *) &RED;
-			break;
-		case 32:
-			*fgcolor = (GdkColor *) &GREEN;
-			break;
-		case 33:
-			*fgcolor = (GdkColor *) &YELLOW;
-			break;
-		case 34:
-			*fgcolor = (GdkColor *) &BLUE;
-			break;
-		case 35:
-			*fgcolor = (GdkColor *) &MAGENTA;
-			break;
-		case 36:
-			*fgcolor = (GdkColor *) &CYAN;
-			break;
-		case 37:
-			*fgcolor = (GdkColor *) &WHITE;
-			break;
-		case 38:
-			*fgcolor = NULL;
-			break;
-		case 40:
-			*bgcolor = (GdkColor *) &BLACK;
-			break;
-		case 41:
-			*bgcolor = (GdkColor *) &RED;
-			break;
-		case 42:
-			*bgcolor = (GdkColor *) &GREEN;
-			break;
-		case 43:
-			*bgcolor = (GdkColor *) &YELLOW;
-			break;
-		case 44:
-			*bgcolor = (GdkColor *) &BLUE;
-			break;
-		case 45:
-			*bgcolor = (GdkColor *) &MAGENTA;
-			break;
-		case 46:
-			*bgcolor = (GdkColor *) &CYAN;
-			break;
-		case 47:
-			*bgcolor = (GdkColor *) &WHITE;
-			break;
-		case 48:
-			*bgcolor = NULL;
-			break;
+		case 30: *fgcolor = (GdkColor *) &BLACK;  break;
+		case 31: *fgcolor = (GdkColor *) &RED;    break;
+		case 32: *fgcolor = (GdkColor *) &GREEN;  break;
+		case 33: *fgcolor = (GdkColor *) &YELLOW; break;
+		case 34: *fgcolor = (GdkColor *) &BLUE;   break;
+		case 35: *fgcolor = (GdkColor *) &MAGENTA; break;
+		case 36: *fgcolor = (GdkColor *) &CYAN;  break;
+		case 37: *fgcolor = (GdkColor *) &WHITE; break;
+		case 38: *fgcolor = NULL; break;
+		case 40: *bgcolor = (GdkColor *) &BLACK; break;
+		case 41: *bgcolor = (GdkColor *) &RED;   break;
+		case 42: *bgcolor = (GdkColor *) &GREEN; break;
+		case 43: *bgcolor = (GdkColor *) &YELLOW; break;
+		case 44: *bgcolor = (GdkColor *) &BLUE;   break;
+		case 45: *bgcolor = (GdkColor *) &MAGENTA;break;
+		case 46: *bgcolor = (GdkColor *) &CYAN;  break;
+		case 47: *bgcolor = (GdkColor *) &WHITE; break;
+		case 48: *bgcolor = NULL; break;
 	}
 }
 
