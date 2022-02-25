@@ -29,7 +29,6 @@ gboolean dialog_compat = FALSE;
 #define HELP_TEXT1 \
 "Xdialog v"VERSION" by Thierry Godefroy <xdialog@free.fr> (v1.0 was\n\
 written by Alfred at Cyberone Internet <alfred@cyberone.com.au>).\n\
-Xdialog home page available at: http://xdialog.dyns.net/\n\
 \n\
 Usage: "
 
