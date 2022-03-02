@@ -107,7 +107,7 @@ gboolean exit_cancel(gpointer object, gpointer data)
 
 gint exit_keypress(gpointer object, GdkEventKey *event, gpointer data)
 {
-	if (event->type == GDK_KEY_PRESS && (event->keyval == GDK_Escape)) {
+	if (event->type == GDK_KEY_PRESS && (event->keyval == GDK_KEY(Escape))) {
 		return exit_cancel(object, data);
 	}
 	return TRUE;
@@ -381,8 +381,8 @@ gboolean tailbox_timeout(gpointer data)
 gint tailbox_keypress(GtkWidget *text, GdkEventKey *event,
 		      gpointer data)
 {
-	if (event->type == GDK_KEY_PRESS && (event->keyval == GDK_Return ||
-					     event->keyval == GDK_KP_Enter)) {
+	if (event->type == GDK_KEY_PRESS &&
+    (event->keyval == GDK_KEY(Return) || event->keyval == GDK_KEY(KP_Enter))) {
 		if (Xdialog.default_no)
 			Xdialog.exit_code = 1;
 		else
@@ -565,8 +565,8 @@ gboolean inputbox_timeout(gpointer data)
 
 gint input_keypress(GtkWidget *entry, GdkEventKey *event, gpointer data)
 {
-	if (event->type == GDK_KEY_PRESS && (event->keyval == GDK_Return ||
-					     event->keyval == GDK_KP_Enter)) {
+	if (event->type == GDK_KEY_PRESS
+        && (event->keyval == GDK_KEY(Return) || event->keyval == GDK_KEY(KP_Enter))) {
 		if (Xdialog.default_no) {
 			Xdialog.exit_code = 1;
 		} else {
