@@ -1,6 +1,32 @@
 #!/bin/sh
+# --2inputsbox/--password/-left is not supported by dialog (ncurses)
 
-LOGIN1=`Xdialog	--stdout --separator "|" \
+DIALOG='Xdialog'
+if [ -x ./Xdialog ] ; then
+    DIALOG='./Xdialog'
+elif [ -x ../Xdialog ] ; then
+    DIALOG='../Xdialog'
+fi
+
+case $1 in
+    cli|-cli|--cli)
+        DIALOG='dialog'
+        echo "this is not compatible with (c)dialog [ncurses]"
+        exit 0
+        ;;
+    *dialog*)
+        if [ -x $1 ] ; then
+            DIALOG=$1
+            shift
+        fi
+        ;;
+esac
+
+echo "$DIALOG"
+
+#================================
+
+LOGIN1=`$DIALOG	--stdout --separator "|" \
 		--title "Login" --backtitle "System login" \
 		--icon ./dialog-error.png --left --password \
 		--2inputsbox "Restricted access, authorized users only !\nPlease login..." 0 0 \

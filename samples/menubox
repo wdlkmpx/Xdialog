@@ -1,7 +1,40 @@
 #!/bin/sh
-DIALOG=Xdialog
+
+DIALOG='Xdialog'
+if [ -x ./Xdialog ] ; then
+    DIALOG='./Xdialog'
+elif [ -x ../Xdialog ] ; then
+    DIALOG='../Xdialog'
+fi
+
+case $1 in
+    cli|-cli|--cli)
+        DIALOG='dialog'
+        shift
+        ;;
+    *dialog*)
+        if [ -x $1 ] ; then
+            DIALOG=$1
+            shift
+        fi
+        ;;
+esac
+
+echo "$DIALOG"
+
+#================================
+
+opts=
+
+case $0 in
+    *notags*)   opts="$opts --no-tags"   ;;
+    *itemhelp*) itemhelp='yes' ;;
+esac
+
+if [ "$itemhelp" = "" ] ; then
 
 $DIALOG --title "MENU BOX" \
+        --default-item "PCDOS" $opts \
         --menu "Hi, this is a menu box. You can use this to
 present a list of choices for the user to
 choose. If there are more items than can fit
@@ -13,7 +46,31 @@ Choose the OS you like:" 0 0 0 \
         "OS/2" "IBM OS/2" \
         "WIN NT" "Microsoft Windows NT" \
         "PCDOS"  "IBM PC DOS" \
-        "MSDOS"  "Microsoft DOS" 2> /tmp/menu.tmp.$$
+        "MSDOS"  "Microsoft DOS" \
+        ""  "no tag" \
+        ""  "no tag2" 2> /tmp/menu.tmp.$$
+        
+else
+
+$DIALOG --title "MENU BOX" \
+        --default-item "PCDOS" $opts \
+        --item-help \
+        --menu "Hi, this is a menu box. You can use this to
+present a list of choices for the user to
+choose. If there are more items than can fit
+on the screen, the menu will be scrolled.
+Try it now!\n
+Choose the OS you like:" 0 0 0 \
+        "Linux"  "The Great Unix Clone for 386/486" "help_linux" \
+        "NetBSD" "Another free Unix Clone for 386/486" "help_netbsd" \
+        "OS/2" "IBM OS/2" "help_os/2"\
+        "WIN NT" "Microsoft Windows NT" "help_winnt" \
+        "PCDOS"  "IBM PC DOS" "help_pcdos" \
+        "MSDOS"  "Microsoft DOS" "help_dos" \
+        ""  "no tag" "help_tag" \
+        ""  "no tag2" "help_tag2" 2> /tmp/menu.tmp.$$
+
+fi
 
 retval=$?
 

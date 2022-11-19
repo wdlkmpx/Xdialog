@@ -1,4 +1,30 @@
 #!/bin/sh
+# don't use --menubox, --menu is compatible with the curses dialog
+# --check "$CHECKER" is not supported by the ncurses dialog
+
+DIALOG='Xdialog'
+if [ -x ./Xdialog ] ; then
+    DIALOG='./Xdialog'
+elif [ -x ../Xdialog ] ; then
+    DIALOG='../Xdialog'
+fi
+
+case $1 in
+    cli|-cli|--cli)
+        DIALOG='dialog'
+        shift
+        ;;
+    *dialog*)
+        if [ -x $1 ] ; then
+            DIALOG=$1
+            shift
+        fi
+        ;;
+esac
+
+echo "$DIALOG"
+
+#================================
 
 TITLE="Screen saver"
 PROMPT="Please choose the mode:"
@@ -7,7 +33,7 @@ MENU=/tmp/menu.$$
 
 cat << EOF >$MENU
 #!/bin/sh
-CHOICE=\$(Xdialog --title "$TITLE" --stdout --no-tags --check "$CHECKER" --default-item "random" --menubox "$PROMPT" 0 0 7 \\
+CHOICE=\$($DIALOG --title "$TITLE" --stdout --no-tags --check "$CHECKER" --default-item "random" --menu "$PROMPT" 0 0 7 \\
 EOF
 xlock -help | awk --source '{ if (substr($1,1,1) != "-" && $1 != "where" && $1 != "" && $1 != "xlock" && $1 != "usage:") print $1 " " $1 " \\" }' >>$MENU
 cat << EOF2 >>$MENU

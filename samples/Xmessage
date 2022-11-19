@@ -1,4 +1,29 @@
 #!/bin/sh
+# this example doesn't work, needs fixing or it should be removed
+
+DIALOG='Xdialog'
+if [ -x ./Xdialog ] ; then
+    DIALOG='./Xdialog'
+elif [ -x ../Xdialog ] ; then
+    DIALOG='../Xdialog'
+fi
+
+case $1 in
+    cli|-cli|--cli)
+        DIALOG='dialog'
+        shift
+        ;;
+    *dialog*)
+        if [ -x $1 ] ; then
+            DIALOG=$1
+            shift
+        fi
+        ;;
+esac
+
+echo "$DIALOG"
+
+#================================
 
 # This is a sample wrapper allowing to emulate the "xmessage" utility by
 # using "Xdialog" in the closest possible way. Note that when the "-buttons"
@@ -109,10 +134,10 @@ if [ "$TIMEOUT" != "" ] ; then
 	# So first start Xdialog as an asynchronous process...
 	if [ "$FILE" = "" ] ; then
 		echo "$TEXT" | \
-		Xdialog --title "$TITLE" --wmclass "$WMCLASS" $PLACEMENT $FONT --no-cancel \
+		$DIALOG --title "$TITLE" --wmclass "$WMCLASS" $PLACEMENT $FONT --no-cancel \
 			--tailbox "-" $YSIZE $XSIZE &
 	else
-		Xdialog --title "$TITLE" --wmclass "$WMCLASS" $PLACEMENT $FONT --no-cancel \
+		$DIALOG --title "$TITLE" --wmclass "$WMCLASS" $PLACEMENT $FONT --no-cancel \
 			--textbox "$FILE" $YSIZE $XSIZE &
 	fi
 	# Get Xdialog PID and build the source for the awk command that
@@ -137,10 +162,10 @@ else
 	# No timeout, just start Xdialog synchronously then...
 	if [ "$FILE" = "" ] ; then
 		echo "$TEXT" | \
-		Xdialog --title "$TITLE" --wmclass "$WMCLASS" $PLACEMENT $FONT --no-cancel \
+		$DIALOG --title "$TITLE" --wmclass "$WMCLASS" $PLACEMENT $FONT --no-cancel \
 			--tailbox "-" $YSIZE $XSIZE
 	else
-		Xdialog --title "$TITLE" --wmclass "$WMCLASS" $PLACEMENT $FONT --no-cancel \
+		$DIALOG --title "$TITLE" --wmclass "$WMCLASS" $PLACEMENT $FONT --no-cancel \
 			--textbox "$FILE" $YSIZE $XSIZE
 	fi
 fi

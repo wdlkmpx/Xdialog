@@ -1,14 +1,102 @@
 #!/bin/sh
 
-result=`Xdialog --title "XDIALOG BUILDLIST" --backtitle "A user-built list" \
-		--stdout --separator "|" \
+DIALOG='Xdialog'
+if [ -x ./Xdialog ] ; then
+    DIALOG='./Xdialog'
+elif [ -x ../Xdialog ] ; then
+    DIALOG='../Xdialog'
+fi
+
+case $1 in
+    cli|-cli|--cli)
+        DIALOG='dialog'
+        shift
+        ;;
+    *dialog*)
+        if [ -x $1 ] ; then
+            DIALOG=$1
+            shift
+        fi
+        ;;
+esac
+
+echo "$DIALOG"
+
+#================================
+
+case $0 in
+    *itemhelp*) itemhelp=yes ;;
+esac
+
+if [ "$itemhelp" = "" ] ; then
+    result=`
+$DIALOG --title "XDIALOG BUILDLIST" \
+        --backtitle "A user-built list" \
+		--stdout \
+        --separator "|" \
 		--buildlist "hello, this is a --buildlist..." 0 0 0 \
-			    "1" "Item n° 1" "on" \
-			    "2" "Item n° 2" "off" \
-			    "3" "Item n° 3" "on" \
-			    "4" "Item n° 4" "on" \
-			    "5" "Item n° 5" "off" \
-			    "6" "Item n° 6" "on"`
+            "1" "Item n° 1" "on" \
+            "2" "Item n° 2" "off" \
+            "3" "Item n° 3" "on" \
+            "4" "Item n° 4" "on" \
+            "5" "Item n° 5" "off" \
+            "6" "Item n° 6" "on" \
+            "7" "Item n° 7" "on" \
+            "8" "Item n° 8" "on" \
+            "9" "Item n° 9" "on" \
+            "10" "Item n° 10" "on" \
+            "11" "Item n° 11" "on" \
+            "12" "Item n° 12" "on" \
+            "13" "Item n° 13" "on" \
+            "14" "Item n° 14" "on" \
+            "15" "Item n° 15" "on" \
+            "16" "Item n° 16" "on" \
+            "17" "Item n° 17" "on" \
+            "18" "Item n° 18" "on" \
+            "19" "Item n° 19" "on" \
+            "20" "Item n° 20" "on" \
+            "21" "Item n° 21" "on" \
+            "22" "Item n° 22" "off" \
+            "23" "Item n° 23" "off" \
+            "24" "Item n° 24" "off" \
+            "25" "Item n° 25" "unavailable" \
+        `
+
+else # --item-help
+    result=`
+$DIALOG --title "XDIALOG BUILDLIST" \
+        --backtitle "A user-built list" \
+		--stdout \
+        --separator "|" \
+        --item-help \
+		--buildlist "hello, this is a --buildlist..." 0 0 0 \
+            "1" "Item n° 1" "on" "help1" \
+            "2" "Item n° 2" "off" "help2" \
+            "3" "Item n° 3" "on" "help3" \
+            "4" "Item n° 4" "on" "help4" \
+            "5" "Item n° 5" "off" "help5" \
+            "6" "Item n° 6" "on" "help6" \
+            "7" "Item n° 7" "on" "help7" \
+            "8" "Item n° 8" "on" "help8" \
+            "9" "Item n° 9" "on" "help9" \
+            "10" "Item n° 10" "on" "help10" \
+            "11" "Item n° 11" "on" "help11" \
+            "12" "Item n° 12" "on" "help12" \
+            "13" "Item n° 13" "on" "help13" \
+            "14" "Item n° 14" "on" "help14" \
+            "15" "Item n° 15" "on" "help15" \
+            "16" "Item n° 16" "on" "help16" \
+            "17" "Item n° 17" "on" "help17" \
+            "18" "Item n° 18" "on" "help18" \
+            "19" "Item n° 19" "on" "help19" \
+            "20" "Item n° 20" "on" "help20" \
+            "21" "Item n° 21" "on" "help21" \
+            "22" "Item n° 22" "off" "help22" \
+            "23" "Item n° 23" "off" "help23" \
+            "24" "Item n° 24" "off" "help24" \
+            "25" "Item n° 25" "unavailable" "help25" \
+        `
+fi
 
 retval=$?
 case $retval in

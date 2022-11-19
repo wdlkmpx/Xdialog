@@ -1,8 +1,32 @@
 #!/bin/sh
+
+DIALOG='Xdialog'
+if [ -x ./Xdialog ] ; then
+    DIALOG='./Xdialog'
+elif [ -x ../Xdialog ] ; then
+    DIALOG='../Xdialog'
+fi
+
+case $1 in
+    cli|-cli|--cli)
+        DIALOG='dialog'
+        shift
+        ;;
+    *dialog*)
+        if [ -x $1 ] ; then
+            DIALOG=$1
+            shift
+        fi
+        ;;
+esac
+
+echo "$DIALOG"
+
+#================================
 #
 # A "more" replacement using Xdialog...
 
-size="0x0"
+size="0 0"
 
 #No Xdialog option as default
 opt=""
@@ -49,6 +73,11 @@ if [ "$input" != "-" ] && ! [ -f "$input" ] ; then
 	exit 1
 fi
 
+#--print ""
+
 # Finally, use a Xdialog textbox so to display the file/input stream.
-Xdialog --title Xmore --wmclass Xmore --backtitle "$backtitle" $opt \
-	--no-cancel --print "" --fixed-font --textbox "$input" "$size"
+set -x
+$DIALOG --title Xmore \
+        --wmclass Xmore --backtitle "$backtitle" $opt \
+        --no-cancel --fixed-font \
+        --textbox "$input" ${size}

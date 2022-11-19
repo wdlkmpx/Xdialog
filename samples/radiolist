@@ -1,8 +1,31 @@
 #!/bin/sh
-DIALOG=Xdialog
+
+DIALOG='Xdialog'
+if [ -x ./Xdialog ] ; then
+    DIALOG='./Xdialog'
+elif [ -x ../Xdialog ] ; then
+    DIALOG='../Xdialog'
+fi
+
+case $1 in
+    cli|-cli|--cli)
+        DIALOG='dialog'
+        shift
+        ;;
+    *dialog*)
+        if [ -x $1 ] ; then
+            DIALOG=$1
+            shift
+        fi
+        ;;
+esac
+
+echo "$DIALOG"
+
+#================================
 
 $DIALOG --backtitle "This is the \"backtitle\"" \
-	--title "RADIOLIST BOX" \
+        --title "RADIOLIST BOX" \
         --radiolist "Hi, this is a radiolist box. You can use this
 to make a choice from a list of items.
 If there are more items than can fit on the

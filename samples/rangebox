@@ -1,6 +1,30 @@
 #!/bin/sh
 
-VOLUME=`Xdialog 2>&1 --title "RANGE BOX" --rangebox "Please set the volume..." 0 0 0 12 5`
+DIALOG='Xdialog'
+if [ -x ./Xdialog ] ; then
+    DIALOG='./Xdialog'
+elif [ -x ../Xdialog ] ; then
+    DIALOG='../Xdialog'
+fi
+
+case $1 in
+    cli|-cli|--cli)
+        DIALOG='dialog'
+        shift
+        ;;
+    *dialog*)
+        if [ -x $1 ] ; then
+            DIALOG=$1
+            shift
+        fi
+        ;;
+esac
+
+echo "$DIALOG"
+
+#================================
+
+VOLUME=`$DIALOG --stdout --title "RANGE BOX" --rangebox "Please set the volume..." 0 0 0 12 5`
 
 case $? in
   0)

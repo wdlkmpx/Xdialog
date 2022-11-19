@@ -1,9 +1,32 @@
 #!/bin/sh
-DIALOG=Xdialog
+
+DIALOG='Xdialog'
+if [ -x ./Xdialog ] ; then
+    DIALOG='./Xdialog'
+elif [ -x ../Xdialog ] ; then
+    DIALOG='../Xdialog'
+fi
+
+case $1 in
+    cli|-cli|--cli)
+        DIALOG='dialog'
+        shift
+        ;;
+    *dialog*)
+        if [ -x $1 ] ; then
+            DIALOG=$1
+            shift
+        fi
+        ;;
+esac
+
+echo "$DIALOG"
+
+#================================
 
 $DIALOG --backtitle "This is the \"backtitle\"" \
-	--title "CHECKLIST BOX" \
-        --checklist "Hi, this is a checklist box. You can use this to
+         --title "CHECKLIST BOX" \
+         --checklist "Hi, this is a checklist box. You can use this to
 present a list of choices which can be turned on or
 off. If there are more items than can fit on the
 screen, the list will be scrolled.\n

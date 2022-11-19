@@ -1,12 +1,30 @@
 #!/bin/sh
+# --progress is not compatible with (c)dialog [ncurses]
 
-if [ "$1" ] ; then
-	DIALOG=$1
-else
-	DIALOG=Xdialog
+DIALOG='Xdialog'
+if [ -x ./Xdialog ] ; then
+    DIALOG='./Xdialog'
+elif [ -x ../Xdialog ] ; then
+    DIALOG='../Xdialog'
 fi
 
-#====================================================
+case $1 in
+    cli|-cli|--cli)
+        DIALOG='dialog'
+        echo "this is not compatible with (c)dialog [ncurses]"
+        exit 0
+        ;;
+    *dialog*)
+        if [ -x $1 ] ; then
+            DIALOG=$1
+            shift
+        fi
+        ;;
+esac
+
+echo "$DIALOG"
+
+#================================
 
 ENTRIES=200
 

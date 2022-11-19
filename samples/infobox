@@ -1,5 +1,29 @@
 #!/bin/sh
-DIALOG=Xdialog
+# this doesn't work as expected with dialog (ncurses)
+
+DIALOG='Xdialog'
+if [ -x ./Xdialog ] ; then
+    DIALOG='./Xdialog'
+elif [ -x ../Xdialog ] ; then
+    DIALOG='../Xdialog'
+fi
+
+case $1 in
+    cli|-cli|--cli)
+        DIALOG='dialog'
+        shift
+        ;;
+    *dialog*)
+        if [ -x $1 ] ; then
+            DIALOG=$1
+            shift
+        fi
+        ;;
+esac
+
+echo "$DIALOG"
+
+#================================
 
 $DIALOG --title "INFO BOX" \
         --infobox "Hi, this is an information box. It is

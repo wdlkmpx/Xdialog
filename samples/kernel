@@ -1,5 +1,29 @@
 #!/bin/sh
 
+DIALOG='Xdialog'
+if [ -x ./Xdialog ] ; then
+    DIALOG='./Xdialog'
+elif [ -x ../Xdialog ] ; then
+    DIALOG='../Xdialog'
+fi
+
+case $1 in
+    cli|-cli|--cli)
+        DIALOG='dialog'
+        shift
+        ;;
+    *dialog*)
+        if [ -x $1 ] ; then
+            DIALOG=$1
+            shift
+        fi
+        ;;
+esac
+
+echo "$DIALOG"
+
+#================================
+
 # This little script is aimed at easing the Linux kernel compilation and
 # installation. No guarantee is given on its suitability to your own system
 # though.
@@ -26,7 +50,7 @@ check_error
 cd /usr/src/linux
 check_error
 
-Xdialog --title "$TITLE" --yesno "make mrproper first ?" 0 0
+$DIALOG --title "$TITLE" --yesno "make mrproper first ?" 0 0
 if (( $? == 0 )) ; then
 	echo "--------------------------------------------------------------------------"
 	echo "Making mrproper..."
@@ -36,7 +60,7 @@ if (( $? == 0 )) ; then
 fi
 
 if [ -f /usr/src/linux/.config ] ; then
-	Xdialog --title "$TITLE" --yesno "Configure the kernel ?" 0 0
+	$DIALOG --title "$TITLE" --yesno "Configure the kernel ?" 0 0
 	if (( $? == 0 )) ; then
 		echo "--------------------------------------------------------------------------"
 		echo "Making xconfig..."
@@ -91,7 +115,7 @@ echo "--------------------------------------------------------------------------
 if [ -f /boot/module-info-`uname -r` ] && ! [ -f /boot/module-info-$VERSION ] ; then
 	/bin/cp -f /boot/module-info-`uname -r` /boot/module-info-$VERSION 2>&1
 fi
-Xdialog --title "$TITLE" --yesno "Make the new kernel the current one ?" 0 0
+$DIALOG --title "$TITLE" --yesno "Make the new kernel the current one ?" 0 0
 if (( $? == 0 )) ; then
 	echo "--------------------------------------------------------------------------"
 	echo "Making v$VERSION the current kernel... "
@@ -102,7 +126,7 @@ if (( $? == 0 )) ; then
 		/bin/ln -sf /boot/module-info-$VERSION /boot/module-info 2>&1
 	fi
 	if [ -f /boot/map ] && [ -f /sbin/lilo ] && [ -f /etc/lilo.conf ] ; then
-		Xdialog --title "$TITLE" --yesno "Install the new kernel with lilo ?" 0 0
+		$DIALOG --title "$TITLE" --yesno "Install the new kernel with lilo ?" 0 0
 		if (( $? == 0 )) ; then
 			echo "--------------------------------------------------------------------------"
 			echo "Running lilo... "
@@ -117,7 +141,7 @@ echo "done !"
 
 PID=$!
 
-Xdialog --title "$TITLE" --no-button --smooth --tailbox $TEMP 40 80
+$DIALOG --title "$TITLE" --no-button --smooth --tailbox $TEMP 40 80
 /usr/bin/killall $MAKE 2>/dev/null
 kill $PID 2>/dev/null
 /bin/rm -f $MAKE
