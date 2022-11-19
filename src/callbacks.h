@@ -1,5 +1,3 @@
-#include <gtk/gtk.h>
-#include <stdio.h>
 
 gboolean delete_event(gpointer object, GdkEventAny *event, gpointer data);
 
@@ -63,10 +61,17 @@ gboolean print_items(GtkButton *button, gpointer data);
 
 gboolean itemlist_timeout(gpointer data);
 
+#if GTK_CHECK_VERSION(2,0,0)
 void on_menubox_treeview_row_activated_cb (GtkTreeView *tree_view,    GtkTreePath *path,
-                             GtkTreeViewColumn *column, gpointer data);
+                                           GtkTreeViewColumn *column, gpointer data);
 void on_menubox_ok_click (GtkButton *button, gpointer data);
 void on_menubox_tip_treeview_changed (GtkTreeSelection *selection, gpointer data);
+#else // GTK 1
+void on_menubox_item_select (GtkObject *clist, gint row, gint column,
+                             GdkEventButton *event, gpointer data);
+gboolean move_to_row_timeout(gpointer data);
+void on_menubox_ok_click (GtkButton *button, gpointer data);
+#endif
 
 gboolean print_tree_selection(GtkButton *button, gpointer data);
 

@@ -2,20 +2,12 @@
  * Supporting functions for Xdialog.
  */
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
+#include "common.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
-#ifndef USE_SCANF
+#if !defined(USE_SCANF)
 #	include <errno.h>
 #	include <fcntl.h>
 #endif
-#include <gtk/gtk.h>
 
 #include "interface.h"
 
@@ -25,10 +17,9 @@ extern gboolean dialog_compat;
 
 /* Two useful functions to avoid buffer overflows... */
 
-#ifndef USE_SCANF
+#if !defined(USE_SCANF)
 /* Let's replaces scanf() with a non-blocking function based on read() calls...
-   It may not compile on systems lacking BSD 4.3 mem*() functions and/or
-   lacking errno.h / fcntl.h headers...
+   It may not compile on systems lacking lacking errno.h / fcntl.h headers...
    Code adapted from a patch by Rolland Dudemaine.
  */
 int my_scanf(char *buffer)

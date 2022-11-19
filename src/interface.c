@@ -2,30 +2,22 @@
  * GTK+ interface functions for Xdialog.
  */
 
-#ifdef HAVE_CONFIG_H
-#	include <config.h>
-#endif
+#include "common.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include <sys/stat.h>
-
-#include <gdk/gdkkeysyms.h>
-#include <gtk/gtk.h>
 
 #include "interface.h"
 #include "callbacks.h"
 #include "support.h"
-#include "gtkcompat.h"
 
 /* Global structure and variables */
 extern Xdialog_data Xdialog;
 extern gboolean dialog_compat;
 
 /* Fixed font loading and character size (in pixels) initialisation */
+#if GTK_CHECK_VERSION(2,0,0)
 static PangoFontDescription *fixed_pango_font;
+#endif
 
 static gint xmult = XSIZE_MULT;
 static gint ymult = YSIZE_MULT;
@@ -50,11 +42,13 @@ static void parse_rc_file(void)
 
 static void font_init(void)
 {
+#if GTK_CHECK_VERSION(2,0,0)
 	fixed_pango_font = pango_font_description_new ();
 	pango_font_description_set_family (fixed_pango_font, FIXED_FONT);
 	pango_font_description_set_weight (fixed_pango_font, PANGO_WEIGHT_MEDIUM);
 	pango_font_description_set_size (fixed_pango_font, 10 * PANGO_SCALE);
-#if GTK_MAJOR_VERSION == 2
+#endif
+#if GTK_MAJOR_VERSION <= 2
 	GtkWidget *window;
 	GtkStyle  *style;
 	GdkFont *font;
@@ -252,7 +246,9 @@ static GtkWidget *set_label(gchar *label_text, gboolean expand)
 {
 	GtkWidget *label;
 	GtkWidget *hbox;
+#if GTK_CHECK_VERSION(2,0,0)
 	GdkPixbuf *pixbuf;
+#endif
 	GtkWidget *icon;
 	gchar     text[MAX_LABEL_LENGTH];
 	int icon_width = 0;
@@ -260,6 +256,7 @@ static GtkWidget *set_label(gchar *label_text, gboolean expand)
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_pack_start(Xdialog.vbox, hbox, expand, TRUE, ymult/3);
 
+#if GTK_CHECK_VERSION(2,0,0)
 	if (Xdialog.icon) {
 		pixbuf = gdk_pixbuf_new_from_file (Xdialog.icon_file, NULL);
 		if (pixbuf != NULL) {
@@ -271,7 +268,7 @@ static GtkWidget *set_label(gchar *label_text, gboolean expand)
 			icon_width = requisition.width + 4;
 		}
 	}
-
+#endif
 	trim_string(label_text, text, MAX_LABEL_LENGTH);
 
 	if (Xdialog.wrap || dialog_compat)
@@ -380,11 +377,13 @@ static GtkWidget *set_button(gchar *default_text,
 	button = gtk_button_new_with_mnemonic (text);
 	if (Xdialog.buttons_style != TEXT_ONLY) {
 		/* buttons with icons */
+#if GTK_CHECK_VERSION(2,0,0)
 		icon = gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_BUTTON);
 		gtk_button_set_image (GTK_BUTTON (button), icon);
 		if (Xdialog.buttons_style == ICON_ONLY) {
 			gtk_button_set_label (GTK_BUTTON (button), NULL);
 		}
+#endif
 	}
 	gtk_container_add(GTK_CONTAINER(buttonbox), button);
 
@@ -490,6 +489,7 @@ static GtkWidget *set_all_buttons(gboolean print, gboolean ok)
 static GtkWidget *set_scrollable_text(void)
 {
 	GtkWidget *text;
+#if GTK_CHECK_VERSION(2,0,0)
 	GtkWidget *scrollwin;
 
 	scrollwin = gtk_scrolled_window_new(NULL, NULL);
@@ -498,59 +498,93 @@ static GtkWidget *set_scrollable_text(void)
 	text = gtk_text_view_new();
 
 	if (Xdialog.fixed_font) {
-		gtk_widget_modify_font(text, fixed_pango_font);
+		gtk_widget_override_font(text, fixed_pango_font);
 	}
 
 	gtk_container_add(GTK_CONTAINER (scrollwin), text);
+#else // GTK1
+	GtkWidget *hbox;
+	GtkWidget *vscrollbar;
+	GtkStyle  *style;
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(Xdialog.vbox, hbox, TRUE, TRUE, xmult/2);
+	gtk_widget_show(hbox);
+  
+	text = gtk_text_new(NULL, NULL);
+	gtk_box_pack_start(GTK_BOX(hbox), text, TRUE, TRUE, 0);
+//	if (Xdialog.fixed_font) {
+//		style = gtk_style_new();
+//	  	gdk_font_unref(style->font);
+//		style->font = fixed_font;
+//	 	gtk_widget_push_style(style);     
+//	   	gtk_widget_set_style(text, style);
+//	   	gtk_widget_pop_style();
+//	}
+	gtk_widget_show(text);
+	/* Add a vertical scrollbar to the GtkText widget */
+	vscrollbar = gtk_vscrollbar_new(GTK_TEXT(text)->vadj);
+	gtk_box_pack_start(GTK_BOX(hbox), vscrollbar, FALSE, FALSE, 0);
+	gtk_widget_show(vscrollbar);
+#endif
 	return text;
+
 }
 
-static GtkWidget *set_scrolled_window(GtkBox *box, gint border_width, gint xsize,
-				      gint list_size, gint spacing)
+static GtkWidget *set_scrolled_window (GtkBox *box, gint border_width, gint xsize,
+                                       gint list_size, gint spacing)
 {
 	GtkWidget *scrolled_window;
-
-	scrolled_window = gtk_scrolled_window_new(NULL, NULL);
-	gtk_container_set_border_width(GTK_CONTAINER(scrolled_window), border_width);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
-				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_box_pack_start(box, scrolled_window, TRUE, TRUE, 0);
-
-	if (Xdialog.list_height > 0)
-		gtk_widget_set_size_request(scrolled_window, xsize > 0 ? xsize*xmult : -1,
-				     Xdialog.list_height * (ymult + spacing));
-	else
-		gtk_widget_set_size_request(scrolled_window, xsize > 0 ? xsize*xmult : -1,
-				     MIN(gdk_screen_height() - 15 * ymult,
-					 list_size * (ymult + spacing)));
-
+	scrolled_window = gtk_scrolled_window_new (NULL, NULL);
+	gtk_container_set_border_width (GTK_CONTAINER(scrolled_window), border_width);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrolled_window),
+                                    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	gtk_box_pack_start (box, scrolled_window, TRUE, TRUE, 0);
+	if (Xdialog.list_height > 0) {
+		gtk_widget_set_size_request (scrolled_window, xsize > 0 ? xsize*xmult : -1,
+                                     Xdialog.list_height * (ymult + spacing));
+	} else {
+		gtk_widget_set_size_request (scrolled_window, xsize > 0 ? xsize*xmult : -1,
+                                     MIN(gdk_screen_height() - 40 * ymult,
+                                     list_size * (ymult + spacing)));
+    }
 	return scrolled_window;
 }
 
-static GtkWidget *set_scrolled_list(GtkWidget *box, gint xsize, gint list_size,
-				    gint spacing, GtkListStore *store)
+
+static GtkWidget *set_scrolled_list (GtkWidget *box, gint xsize, gint list_size,
+                                     gint spacing, void *tree_list)
 {
-	GtkWidget *scrolled_window;
 	GtkWidget *list;
+	GtkWidget *scrolled_window;
+	scrolled_window = set_scrolled_window (GTK_BOX(box), 0, xsize, list_size, spacing);
+#if GTK_CHECK_VERSION(2,0,0)
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 
-	scrolled_window = set_scrolled_window(GTK_BOX(box), 0, xsize,
-		list_size, spacing);
-	list = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+    GtkListStore *store = GTK_LIST_STORE (tree_list);
+	list = gtk_tree_view_new_with_model (GTK_TREE_MODEL(store));
+    g_object_unref(G_OBJECT(store));
+
 	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (list), FALSE);
 
 	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes("", renderer, "text",
-		0, NULL);
+	column = gtk_tree_view_column_new_with_attributes ("", renderer,
+                                                       "text", 0, NULL);
+	gtk_tree_view_append_column (GTK_TREE_VIEW(list), column);
+    // don't use gtk_scrolled_window_add_with_viewport() with a GtkTreeView
+    // use gtk_container_add() instead
+    gtk_container_add (GTK_CONTAINER(scrolled_window),list);
 
-	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
-
-	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window),
-		list);
-
+#else // GTK1
+	list = gtk_list_new();
+	gtk_widget_show (list);
+	gtk_list_set_selection_mode (GTK_LIST(list), GTK_SELECTION_MULTIPLE);
+	gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW(scrolled_window), list);
+#endif
 	return list;
 }
+
 
 static GtkWidget *set_horizontal_slider(GtkBox *box, gint deflt, gint min, gint max)
 {
@@ -598,17 +632,21 @@ static GtkWidget *set_spin_button(GtkWidget *hbox, gint min, gint max, gint defl
 	return spin;
 }
 
+
 static int item_status(GtkWidget *item, char *status, char *tag)
 {
-		if (!strcasecmp(status, "on") && strlen(tag) != 0)
-			return 1;
-
-		if (!strcasecmp(status, "unavailable") || strlen(tag) == 0) {
-			gtk_widget_set_sensitive(item, FALSE);
-			return -1;
-		}
-		return 0;
+    if (!strcasecmp(status, "on") && strlen(tag) != 0) {
+        return 1;
+    }
+    if (!strcasecmp(status, "unavailable") || strlen(tag) == 0) {
+        if (item) { // this is only for checklists / radiolists
+            gtk_widget_set_sensitive(item, FALSE);
+            return -1;
+        }
+    }
+    return 0;
 }
+
 
 static void set_timeout(void)
 {
@@ -616,9 +654,10 @@ static void set_timeout(void)
 		Xdialog.timer2 = g_timeout_add(Xdialog.timeout*1000, timeout_exit, NULL);
 }
 
-/*
+
+/* ==============================================================================
  * The Xdialog widgets...
- */
+ * ============================================================================== */
 
 void create_msgbox(gchar *optarg, gboolean yesno)
 {
@@ -703,6 +742,7 @@ void create_gauge(gchar *optarg, gint percent)
 	gtk_box_pack_start (Xdialog.vbox, hbox, FALSE, TRUE, 0);
 
 	/* Set up the progress bar */
+#if GTK_CHECK_VERSION(2,0,0)
 	Xdialog.widget1 = gtk_progress_bar_new ();
 	gtk_box_pack_start (GTK_BOX (hbox), Xdialog.widget1, TRUE, TRUE, 10);
 
@@ -712,6 +752,7 @@ void create_gauge(gchar *optarg, gint percent)
 	gtk_progress_bar_set_text (GTK_PROGRESS_BAR (Xdialog.widget1), txt);
 	value = value / 100;
 	gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (Xdialog.widget1), value);
+#endif
 
 	Xdialog.label_text[0] = 0;
 	Xdialog.new_label = Xdialog.check = FALSE;
@@ -747,12 +788,14 @@ void create_progress(gchar *optarg, gint leading, gint maxdots)
 	gtk_box_pack_start (Xdialog.vbox, hbox, FALSE, TRUE, 0);
 
 	/* Set up the progress bar */
+#if GTK_CHECK_VERSION(2,0,0)
 	Xdialog.widget1 = gtk_progress_bar_new ();
 	gtk_box_pack_start (GTK_BOX (hbox), Xdialog.widget1, TRUE, TRUE, 10);
 
 	// set initial %
 	gtk_progress_bar_set_text (GTK_PROGRESS_BAR (Xdialog.widget1), "0%");
 	gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (Xdialog.widget1), 0.0);
+#endif
 
 	/* Skip the characters to be ignored on the input stream */
 	if (leading < 0) {
@@ -837,6 +880,7 @@ void create_logbox(gchar *optarg)
 
 	set_backtitle(FALSE);
 
+#if GTK_CHECK_VERSION(2,0,0)
 	GtkTreeModel     *model;
 	GtkTreeView      *treeview;
 	GtkTreeSelection *tree_sel;
@@ -901,6 +945,7 @@ void create_logbox(gchar *optarg)
 	g_signal_connect (G_OBJECT(Xdialog.widget1), "key_press_event",
 	                  G_CALLBACK(tailbox_keypress), NULL);
 	gtk_widget_grab_focus(Xdialog.widget1);
+#endif
 
 	scrolled_window = set_scrolled_window(Xdialog.vbox, xmult/2, xsize, 12, 2);
 	gtk_container_add(GTK_CONTAINER(scrolled_window), Xdialog.widget1);
@@ -934,8 +979,10 @@ void create_logbox(gchar *optarg)
 
 void create_textbox(gchar *optarg, gboolean editable)
 {
-	GtkTextView *text;
+    GtkWidget *text;
+#if GTK_CHECK_VERSION(2,0,0)
 	GtkTextBuffer *text_buffer;
+#endif
 	GtkWidget *button_ok = NULL;
 	FILE *infile;
 	gint i, n = 0, llen = 0, lcnt = 0;
@@ -945,9 +992,14 @@ void create_textbox(gchar *optarg, gboolean editable)
 	set_backtitle(FALSE);
 
 	Xdialog.widget1 = set_scrollable_text();
-	gtk_widget_grab_focus(Xdialog.widget1);
-	text = GTK_TEXT_VIEW(Xdialog.widget1);
+    gtk_widget_grab_focus(Xdialog.widget1);
+    text = Xdialog.widget1;
+#if GTK_CHECK_VERSION(2,0,0)
 	text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
+#else // GTK1
+    gtk_text_freeze (GTK_TEXT(text));
+#endif
+    
 
 	/* Fill the GtkText with the text */
 	if (strcmp(optarg, "-") == 0)
@@ -959,11 +1011,12 @@ void create_textbox(gchar *optarg, gboolean editable)
 		int nchars;
 		gsize bytes_read = 0;
 		gsize bytes_written = 0;
-		GError* error = 0;
+		GError* error = NULL;
 		gchar* utf8 = 0;
 
 		do {
 			nchars = fread(buffer, 1, 1024, infile);
+#if GTK_CHECK_VERSION(2,0,0)
 			utf8 = g_convert_with_fallback(buffer, nchars, "UTF-8", "ISO-8859-1", "\357\277\275", &bytes_read, &bytes_written, &error);
 			if (error == NULL)
 			{
@@ -974,7 +1027,9 @@ void create_textbox(gchar *optarg, gboolean editable)
 				printf("Error converting to UTF-8: GConvertError(%02x): %s", error->code, error->message);
 			}
 			g_free(utf8);
-
+#else // GTK1
+            gtk_text_insert (GTK_TEXT(text), NULL, NULL, NULL, buffer, nchars);
+#endif
 			/* Calculate the maximum line length and lines count */
 			for (i = 0; i < nchars; i++)
 				if (buffer[i] != '\n') {
@@ -1004,12 +1059,16 @@ void create_textbox(gchar *optarg, gboolean editable)
 				     MIN(lcnt*ymult, gdk_screen_height()-10*ymult));
 
 	/* Set the editable flag depending on what we want (text or edit box) */
-	gtk_text_view_set_editable(text, editable);
-
+#if GTK_CHECK_VERSION(2,0,0)
+	gtk_text_view_set_editable (GTK_TEXT_VIEW(text), editable);
     // position the cursor on the first line
     GtkTextIter firstLineIter;
     gtk_text_buffer_get_start_iter(text_buffer, &firstLineIter);
     gtk_text_buffer_place_cursor(text_buffer, &firstLineIter);
+#else // GTK1
+    gtk_text_thaw (GTK_TEXT(text));
+    gtk_text_set_editable (GTK_TEXT(text), editable);
+#endif
 
 	if (dialog_compat && !editable)
 		Xdialog.cancel_button = FALSE;
@@ -1243,7 +1302,7 @@ void create_spinbox(gchar *optarg, gchar *options[], gint spins)
 
 
 void create_itemlist(gchar *optarg, gint type, gchar *options[], gint list_size)
-{
+{ // radiolist / checklist
 	GtkWidget *vbox;
 	GtkWidget *scrolled_window;
 	GtkWidget *button_ok;
@@ -1290,9 +1349,9 @@ void create_itemlist(gchar *optarg, gint type, gchar *options[], gint list_size)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(item), TRUE);
 
 		g_signal_connect (G_OBJECT(item), "toggled",
-				   G_CALLBACK(item_toggle), (gpointer)i);
+                          G_CALLBACK(item_toggle), (gpointer)i);
 		g_signal_connect (G_OBJECT(item), "button_press_event",
-				   G_CALLBACK(double_click_event), button_ok);
+                          G_CALLBACK(double_click_event), button_ok);
 		g_signal_emit_by_name (G_OBJECT(item), "toggled");
 
 		if (Xdialog.tips == 1 && strlen(options[params*i+3]) > 0) {
@@ -1315,9 +1374,18 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 	GtkWidget *button_add;
 	GtkWidget *button_remove;
 	GtkWidget *button_ok;
-	GtkListStore *tree_list1;
-	GtkListStore *tree_list2;
-	GtkTreeIter tree_iter;
+#if GTK_CHECK_VERSION(2,0,0)
+	GtkListStore *tree_list1 = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
+	GtkListStore *tree_list2 = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
+	GtkTreeIter tree_iter1;
+	GtkTreeIter tree_iter2;
+#else
+	void *tree_list1 = NULL;
+	void *tree_list2 = NULL;
+	GList *glist1 = NULL;
+	GList *glist2 = NULL;
+	GtkWidget *item;
+#endif
 	gint i, n = 0;
 	int params = 3 + Xdialog.tips;
 
@@ -1328,19 +1396,42 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 	set_backtitle(TRUE);
 	set_label(optarg, FALSE);
 
-	tree_list1 = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
-	tree_list2 = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
-
 	/* Put all parameters into an array and calculate the max item width */
-	for (i = 0;  i < list_size; i++) {
-		strncpy(Xdialog.array[i].tag, options[params*i], sizeof(Xdialog.array[i].tag));
-		strncpy(Xdialog.array[i].name, options[params*i+1], sizeof(Xdialog.array[i].name));
-		if ((gint) strlen(Xdialog.array[i].name) > n)
+	for (i = 0;  i < list_size; i++)
+    {
+		strncpy (Xdialog.array[i].tag, options[params*i], sizeof(Xdialog.array[i].tag));
+		strncpy (Xdialog.array[i].name, options[params*i+1], sizeof(Xdialog.array[i].name));
+		if ((gint) strlen(Xdialog.array[i].name) > n) {
 			n = strlen(Xdialog.array[i].name);
-		gtk_list_store_append(tree_list1, &tree_iter);
-		gtk_list_store_set(tree_list1, &tree_iter, 0,
-			Xdialog.array[i].name, 1, Xdialog.array[i].tag, -1);
-		/* TODO: tooltips support in GTK2 */
+        }
+#if GTK_CHECK_VERSION(2,0,0)
+        if (item_status(NULL, options[params*i+2], Xdialog.array[i].tag) == 1) {
+            gtk_list_store_append (tree_list2, &tree_iter2);
+            gtk_list_store_set (tree_list2, &tree_iter2,
+                                0, Xdialog.array[i].name,
+                                1, Xdialog.array[i].tag,
+                                -1);
+        } else {
+            gtk_list_store_append (tree_list1, &tree_iter1);
+            gtk_list_store_set (tree_list1, &tree_iter1,
+                                0, Xdialog.array[i].name,
+                                1, Xdialog.array[i].tag,
+                                -1);
+        }
+#else // GTK1
+		item = gtk_list_item_new_with_label(Xdialog.array[i].name);
+        g_object_set_data (G_OBJECT(item), "listitem", (gpointer) &Xdialog.array[i]);
+		gtk_widget_show(item);
+		Xdialog.array[i].widget = item;
+		if (item_status(NULL, options[params*i+2], Xdialog.array[i].tag) == 1) {
+			glist2 = g_list_append(glist2, item);
+		} else {
+			glist1 = g_list_append(glist1, item);
+        }
+		if (Xdialog.tips == 1 && strlen(options[params*i+3]) > 0) {
+            gtk_widget_set_tooltip_text (item, options[params*i+3]);
+        }
+#endif
 	}
 
 	/* Setup a hbox to hold the scrolled windows and the Add/Remove buttons */
@@ -1348,23 +1439,28 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 	gtk_box_pack_start(Xdialog.vbox, hbox, TRUE, TRUE, ymult/3);
 
 	/* Setup the first list into a scrolled window */
-	Xdialog.widget1 = set_scrolled_list(hbox, MAX(15, n), list_size, 4, tree_list1);
-	g_object_unref(G_OBJECT(tree_list1));
+	Xdialog.widget1 = set_scrolled_list(hbox, MAX(25, n), list_size, 4, tree_list1);
 
 	/* Setup the Add/Remove buttons */
 	vbuttonbox = gtk_button_box_new (GTK_ORIENTATION_VERTICAL);
 	gtk_box_pack_start(GTK_BOX(hbox), vbuttonbox, FALSE, TRUE, 0);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(vbuttonbox), GTK_BUTTONBOX_SPREAD);
+
 	button_add = Xdialog.widget3 = set_button(ADD, vbuttonbox, -1, FALSE);
 	g_signal_connect (G_OBJECT(button_add), "clicked",
-			   G_CALLBACK(add_to_list), NULL);
+                      G_CALLBACK(add_to_list), NULL);
+
 	button_remove = Xdialog.widget4 = set_button(REMOVE, vbuttonbox, -1, FALSE);
 	g_signal_connect (G_OBJECT(button_remove), "clicked",
-			   G_CALLBACK(remove_from_list), NULL);
+                      G_CALLBACK(remove_from_list), NULL);
 
 	/* Setup the second list into a scrolled window */
-	Xdialog.widget2 = set_scrolled_list(hbox, MAX(15, n), list_size, 4, tree_list2);
-	g_object_unref(G_OBJECT(tree_list2));
+	Xdialog.widget2 = set_scrolled_list(hbox, MAX(25, n), list_size, 4, tree_list2);
+
+#if !GTK_CHECK_VERSION(2,0,0) // GTK1
+	gtk_list_append_items(GTK_LIST(Xdialog.widget1), glist1);
+	gtk_list_append_items(GTK_LIST(Xdialog.widget2), glist2);
+#endif
 
 	button_ok = set_all_buttons(FALSE, TRUE);
 	g_signal_connect (G_OBJECT(button_ok), "clicked", G_CALLBACK(print_list), NULL);
@@ -1374,6 +1470,7 @@ void create_buildlist(gchar *optarg, gchar *options[], gint list_size)
 	set_timeout();
 }
 
+
 void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 {
 	GtkWidget *button_ok;
@@ -1381,19 +1478,18 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 	GtkWidget *status_bar = NULL;
 	GtkWidget *hbox = NULL;
 	int i;
+	int rownum = 0;
 	int params = 2 + Xdialog.tips;
 
+#if GTK_CHECK_VERSION(2,0,0)
 	GtkTreeModel     *tree_model;
 	GtkTreeView      *treeview;
 	GtkTreeSelection *tree_sel;
-
+    GtkTreeIter  iter;
 	GtkListStore *store;
 
-	if (Xdialog.tips) { // --item-help
-		store = gtk_list_store_new (3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-	} else {
-		store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
-	}
+	store = gtk_list_store_new (3, G_TYPE_STRING, G_TYPE_STRING,
+                                G_TYPE_POINTER); // hidden 
 	tree_model = GTK_TREE_MODEL (store);
 
 	treeview = GTK_TREE_VIEW (gtk_tree_view_new_with_model (tree_model));
@@ -1421,17 +1517,16 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 	}
 
 	// column 1 - name
-	renderer = g_object_new(GTK_TYPE_CELL_RENDERER_TEXT,
-                           "xalign", 0.0,
-                           NULL);
+	renderer = g_object_new (GTK_TYPE_CELL_RENDERER_TEXT,
+                            "xalign", 0.0,
+                            NULL);
 	column = g_object_new (GTK_TYPE_TREE_VIEW_COLUMN,
-                          "title",          "name",
-                          NULL);
+                           "title",          "name",
+                           NULL);
 	gtk_tree_view_column_pack_start (column, renderer, FALSE);
 	gtk_tree_view_column_add_attribute (column, renderer, "text", 1);
 	gtk_tree_view_append_column (treeview, column);
 	gtk_tree_view_column_set_sizing (column, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
-
 	//----
 
 	Xdialog_array(list_size);
@@ -1452,51 +1547,148 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size)
 		if (Xdialog.tips == 1) {
 			strncpy(Xdialog.array[i].tips, options[params*i+2], sizeof(Xdialog.array[i].tips));
 		}
-		GtkTreeIter  iter;
 		gtk_list_store_append (store, &iter);
-
 		gtk_list_store_set (store, &iter,
-						0, Xdialog.array[i].tag,
-						1, Xdialog.array[i].name,
-						-1);
-		if (Xdialog.tips) {
-			gtk_list_store_set (store, &iter, 2, Xdialog.array[i].tips, -1);
+                            0, Xdialog.array[i].tag,
+                            1, Xdialog.array[i].name,
+                            2, &Xdialog.array[i],
+                            -1);
+		/* Select this row as default if the tag is the good one */
+		if (strlen(Xdialog.default_item) != 0 && !strcmp(Xdialog.default_item, Xdialog.array[i].tag)) {
+            rownum = i;
 		}
 	}
+    Xdialog.array[0].state = rownum;
 
-	GtkTreePath  *tpath = gtk_tree_path_new_from_indices (0, -1);
+	GtkTreePath  *tpath = gtk_tree_path_new_from_indices (rownum, -1);
 	gtk_tree_selection_select_path (tree_sel, tpath);
 	gtk_tree_path_free (tpath);
 
 	g_signal_connect (G_OBJECT (treeview),  "row_activated",
-				G_CALLBACK(on_menubox_treeview_row_activated_cb), NULL);
+                      G_CALLBACK(on_menubox_treeview_row_activated_cb), NULL);
 
-	gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(treeview));
+	gtk_container_add (GTK_CONTAINER(scrolled_window), GTK_WIDGET(treeview));
 
 	button_ok = set_all_buttons(FALSE, TRUE);
 	g_signal_connect (G_OBJECT(button_ok), "clicked",
-					G_CALLBACK(on_menubox_ok_click), treeview);
+                      G_CALLBACK(on_menubox_ok_click), treeview);
 
 	if (Xdialog.tips == 1) {
 		hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+		gtk_box_pack_end (Xdialog.vbox, hbox, FALSE, FALSE, 0);
+		status_bar = Xdialog.widget1 = gtk_statusbar_new();
+		gtk_container_add (GTK_CONTAINER(hbox), status_bar);
+		Xdialog.status_id = gtk_statusbar_get_context_id(GTK_STATUSBAR(status_bar), "tips");
+		gtk_statusbar_push (GTK_STATUSBAR(status_bar), Xdialog.status_id,
+                            Xdialog.array[0].tips);
+		g_signal_connect (G_OBJECT(tree_sel), "changed",
+                          G_CALLBACK(on_menubox_tip_treeview_changed), status_bar);
+	}
+
+#else // GTK1
+
+	GtkCList *clist;
+	static gchar *null_row[] = {NULL, NULL};
+	gint first_selectable = -1;
+	const GdkColor GREY1 = { 0, 0x6000, 0x6000, 0x6000 };
+	const GdkColor GREY2 = { 0, 0xe000, 0xe000, 0xe000 };
+
+	Xdialog_array(list_size);
+	Xdialog.array[0].state = -1;
+
+	open_window();
+
+	set_backtitle(TRUE);
+	set_label(optarg, FALSE);
+
+	scrolled_window = set_scrolled_window(Xdialog.vbox, xmult/2, -1, list_size, 4);
+
+	Xdialog.widget2 = gtk_clist_new(2);
+	clist = GTK_CLIST(Xdialog.widget2);
+	gtk_clist_set_selection_mode (clist, GTK_SELECTION_BROWSE);
+	gtk_clist_set_shadow_type (clist, GTK_SHADOW_IN);
+
+	for (i = 0; i < list_size; i++) {
+		strncpy(Xdialog.array[i].tag, options[params*i], sizeof(Xdialog.array[i].tag));
+		strncpy(Xdialog.array[i].name, options[params*i+1], sizeof(Xdialog.array[i].name));
+		if (Xdialog.tips == 1) {
+			strncpy(Xdialog.array[i].tips, options[params*i+2], sizeof(Xdialog.array[i].tips));
+		}
+		rownum = gtk_clist_append (clist, null_row);
+
+		if (strlen(Xdialog.array[i].tag) == 0) {
+			gtk_clist_set_text (clist, rownum, 0, "~");
+			gtk_clist_set_selectable (clist, rownum, FALSE);
+			gtk_clist_set_foreground (clist, rownum, (GdkColor *) &GREY1);
+			gtk_clist_set_background (clist, rownum, (GdkColor *) &GREY2);
+		} else {
+			gtk_clist_set_text (clist, rownum, 0, Xdialog.array[i].tag);
+            gtk_clist_set_row_data (clist, rownum, (gpointer) &Xdialog.array[i]);
+			if ( first_selectable == -1 ) {
+				first_selectable = rownum;
+			}
+		}
+		gtk_clist_set_text(clist, rownum, 1, Xdialog.array[i].name);
+
+		/* Select this row as default if the tag is the good one */
+		if (strlen(Xdialog.default_item) != 0 && !strcmp(Xdialog.default_item, Xdialog.array[i].tag)) {
+			Xdialog.array[0].state = rownum;
+			gtk_clist_select_row(clist, rownum, 0);
+		}
+	}
+
+	gtk_clist_columns_autosize(clist);
+
+	/* Select the first selectable row as default if no other row is selected */
+	if (Xdialog.array[0].state < 0) {
+		if ( first_selectable >= 0 ) {
+			Xdialog.array[0].state = first_selectable;
+			gtk_clist_select_row(clist, first_selectable, 0);
+		}
+	}
+	/* We can't move to the default selected row right from here,
+	 * we need a timeout function to do so... It will run only once
+	 * of course !
+	 */
+	g_timeout_add (1, move_to_row_timeout, NULL);
+
+
+	if (!Xdialog.tags) {
+		gtk_clist_set_column_visibility(clist, 0, FALSE);
+    }
+	gtk_container_add (GTK_CONTAINER(scrolled_window), Xdialog.widget2);
+	gtk_widget_show(Xdialog.widget2);
+	gtk_signal_connect (GTK_OBJECT(Xdialog.widget2), "select_row",
+                        GTK_SIGNAL_FUNC(on_menubox_item_select), NULL);
+
+	button_ok = set_all_buttons(FALSE, TRUE);
+	gtk_signal_connect (GTK_OBJECT(button_ok), "clicked",
+                        GTK_SIGNAL_FUNC(on_menubox_ok_click), clist);
+	gtk_signal_connect (GTK_OBJECT(Xdialog.widget2), "button_press_event",
+                        GTK_SIGNAL_FUNC(double_click_event), button_ok);
+
+	if (Xdialog.tips == 1) {
+		hbox = gtk_hbox_new(FALSE, 0);
 		gtk_box_pack_end(Xdialog.vbox, hbox, FALSE, FALSE, 0);
+		gtk_widget_show(hbox);
 		status_bar = Xdialog.widget1 = gtk_statusbar_new();
 		gtk_container_add(GTK_CONTAINER(hbox), status_bar);
+		gtk_widget_show(status_bar);
 		Xdialog.status_id = gtk_statusbar_get_context_id(GTK_STATUSBAR(status_bar), "tips");
 		gtk_statusbar_push(GTK_STATUSBAR(status_bar), Xdialog.status_id,
 				   Xdialog.array[0].tips);
-		g_signal_connect (G_OBJECT(tree_sel), "changed",
-				G_CALLBACK(on_menubox_tip_treeview_changed), status_bar);
 	}
+#endif
 
 	set_timeout();
 }
 
-/* TODO: implement tooltips support */
+
 void create_treeview(gchar *optarg, gchar *options[], gint list_size)
 {
 	GtkWidget *scrolled_window;
 	GtkWidget *button_ok;
+#if GTK_CHECK_VERSION(2,0,0)
 	GtkTreeStore *store;
 	GtkTreeViewColumn *column;
 	GtkCellRenderer *renderer;
@@ -1565,7 +1757,7 @@ void create_treeview(gchar *optarg, gchar *options[], gint list_size)
 	select = gtk_tree_view_get_selection(GTK_TREE_VIEW(Xdialog.widget1));
 	gtk_tree_selection_set_mode(select, GTK_SELECTION_SINGLE);
 	g_signal_connect(G_OBJECT(select), "changed", G_CALLBACK(cb_selection_changed), NULL);
-
+#endif
 	set_timeout();
 }
 
@@ -1574,6 +1766,7 @@ void create_filesel(gchar *optarg, gboolean dsel_flag)
 	GtkWidget *hbuttonbox;
 	GtkWidget *button, *ok_button = NULL;
 	gboolean flag;
+#if GTK_CHECK_VERSION(2,0,0)
 	GtkFileChooser *filesel;
 	GtkFileChooserAction action;
 
@@ -1673,6 +1866,7 @@ void create_filesel(gchar *optarg, gboolean dsel_flag)
 	/* Beep if requested */
 	if (Xdialog.beep & BEEP_BEFORE && Xdialog.exit_code != 2)
 		gdk_beep();
+#endif
 
 	/* Default exit code */
 	Xdialog.exit_code = 255;
@@ -1694,6 +1888,7 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	parse_rc_file();
 
 	/* Create a color selector and update Xdialog structure accordingly */
+#if GTK_CHECK_VERSION(2,0,0)
 	Xdialog.window = gtk_color_selection_dialog_new(Xdialog.title);
 	colorsel_dlg = GTK_COLOR_SELECTION_DIALOG (Xdialog.window);
 	colorsel     = GTK_COLOR_SELECTION (gtk_color_selection_dialog_get_color_selection (colorsel_dlg));
@@ -1751,7 +1946,7 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 	} else {
 		gtk_widget_destroy (help_button);
 	}
-
+#endif
 	/* Beep if requested */
 	if (Xdialog.beep & BEEP_BEFORE && Xdialog.exit_code != 2)
 		gdk_beep();
@@ -1765,28 +1960,34 @@ void create_colorsel(gchar *optarg, gdouble *colors)
 
 void create_fontsel(gchar *optarg)
 {
-	GtkFontSelectionDialog *fontsel_dlg;
-	GtkFontSelection * fontsel;
+	GtkWidget * fontsel_dlg;
 	GtkWidget * ok_button, * cancel_button;
 
 	font_init();
 	parse_rc_file();
 
 	/* Create a font selector and update Xdialog structure accordingly */
-	fontsel_dlg = GTK_FONT_SELECTION_DIALOG (gtk_font_selection_dialog_new (Xdialog.title));
-	fontsel = GTK_FONT_SELECTION (gtk_font_selection_dialog_get_font_selection (fontsel_dlg));
+	fontsel_dlg = gtk_font_chooser_dialog_new (Xdialog.title, NULL);
+#if GTK_CHECK_VERSION(2,0,0)
 	Xdialog.vbox = GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (fontsel_dlg)));
-	Xdialog.window = GTK_WIDGET (fontsel_dlg);
+#else // GTK1: GtkFontSelectionDialog derives from GtkWindow
+    Xdialog.vbox = GTK_BOX (GTK_FONT_SELECTION_DIALOG(fontsel_dlg)->main_vbox);
+#endif
+	Xdialog.window = fontsel_dlg;
 
 	/* Set the backtitle */
 	set_backtitle(FALSE);
 
 	/* Set the default font name */
-	gtk_font_selection_set_font_name (fontsel, optarg);
-	gtk_font_selection_set_preview_text(fontsel, "abcdefghijklmnopqrstuvwxyz 0123456789");
+	gtk_font_chooser_set_font (GTK_FONT_CHOOSER(fontsel_dlg), optarg);
+	gtk_font_chooser_set_preview_text (GTK_FONT_CHOOSER(fontsel_dlg), "abcdefghijklmnopqrstuvwxyz 0123456789");
 
 	/* If requested, add a check button into the fontsel action area */
+#if GTK_CHECK_VERSION(2,0,0)
 	set_check_button (gtk_dialog_get_action_area (GTK_DIALOG (fontsel_dlg)));
+#else // GTK1: GtkFontSelectionDialog derives from GtkWindow
+    set_check_button (GTK_FONT_SELECTION_DIALOG(fontsel_dlg)->action_area);
+#endif
 
 	/* We must realize the widget before moving it and creating the buttons pixbufs */
 	gtk_widget_realize(Xdialog.window);
@@ -1794,8 +1995,13 @@ void create_fontsel(gchar *optarg)
 	/* Set the window size and placement policy */
 	set_window_size_and_placement();
 
-	ok_button = gtk_font_selection_dialog_get_ok_button (fontsel_dlg);
-	cancel_button = gtk_font_selection_dialog_get_cancel_button (fontsel_dlg);
+#if GTK_CHECK_VERSION(2,0,0)
+	ok_button     = gtk_dialog_get_widget_for_response (GTK_DIALOG(fontsel_dlg), GTK_RESPONSE_OK);
+	cancel_button = gtk_dialog_get_widget_for_response (GTK_DIALOG(fontsel_dlg), GTK_RESPONSE_CANCEL);
+#else
+	ok_button     = GTK_FONT_SELECTION_DIALOG(fontsel_dlg)->ok_button;
+	cancel_button = GTK_FONT_SELECTION_DIALOG(fontsel_dlg)->cancel_button;
+#endif
 	if (Xdialog.default_no)
 		gtk_widget_grab_focus(cancel_button);
 
@@ -1805,8 +2011,8 @@ void create_fontsel(gchar *optarg)
 	if (Xdialog.cancel_label && *Xdialog.cancel_label) {
 		gtk_button_set_label (GTK_BUTTON (cancel_button), Xdialog.cancel_label);
 	}
-#if GTK_MAJOR_VERSION == 2
-	gtk_widget_destroy (fontsel_dlg->apply_button);
+#if GTK_MAJOR_VERSION <= 2
+	gtk_widget_destroy (GTK_FONT_SELECTION_DIALOG(fontsel_dlg)->apply_button);
 #endif
 
 	/* Setup callbacks */

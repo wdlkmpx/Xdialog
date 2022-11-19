@@ -2,23 +2,13 @@
  * Callback functions for Xdialog.
  */
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
+#include "common.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include <time.h>
-
-#include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
 
 #include "callbacks.h"
 #include "interface.h"
 #include "support.h"
-#include "gtkcompat.h"
 
 extern Xdialog_data Xdialog;
 
@@ -218,6 +208,7 @@ gboolean infobox_timeout(gpointer data)
 
 gboolean gauge_timeout(gpointer data)
 {
+#if GTK_CHECK_VERSION(2,0,0)
 	gdouble new_val;
 	char temp[256];
 	int ret;
@@ -274,7 +265,7 @@ gboolean gauge_timeout(gpointer data)
 			}
 		}
 	}
-
+#endif
 	/* As this is a timeout function, return TRUE so that it
 	 * continues to get called */
 	return TRUE;
@@ -284,6 +275,7 @@ gboolean gauge_timeout(gpointer data)
 
 gboolean progress_timeout(gpointer data)
 {
+#if GTK_CHECK_VERSION(2,0,0)
 	gdouble new_val;
 	char temp[256];
 	int ret, percent;
@@ -333,7 +325,7 @@ gboolean progress_timeout(gpointer data)
 
 	/* Set the new value */
 	gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (Xdialog.widget1), new_val);
-
+#endif
 	/* As this is a timeout function, return TRUE so that it
 	 * continues to get called */
 	return TRUE;
@@ -344,12 +336,13 @@ gboolean progress_timeout(gpointer data)
 gboolean tailbox_timeout(gpointer data)
 {
 	gchar buffer[1024];
-	int nchars = 0;
+	int nchars;
+#if GTK_CHECK_VERSION(2,0,0)
 	GtkTextIter end_iter;
-
 	GtkTextBuffer *text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(Xdialog.widget1));
 
-	do {
+	do
+    {
 		if (!empty_gtk_queue() && (Xdialog.file_init_size <= 0))
 			return FALSE;
 
@@ -368,13 +361,51 @@ gboolean tailbox_timeout(gpointer data)
 		GtkTextMark *mark;
 		gtk_text_buffer_get_end_iter(text_buffer, &end_iter);
 
-		mark = gtk_text_buffer_create_mark(text_buffer, "end",
-			&end_iter, TRUE);
+		mark = gtk_text_buffer_create_mark(text_buffer, "end", &end_iter, TRUE);
 
 		gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(Xdialog.widget1),
 			mark, 0, FALSE, 0, 0);
 	}
+#else // GTK1
+	GtkAdjustment *adj;
+	gboolean flag = FALSE;
 
+	adj = GTK_TEXT(Xdialog.widget1)->vadj;
+
+	if (Xdialog.file_init_size > 0)
+		gtk_text_freeze(GTK_TEXT(Xdialog.widget1));
+
+	do
+    {
+		if (!empty_gtk_queue() && (Xdialog.file_init_size <= 0))
+			return FALSE;
+
+		nchars = fread(buffer, sizeof(gchar), 1024, Xdialog.file);
+
+		if (nchars == 0)
+			break;
+
+		if (Xdialog.file_init_size > 0) {
+			Xdialog.file_init_size -= nchars;
+			if (Xdialog.file_init_size <= 0)
+				flag = TRUE;
+		} else {
+			if (!Xdialog.smooth)
+				gtk_text_freeze(GTK_TEXT(Xdialog.widget1));
+		}
+
+		gtk_text_insert (GTK_TEXT(Xdialog.widget1), NULL, NULL,
+                          NULL, buffer, nchars);
+
+		if ((!Xdialog.smooth || flag) && Xdialog.file_init_size <= 0) {
+			gtk_text_thaw (GTK_TEXT(Xdialog.widget1));
+            flag = FALSE;
+		}
+
+		gtk_adjustment_set_value(adj, adj->upper);
+
+	} while (nchars == 1024);
+#endif
 	return TRUE;
 }
 
@@ -445,6 +476,7 @@ static GdkColor *old_bgcolor = NULL;
 
 gboolean logbox_timeout(gpointer data)
 {
+#if GTK_CHECK_VERSION(2,0,0)
 	GtkTreeView  * tree  = GTK_TREE_VIEW (Xdialog.widget1);
 	GtkTreeModel * model = gtk_tree_view_get_model (tree);
 	GtkListStore * store = GTK_LIST_STORE (model);
@@ -536,6 +568,7 @@ gboolean logbox_timeout(gpointer data)
 			return FALSE;
 		}
 	}
+#endif
 	return TRUE;
 }
 
@@ -608,13 +641,19 @@ gboolean hide_passwords(GtkWidget *button, gpointer data)
 
 gboolean editbox_ok(gpointer object, gpointer data)
 {
+#if GTK_CHECK_VERSION(2,0,0)
 	GtkTextIter start_iter, end_iter;
-
 	GtkTextBuffer *text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(Xdialog.widget1));
 	gtk_text_buffer_get_bounds(text_buffer, &start_iter, &end_iter);
-	fputs(gtk_text_buffer_get_text(text_buffer, &start_iter, &end_iter,
-		FALSE), Xdialog.output);
+	fputs (gtk_text_buffer_get_text(text_buffer, &start_iter, &end_iter, FALSE), Xdialog.output);
+#else // GTK1
+	int length, i;
+    length = gtk_text_get_length(GTK_TEXT(Xdialog.widget1));
+	for (i = 0; i < length; i++)
+		fputc(GTK_TEXT_INDEX(GTK_TEXT(Xdialog.widget1), i),
+		      Xdialog.output);
 
+#endif
 	return TRUE;
 }
 
@@ -622,28 +661,40 @@ gboolean editbox_ok(gpointer object, gpointer data)
 
 gboolean print_text(gpointer object, gpointer data)
 {
-	gint length;
+	int length;
 	char cmd[MAX_PRTCMD_LENGTH];
 	FILE * temp;
-	GtkTextIter start_iter, end_iter;
-	GtkTextBuffer *text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(Xdialog.widget1));
-	
-	gtk_text_buffer_get_bounds(text_buffer, &start_iter, &end_iter);
-
+    char *buffer;
+    
 	strncpy(cmd, PRINTER_CMD, sizeof(cmd));
 	if (strlen(Xdialog.printer) != 0) {
 		strncat(cmd, " "PRINTER_CMD_OPTION, sizeof(cmd));
 		strncat(cmd, Xdialog.printer, sizeof(cmd));
 	}
+#if GTK_CHECK_VERSION(2,0,0)
+	GtkTextIter start_iter;
+	GtkTextIter end_iter;
+	GtkTextBuffer *text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(Xdialog.widget1));
 
-	length = gtk_text_buffer_get_char_count(text_buffer);
+	gtk_text_buffer_get_bounds (text_buffer, &start_iter, &end_iter);
 
+	length = gtk_text_buffer_get_char_count (text_buffer);
+    buffer = gtk_text_buffer_get_text (text_buffer, &start_iter, &end_iter, FALSE);
+#else
+    int i;
+	length = gtk_text_get_length (GTK_TEXT(Xdialog.widget1));
+	buffer = g_malloc ((length+1)*sizeof(gchar));
+	for (i = 0; i < length; i++)
+    {
+		buffer[i] = GTK_TEXT_INDEX(GTK_TEXT(Xdialog.widget1), i);
+    }
+#endif
 	temp = popen(cmd, "w");
 	if (temp != NULL) {
-		fwrite(gtk_text_buffer_get_text(text_buffer, &start_iter,
-			&end_iter, FALSE), sizeof(gchar), length, temp);
-		pclose(temp);
+		fwrite (buffer, sizeof(gchar), length, temp);
+		pclose (temp);
 	}
+	g_free(buffer);
 
 	return TRUE;
 }
@@ -753,7 +804,9 @@ gboolean itemlist_timeout(gpointer data)
 
 /* menubox callback */
 
-static void menubox_print_selected(GtkTreeView *tree_view)
+#if GTK_CHECK_VERSION(2,0,0)
+
+static void menubox_print_selected (GtkTreeView *tree_view)
 {
 	GtkTreeSelection *selection;
 	GtkTreeModel *model;
@@ -770,35 +823,93 @@ static void menubox_print_selected(GtkTreeView *tree_view)
 	}
 }
 
-void
-on_menubox_treeview_row_activated_cb (GtkTreeView *tree_view,    GtkTreePath *path,
-                             GtkTreeViewColumn *column, gpointer data)
+void on_menubox_treeview_row_activated_cb (GtkTreeView *tree_view, GtkTreePath *path,
+                                           GtkTreeViewColumn *column, gpointer data)
 {
 	menubox_print_selected (tree_view);
 	exit_ok (NULL, NULL);
 }
 
-void
-on_menubox_ok_click (GtkButton *button, gpointer data)
+void on_menubox_ok_click (GtkButton *button, gpointer data)
 {
 	menubox_print_selected (GTK_TREE_VIEW (data));
 	exit_ok (NULL, NULL);
 }
 
-void
-on_menubox_tip_treeview_changed (GtkTreeSelection *selection, gpointer data)
+void on_menubox_tip_treeview_changed (GtkTreeSelection *selection, gpointer data)
 {
+    if (Xdialog.tips != 1) {
+        return;
+    }
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	gchar *tip;
-	gtk_tree_selection_get_selected(selection, &model, &iter);
-	gtk_tree_model_get (model, &iter, 2, &tip, -1);
-	if (tip) {
-		gtk_statusbar_pop(GTK_STATUSBAR(data), Xdialog.status_id);
-		gtk_statusbar_push(GTK_STATUSBAR(data), Xdialog.status_id, tip);
-		g_free(tip);
+    listname *rowdata;
+	gtk_tree_selection_get_selected (selection, &model, &iter);
+	gtk_tree_model_get (model, &iter, 2, &rowdata, -1);
+    gtk_statusbar_pop  (GTK_STATUSBAR(data), Xdialog.status_id);
+    gtk_statusbar_push (GTK_STATUSBAR(data), Xdialog.status_id, rowdata->tips);
+}
+
+#else // GTK 1
+
+void on_menubox_item_select (GtkObject *clist, gint row, gint column,
+                             GdkEventButton *event, gpointer data)
+{
+	// If the tag is empty, then this is an unavailable item:
+	// select back the last selected row and exit.
+	if (strlen(Xdialog.array[row].tag) == 0) {
+		gtk_clist_select_row(GTK_CLIST(clist), Xdialog.array[0].state, 0);
+		return;
+	}
+	// remember which row was last selected
+    // (store it in the first element state of the array)
+	Xdialog.array[0].state = row;
+	
+    if (Xdialog.tips == 1)
+    {
+		gtk_statusbar_pop  (GTK_STATUSBAR(Xdialog.widget1), Xdialog.status_id);
+		gtk_statusbar_push (GTK_STATUSBAR(Xdialog.widget1), Xdialog.status_id,
+                            Xdialog.array[row].tips);
 	}
 }
+
+static void menubox_print_selected (GtkWidget *list)
+{
+    GList *selection = GTK_CLIST(list)->selection;
+    int      sel_row = GPOINTER_TO_INT(selection->data);
+#if 0
+    // gtk1.2 this segfaults if there are less then 6 rows !!?
+    char *tag;
+    gtk_clist_get_text (GTK_CLIST(list), sel_row, 0, &tag);
+	if (tag) {
+        fprintf(Xdialog.output, "%s\n", tag);
+        g_free(tag);
+	}
+#else
+    listname *rowdata;
+    rowdata = (listname*) gtk_clist_get_row_data (GTK_CLIST(list), sel_row);
+    if (rowdata) {
+        fprintf(Xdialog.output, "%s\n", rowdata->tag);
+    }
+#endif
+}
+
+void on_menubox_ok_click (GtkButton *button, gpointer data)
+{
+	menubox_print_selected (GTK_WIDGET(data));
+	exit_ok (NULL, NULL);
+}
+
+gboolean move_to_row_timeout(gpointer data)
+{
+	gtk_clist_moveto (GTK_CLIST(Xdialog.widget2),
+                      Xdialog.array[0].state, 0, 0.5, 0.0);
+	/* Run this timeout function only once ! */
+	return FALSE;	
+}
+
+#endif
+
 
 /* treeview callback */
 
@@ -816,6 +927,7 @@ gboolean print_tree_selection(GtkButton *button, gpointer data)
 
 void cb_selection_changed(GtkWidget *tree)
 {
+#if GTK_CHECK_VERSION(2,0,0)
 	GtkTreeIter tree_iter;
 	GtkTreeModel *model;
 	GtkTreeSelection* selection;
@@ -836,9 +948,24 @@ void cb_selection_changed(GtkWidget *tree)
 				Xdialog.array[i].state = 0;
 		}
 	}
-
 	if (name) g_free(name);
 	if (tag) g_free(tag);
+#else // GTK1
+	GList *list;
+	GtkWidget *item;
+	int i;
+
+	list = GTK_TREE_SELECTION(tree);
+	if (list != NULL) {
+		item = GTK_WIDGET(list->data);
+		for (i = 0 ; Xdialog.array[i].state != -1 ; i++) {
+			if (Xdialog.array[i].widget == item) {
+				Xdialog.array[0].state = i;
+				break;
+			}
+		}
+	}
+#endif
 }
 
 /* buildlist callbacks */
@@ -848,6 +975,7 @@ void cb_selection_changed(GtkWidget *tree)
  */
 void sensitive_buttons(void)
 {
+#if GTK_CHECK_VERSION(2,0,0)
 	GtkTreeIter tree_iter;
 	GtkTreeModel *model;
 
@@ -866,58 +994,75 @@ void sensitive_buttons(void)
 	} else {
 		gtk_widget_set_sensitive(Xdialog.widget4, FALSE);
 	}
+#else // GTK1
+	gtk_widget_set_sensitive(Xdialog.widget3,
+				 g_list_length(GTK_LIST(Xdialog.widget1)->children) != 0);
+	gtk_widget_set_sensitive(Xdialog.widget4,
+				 g_list_length(GTK_LIST(Xdialog.widget2)->children) != 0);
+#endif
 }
+
 
 gboolean add_to_list(GtkButton *button, gpointer data)
 {
+#if GTK_CHECK_VERSION(2,0,0)
 	GtkTreeIter tree_iter1, tree_iter2;
 	GtkTreeModel *model1, *model2;
 	GtkTreeSelection* selection1;
+    gchar *name, *tag;
 
-	model1 = gtk_tree_view_get_model(GTK_TREE_VIEW(Xdialog.widget1));
-	selection1 = gtk_tree_view_get_selection(GTK_TREE_VIEW(Xdialog.widget1));
-	model2 = gtk_tree_view_get_model(GTK_TREE_VIEW(Xdialog.widget2));
+	model1     = gtk_tree_view_get_model (GTK_TREE_VIEW(Xdialog.widget1));
+	selection1 = gtk_tree_view_get_selection (GTK_TREE_VIEW(Xdialog.widget1));
+	model2     = gtk_tree_view_get_model (GTK_TREE_VIEW(Xdialog.widget2));
 
-	if (gtk_tree_selection_get_selected(selection1, &model1, &tree_iter1)) {
-		gchar *name, *tag;
-		gtk_tree_model_get(model1, &tree_iter1, 0, &name, 1, &tag, -1);
-
-		gtk_list_store_append(GTK_LIST_STORE(model2), &tree_iter2);
-		gtk_list_store_set(GTK_LIST_STORE(model2), &tree_iter2, 0,
-			 name, 1, tag, -1);
-		gtk_list_store_remove(GTK_LIST_STORE(model1), &tree_iter1);
-
-		g_free(name);
-		g_free(tag);
+	if (gtk_tree_selection_get_selected(selection1, &model1, &tree_iter1))
+    {
+		gtk_tree_model_get (model1, &tree_iter1, 0, &name, 1, &tag, -1);
+		gtk_list_store_append (GTK_LIST_STORE(model2), &tree_iter2);
+		gtk_list_store_set (GTK_LIST_STORE(model2), &tree_iter2,  0, name,  1, tag, -1);
+		gtk_list_store_remove (GTK_LIST_STORE(model1), &tree_iter1);
+		g_free (name);
+		g_free (tag);
 	}
-  
+#else // GTK1
+	GList *selected;
+	selected = g_list_copy (GTK_LIST(Xdialog.widget1)->selection);
+	gtk_list_remove_items_no_unref (GTK_LIST(Xdialog.widget1), selected);
+	gtk_list_append_items (GTK_LIST(Xdialog.widget2), selected);
+#endif
 	sensitive_buttons(); 
 
 	return TRUE;
 }
 
+
 gboolean remove_from_list(GtkButton *button, gpointer data)
 {
+#if GTK_CHECK_VERSION(2,0,0)
 	GtkTreeIter tree_iter1, tree_iter2;
 	GtkTreeModel *model1, *model2;
 	GtkTreeSelection* selection2;
+    gchar *name, *tag;
 
-	model1 = gtk_tree_view_get_model(GTK_TREE_VIEW(Xdialog.widget1));
-	model2 = gtk_tree_view_get_model(GTK_TREE_VIEW(Xdialog.widget2));
-	selection2 = gtk_tree_view_get_selection(GTK_TREE_VIEW(Xdialog.widget2));
+	model1 = gtk_tree_view_get_model (GTK_TREE_VIEW(Xdialog.widget1));
+	model2 = gtk_tree_view_get_model (GTK_TREE_VIEW(Xdialog.widget2));
+	selection2 = gtk_tree_view_get_selection (GTK_TREE_VIEW(Xdialog.widget2));
 
-	if (gtk_tree_selection_get_selected(selection2, &model2, &tree_iter2)) {
-		gchar *name, *tag;
-		gtk_tree_model_get(model2, &tree_iter2, 0, &name, 1, &tag, -1);
-
-		gtk_list_store_append(GTK_LIST_STORE(model1), &tree_iter1);
-		gtk_list_store_set(GTK_LIST_STORE(model1), &tree_iter1, 0, name, 1, tag, -1);
-		gtk_list_store_remove(GTK_LIST_STORE(model2), &tree_iter2);
-
-		g_free(name);
-		g_free(tag);
+	if (gtk_tree_selection_get_selected(selection2, &model2, &tree_iter2))
+    {
+		gtk_tree_model_get (model2, &tree_iter2, 0, &name, 1, &tag, -1);
+		gtk_list_store_append (GTK_LIST_STORE(model1), &tree_iter1);
+		gtk_list_store_set (GTK_LIST_STORE(model1), &tree_iter1, 0, name, 1, tag, -1);
+		gtk_list_store_remove (GTK_LIST_STORE(model2), &tree_iter2);
+		g_free (name);
+		g_free (tag);
 	}
-
+#else // GTK1
+	GList *selected;
+	selected = g_list_copy (GTK_LIST(Xdialog.widget2)->selection);
+	gtk_list_remove_items_no_unref (GTK_LIST(Xdialog.widget2), selected);
+	gtk_list_append_items (GTK_LIST(Xdialog.widget1), selected);
+#endif
 	sensitive_buttons();
 
 	return TRUE;
@@ -925,57 +1070,75 @@ gboolean remove_from_list(GtkButton *button, gpointer data)
 
 gboolean print_list(GtkButton *button, gpointer data)
 {
+  	gboolean flag = FALSE;
+#if GTK_CHECK_VERSION(2,0,0)
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	gboolean valid;
-	gboolean flag = FALSE;
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(Xdialog.widget2));
+    char *name_data, *tag_data;
+	model = gtk_tree_view_get_model (GTK_TREE_VIEW(Xdialog.widget2));
 	valid = gtk_tree_model_get_iter_first(model, &iter);
-
-	while (valid) {
-		gchar *name_data, *tag_data;
-
-		gtk_tree_model_get(model, &iter, 0, &name_data, 1, &tag_data, -1);
-
-		if (flag)
+	while (valid)
+    {
+		gtk_tree_model_get (model, &iter, 0, &name_data, 1, &tag_data, -1);
+		if (flag) {
 			fprintf(Xdialog.output, "%s", Xdialog.separator);
-
-		fprintf(Xdialog.output, "%s", tag_data);
+        }
+		fprintf (Xdialog.output, "%s", tag_data);
+		g_free (name_data);
+		g_free (tag_data);
 		flag = TRUE;
-
-		g_free(name_data);
-		g_free(tag_data);
-
 		valid = gtk_tree_model_iter_next(model, &iter);
 	}
-
-	if (flag)
+#else // GTK1
+	GList *children;
+    listname *rowdata;
+	children = GTK_LIST(Xdialog.widget2)->children;
+	while (children)
+    {
+        // children->data = GtkListItem
+        rowdata = (listname*) g_object_get_data (G_OBJECT(children->data), "listitem");
+        if (rowdata) {
+            if (flag) {
+                fprintf(Xdialog.output, "%s", Xdialog.separator);
+            }
+            fprintf(Xdialog.output, "%s", rowdata->tag);
+            flag = TRUE;
+        }
+		children = g_list_next(children);
+	}
+#endif
+	if (flag) {
 		fprintf(Xdialog.output, "\n");
-
+    }
 	return TRUE;
 }
 
 /* fselect callback */
 gboolean filesel_exit(GtkWidget *filesel, gpointer client_data)
 {
+#if GTK_CHECK_VERSION(2,0,0)
 	char *filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (client_data));
 	if (filename) {
 		fprintf(Xdialog.output, "%s\n", filename);
 		g_free (filename);
 	}
+#endif
 	return exit_ok(NULL, NULL);
 }
 
 /* colorsel callback */
 gboolean colorsel_exit(GtkWidget *colorsel, gpointer client_data)
 {
+#if GTK_CHECK_VERSION(2,0,0)
 	GdkColor colors;
-	gtk_color_selection_get_current_color (
-			GTK_COLOR_SELECTION(client_data),
-			&colors);
-	fprintf(Xdialog.output, "%d %d %d\n",
-                colors.red / 256, colors.green / 256, colors.blue / 256);
+	gtk_color_selection_get_current_color (GTK_COLOR_SELECTION(client_data),
+                                           &colors);
+	fprintf (Xdialog.output, "%d %d %d\n",
+             colors.red   / 256,
+             colors.green / 256,
+             colors.blue  / 256);
+#endif
 	return exit_ok(NULL, NULL);
 }
 
@@ -983,9 +1146,11 @@ gboolean colorsel_exit(GtkWidget *colorsel, gpointer client_data)
 
 gboolean fontsel_exit(GtkWidget *fontsel, gpointer client_data)
 {
-	fprintf(Xdialog.output, "%s\n",
-                gtk_font_selection_dialog_get_font_name(GTK_FONT_SELECTION_DIALOG(client_data)));
-	return exit_ok(NULL, NULL);
+    char * font;
+    font = gtk_font_chooser_get_font (GTK_FONT_CHOOSER(client_data));
+    fprintf(Xdialog.output, "%s\n", font);
+    g_free (font);
+    return exit_ok(NULL, NULL);
 }
 
 /* calendar callbacks */
@@ -993,7 +1158,6 @@ gboolean fontsel_exit(GtkWidget *fontsel, gpointer client_data)
 gboolean calendar_exit(gpointer object, gpointer data)
 {
 	guint day, month, year;
-
 	gtk_calendar_get_date(GTK_CALENDAR(Xdialog.widget1), &year, &month, &day);
 	fprintf(Xdialog.output, "%02d/%02d/%d\n", day, month+1, year);
 

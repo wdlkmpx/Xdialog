@@ -2,21 +2,13 @@
  * Command line parsing and main routines for Xdialog.
  */
 
-#ifdef HAVE_CONFIG_H
-#	include <config.h>
-#endif
+#include "common.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <gtk/gtk.h>
 #include <getopt.h>
 
 #include "interface.h"
 #include "support.h"
 #include "time.h"
-#include "gtkcompat.h"
 
 /* A structure used to pass Xdialog parameters. */
 Xdialog_data Xdialog;
@@ -26,14 +18,9 @@ gboolean dialog_compat = FALSE;
 
 /* Usage displaying */
 
-#define HELP_TEXT1 \
-"Xdialog v"VERSION" by Thierry Godefroy <xdialog@free.fr> (v1.0 was\n\
-written by Alfred at Cyberone Internet <alfred@cyberone.com.au>).\n\
-\n\
-Usage: "
-
 #define HELP_TEXT2 \
-" [<common options>] [<transient options>] <box option> ...\n\
+" v"VERSION" \n\
+ Usage: [<common options>] [<transient options>] <box option> ...\n\
 \n\
 Common options:\n\
   --wmclass <name>\n\
@@ -243,12 +230,10 @@ static void print_help_info(char *name, char *errmsg)
 {
 	gchar msg[HELP_MSG_SIZE];
 	gchar cmd[32];
-	GtkTextBuffer *text_buffer;
 
 	strcpy(cmd, strlen(name) < 32 ? name : XDIALOG);
 
-	strncpy(msg, HELP_TEXT1, sizeof(msg));
-	strncat(msg, cmd, sizeof(msg));
+	strncpy(msg, cmd, sizeof(msg));
 	strncat(msg, HELP_TEXT2, sizeof(msg));
 #ifdef USE_SCANF
 	strncat(msg, HELP_TEXT3, sizeof(msg));
@@ -278,9 +263,16 @@ static void print_help_info(char *name, char *errmsg)
 	Xdialog.xorg = Xdialog.yorg = 0;
 	Xdialog.size_in_pixels = FALSE;
 	get_maxsize(&Xdialog.xsize, &Xdialog.ysize);
+
 	create_textbox("", FALSE);
-	text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(Xdialog.widget1));
-	gtk_text_buffer_insert_at_cursor(text_buffer, msg, strlen(msg));
+#if GTK_CHECK_VERSION(2,0,0)
+    GtkTextBuffer *text_buffer;
+	text_buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW(Xdialog.widget1));
+	gtk_text_buffer_insert_at_cursor (text_buffer, msg, strlen(msg));
+#else
+	gtk_text_insert (GTK_TEXT(Xdialog.widget1), NULL, NULL, NULL, msg, strlen(msg));
+#endif
+
 	gtk_widget_show_all (Xdialog.window);
 	gtk_main();
 
@@ -668,11 +660,6 @@ int main(int argc, char *argv[])
 #endif
 	strcpy(Xdialog.title, XDIALOG);			/* Default widget title */
 	strcpy(Xdialog.separator, "/");			/* Default results separator */
-
-	if (gtk_major_version < 1 ||
-	    (gtk_major_version == 1 && gtk_minor_version < 2))
-		fprintf(stderr,
-			"%s: GTK+ version too old, please upgrade !\n", argv[0]);
 
 	/* Set custom log handler routines, so that GTK, GDK and GLIB never
          * print anything on stdout, but always use stderr instead.
