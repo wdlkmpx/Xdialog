@@ -8,7 +8,7 @@
 
 #define INFO_TIME 1000		/* the number of ms an infobox should stay up*/
 
-				/* Names for environment variables */
+/* Names for environment variables */
 #define HIGH_DIALOG_COMPAT	"XDIALOG_HIGH_DIALOG_COMPAT"
 #define FORCE_AUTOSIZE		"XDIALOG_FORCE_AUTOSIZE"
 #define INFOBOX_TIMEOUT		"XDIALOG_INFOBOX_TIMEOUT"
@@ -107,7 +107,6 @@ typedef enum
 
 typedef struct {
 	gint state;
-	GtkWidget *widget;
 	gchar tag[MAX_ITEM_LENGTH];
 	gchar name[MAX_ITEM_LENGTH];
 	gchar tips[MAX_ITEM_LENGTH];
@@ -220,7 +219,8 @@ void create_menubox(gchar *optarg, gchar *options[], gint list_size);
 
 void create_filesel(gchar *optarg, gboolean dsel_flag);
 
-void create_colorsel(gchar *optarg, gdouble *colors);
+///void create_colorsel(gchar *optarg, gdouble *colors);
+void create_colorsel(gchar *optarg, int *rgb);
 
 void create_fontsel(gchar *optarg);
 

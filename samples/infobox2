@@ -1,32 +1,13 @@
 #!/bin/sh
 # this doesn't work with dialog (ncurses)
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
+NO_NCURSES_COMPAT=1
+. ./0common.sh || exit 1
 
-case $1 in
-    cli|-cli|--cli)
-        DIALOG='dialog'
-        shift
-        ;;
-    *dialog*)
-        if [ -x $1 ] ; then
-            DIALOG=$1
-            shift
-        fi
-        ;;
-esac
-
-echo "$DIALOG"
-
-#================================
 
 (sleep 2;echo "XXX";echo "New message";echo "XXX";sleep 2;echo "XXXX") | \
-$DIALOG --title "INFO BOX 2" --infobox "Infobox test" 10 32 0
+$DIALOG --title "INFO BOX 2" \
+        --infobox "Infobox test" 10 32 0
 
 case $? in
 	1)
@@ -36,7 +17,9 @@ case $? in
 esac
 
 (sleep 2;echo "XXX";echo "New";echo "\\n";echo "message";echo "XXX";sleep 2;echo "XXXX") | \
-$DIALOG --title "INFO BOX 2" --no-button --infobox "Infobox test (no button)" 10 32 0
+$DIALOG --title "INFO BOX 2" \
+        --no-button \
+        --infobox "Infobox test (no button)" 10 32 0
 
 if [ "$?" = 255 ] ; then
 	echo "Box closed."

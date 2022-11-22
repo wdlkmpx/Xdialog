@@ -1,59 +1,37 @@
 #!/bin/sh
 # --logbox is not compatible with (c)dialog [ncurses]
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
-
-case $1 in
-    cli|-cli|--cli)
-        DIALOG='dialog'
-        echo "this is not compatible with (c)dialog [ncurses]"
-        exit 0
-        ;;
-    *dialog*)
-        if [ -x $1 ] ; then
-            DIALOG=$1
-            shift
-        fi
-        ;;
-esac
-
-echo "$DIALOG"
-
-#================================
+NO_NCURSES_COMPAT=1
+. ./0common.sh || exit 1
 
 LOGFILE=/tmp/logbox.tmp.$$
 
 REVERSE=""
 TIMESTAMP=""
-CHOICE=`$DIALOG --stdout --title "LOGBOX" \
-		--check "I want the messages to appear in reverse order" \
-		--no-tags --no-cancel --no-close \
+CHOICE=$(
+$DIALOG --stdout \
+        --title "LOGBOX" \
+		--check "I want the messages to appear in _reverse order" \
+		--no-tags \
+        --no-cancel \
+        --no-close \
 		--radiolist "What type of time stamps do you want in the log box ?" 0 0 0 \
 			    "none" "No stamps at all"				"off" \
 			    "time" "Time (HH:MM:SS) only"			"off"\
-			    "date" "Date and time (DD/MM/YYYY HH:MM:SS)"	"on"`
+			    "date" "Date and time (DD/MM/YYYY HH:MM:SS)"	"on"
+)
 for i in $CHOICE ; do
 	case $i in
-		checked)
-			REVERSE="--reverse"
-			;;
-		time)
-			TIMESTAMP="--time-stamp"
-			;;
-		date)
-			TIMESTAMP="--date-stamp"
-			;;
+		checked) REVERSE="--reverse" ;;
+		time)    TIMESTAMP="--time-stamp" ;;
+		date)    TIMESTAMP="--date-stamp" ;;
 	esac
 done
 
 touch $LOGFILE
 
-$DIALOG --title "LOGBOX" $TIMESTAMP $REVERSE --logbox $LOGFILE 0 0 &
+$DIALOG --title "LOGBOX" $TIMESTAMP $REVERSE \
+        --logbox $LOGFILE 0 0 &
 
 echo "Normal text 1." >>$LOGFILE
 echo "Normal text 2." >>$LOGFILE

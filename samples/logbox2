@@ -1,37 +1,16 @@
 #!/bin/sh
 # --logbox is not compatible with (c)dialog [ncurses]
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
+NO_NCURSES_COMPAT=1
+. ./0common.sh || exit 1
 
-case $1 in
-    cli|-cli|--cli)
-        DIALOG='dialog'
-        echo "this is not compatible with (c)dialog [ncurses]"
-        exit 0
-        ;;
-    *dialog*)
-        if [ -x $1 ] ; then
-            DIALOG=$1
-            shift
-        fi
-        ;;
-esac
-
-echo "$DIALOG"
-
-#================================
 
 LOGFILE=/tmp/logbox.tmp.$$
 
 REVERSE=""
 TIMESTAMP=""
 CHOICE=`$DIALOG --stdout --title "LOGBOX" \
-		--check "I want the messages to appear in reverse order" \
+		--check "I want the messages to appear in _reverse order" \
 		--no-tags --no-cancel --no-close \
 		--radiolist "What type of time stamps do you want in the log box ?" 0 0 0 \
 			    "none" "No stamps at all"				"off" \
@@ -53,9 +32,12 @@ done
 
 touch $LOGFILE
 
-$DIALOG --title "LOGBOX" --backtitle "This logbox uses the --keep-colors option" \
-	--this-option-does-not-exist-and-will-therefore-be-ignored \
-	$TIMESTAMP $REVERSE --keep-colors --smooth --logbox $LOGFILE 0 0 &
+$DIALOG --title "LOGBOX" $TIMESTAMP $REVERSE \
+        --backtitle "This logbox uses the --keep-colors option" \
+        --this-option-does-not-exist-and-will-therefore-be-ignored \
+        --keep-colors \
+        --smooth \
+        --logbox $LOGFILE 0 0 &
 
 echo "Normal text 1." >>$LOGFILE
 echo "Normal text 2." >>$LOGFILE

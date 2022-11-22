@@ -1,32 +1,14 @@
 #!/bin/sh
 # --fontsel is not compatible with (c)dialog [ncurses]
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
+NO_NCURSES_COMPAT=1
+. ./0common.sh || exit 1
 
-case $1 in
-    cli|-cli|--cli)
-        DIALOG='dialog'
-        echo "this is not compatible with (c)dialog [ncurses]"
-        exit 0
-        ;;
-    *dialog*)
-        if [ -x $1 ] ; then
-            DIALOG=$1
-            shift
-        fi
-        ;;
-esac
-
-echo "$DIALOG"
-
-#================================
-
-FONTX=`$DIALOG --stdout --title "Select font" --fontsel "Choose a font..." 0 0`
+FONTX=$(
+$DIALOG --stdout \
+        --title "Select font" \
+        --fontsel "Choose a font..." 0 0
+)
 
 case $? in
 	0)   echo "Selected font: $FONTX." ;;

@@ -1,41 +1,24 @@
 #!/bin/sh
 # works in both gtk and curses but the behavior is a bit different
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
+. ./0common.sh || exit 1
+#        --default-item tag3 \
 
-case $1 in
-    cli|-cli|--cli)
-        DIALOG='dialog'
-        shift
-        ;;
-    *dialog*)
-        if [ -x $1 ] ; then
-            DIALOG=$1
-            shift
-        fi
-        ;;
-esac
 
-echo "$DIALOG"
-
-#================================
-
-CHOICE=`$DIALOG --stdout --title "TREE VIEW BOX" \
-		--treeview "treeview box demo" 0 0 0 \
-			   tag1 one off 0 \
-			   tag2 two off 1 \
-			   tag3 three on 2 \
-			   tag4 four off 1 \
-			   tag5 five off 2 \
-			   tag6 six off 3 \
-			   tag7 seven off 3 \
-			   tag8 eight off 4 \
-			   tag9 nine off 1`
+CHOICE=$(
+$DIALOG --stdout \
+        --title "TREE VIEW BOX" \
+        --treeview "treeview box demo" 0 0 0 \
+            tag1 one off 0 \
+            tag2 two off 1 \
+            tag3 three on 2 \
+            tag4 four off 1 \
+            tag5 five off 2 \
+            tag6 six off 3 \
+            tag7 seven off 3 \
+            tag8 eight off 4 \
+            tag9 nine off 1
+)
 
 case $? in
 	0)

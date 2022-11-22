@@ -1,28 +1,6 @@
 #!/bin/sh
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
-
-case $1 in
-    cli|-cli|--cli)
-        DIALOG='dialog'
-        shift
-        ;;
-    *dialog*)
-        if [ -x $1 ] ; then
-            DIALOG=$1
-            shift
-        fi
-        ;;
-esac
-
-echo "$DIALOG"
-
-#================================
+. ./0common.sh || exit 1
 
 (
 echo "10" ; sleep 1
@@ -31,8 +9,9 @@ echo "20" ; sleep 1
 echo "50" ; sleep 1
 echo "75" ; sleep 1
 echo "100" ; sleep 1
-) |
-$DIALOG --title "GAUGE" --gauge "Hi, this is a gauge widget" 8 30
+) | \
+$DIALOG --title "GAUGE" \
+        --gauge "Hi, this is a gauge widget" 8 30
 
 if [ "$?" = 255 ] ; then
 	echo ""

@@ -1,104 +1,55 @@
-#!/bin/sh
+#!/bin/bash
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
-
-case $1 in
-    cli|-cli|--cli)
-        DIALOG='dialog'
-        shift
-        ;;
-    *dialog*)
-        if [ -x $1 ] ; then
-            DIALOG=$1
-            shift
-        fi
-        ;;
-esac
-
-echo "$DIALOG"
-
-#================================
+. ./0common.sh || exit 1
 
 case $0 in
-    *itemhelp*) itemhelp=yes ;;
+    *itemhelp*)
+        # this is for testing purposes, help tips with spaces don't work
+        # because you need to add quotes to the index: "${item_help[1]}"
+        #     in that case you need specify a different command
+        item_help=("--item-help" #index 0
+            "help1" "help2" "help3" "help4" "help5" "help6" "help7"
+            "help8" "help9" "help10" "help11" "help12" "help13" "help14"
+            "help15" "help16" "help17" "help18" "help19" "help20" 
+            "help21" "help22" "help23" "help24" "help25")
+        ;;
 esac
 
-if [ "$itemhelp" = "" ] ; then
-    result=`
+
+result=$(
 $DIALOG --title "XDIALOG BUILDLIST" \
         --backtitle "A user-built list" \
-		--stdout \
-        --separator "|" \
-		--buildlist "hello, this is a --buildlist..." 0 0 0 \
-            "1" "Item n° 1" "on" \
-            "2" "Item n° 2" "off" \
-            "3" "Item n° 3" "on" \
-            "4" "Item n° 4" "on" \
-            "5" "Item n° 5" "off" \
-            "6" "Item n° 6" "on" \
-            "7" "Item n° 7" "on" \
-            "8" "Item n° 8" "on" \
-            "9" "Item n° 9" "on" \
-            "10" "Item n° 10" "on" \
-            "11" "Item n° 11" "on" \
-            "12" "Item n° 12" "on" \
-            "13" "Item n° 13" "on" \
-            "14" "Item n° 14" "on" \
-            "15" "Item n° 15" "on" \
-            "16" "Item n° 16" "on" \
-            "17" "Item n° 17" "on" \
-            "18" "Item n° 18" "on" \
-            "19" "Item n° 19" "on" \
-            "20" "Item n° 20" "on" \
-            "21" "Item n° 21" "on" \
-            "22" "Item n° 22" "off" \
-            "23" "Item n° 23" "off" \
-            "24" "Item n° 24" "off" \
-            "25" "Item n° 25" "unavailable" \
-        `
-
-else # --item-help
-    result=`
-$DIALOG --title "XDIALOG BUILDLIST" \
-        --backtitle "A user-built list" \
-		--stdout \
-        --separator "|" \
-        --item-help \
-		--buildlist "hello, this is a --buildlist..." 0 0 0 \
-            "1" "Item n° 1" "on" "help1" \
-            "2" "Item n° 2" "off" "help2" \
-            "3" "Item n° 3" "on" "help3" \
-            "4" "Item n° 4" "on" "help4" \
-            "5" "Item n° 5" "off" "help5" \
-            "6" "Item n° 6" "on" "help6" \
-            "7" "Item n° 7" "on" "help7" \
-            "8" "Item n° 8" "on" "help8" \
-            "9" "Item n° 9" "on" "help9" \
-            "10" "Item n° 10" "on" "help10" \
-            "11" "Item n° 11" "on" "help11" \
-            "12" "Item n° 12" "on" "help12" \
-            "13" "Item n° 13" "on" "help13" \
-            "14" "Item n° 14" "on" "help14" \
-            "15" "Item n° 15" "on" "help15" \
-            "16" "Item n° 16" "on" "help16" \
-            "17" "Item n° 17" "on" "help17" \
-            "18" "Item n° 18" "on" "help18" \
-            "19" "Item n° 19" "on" "help19" \
-            "20" "Item n° 20" "on" "help20" \
-            "21" "Item n° 21" "on" "help21" \
-            "22" "Item n° 22" "off" "help22" \
-            "23" "Item n° 23" "off" "help23" \
-            "24" "Item n° 24" "off" "help24" \
-            "25" "Item n° 25" "unavailable" "help25" \
-        `
-fi
-
+        --stdout \
+        --separator "|" ${item_help[0]} \
+        --buildlist "hello, this is a --buildlist..." 0 0 0 \
+            "1"  "Item n° 1" "on"   ${item_help[1]} \
+            "2"  "Item n° 2" "off"  ${item_help[2]} \
+            "3"  "Item n° 3" "on"   ${item_help[3]} \
+            "4"  "Item n° 4" "on"   ${item_help[4]} \
+            "5"  "Item n° 5" "off"  ${item_help[5]} \
+            "6"  "Item n° 6" "on"   ${item_help[6]} \
+            "7"  "Item n° 7" "on"   ${item_help[7]} \
+            "8"  "Item n° 8" "on"   ${item_help[8]} \
+            "9"  "Item n° 9" "on"   ${item_help[9]} \
+            "10" "Item n° 10" "on"  ${item_help[10]} \
+            "11" "Item n° 11" "on"  ${item_help[11]} \
+            "12" "Item n° 12" "on"  ${item_help[12]} \
+            "13" "Item n° 13" "on"  ${item_help[13]} \
+            "14" "Item n° 14" "on"  ${item_help[14]} \
+            "15" "Item n° 15" "on"  ${item_help[15]} \
+            "16" "Item n° 16" "on"  ${item_help[16]} \
+            "17" "Item n° 17" "on"  ${item_help[17]} \
+            "18" "Item n° 18" "on"  ${item_help[18]} \
+            "19" "Item n° 19" "on"  ${item_help[19]} \
+            "20" "Item n° 20" "on"  ${item_help[20]} \
+            "21" "Item n° 21" "on"  ${item_help[21]} \
+            "22" "Item n° 22" "off" ${item_help[22]} \
+            "23" "Item n° 23" "off" ${item_help[23]} \
+            "24" "Item n° 24" "off" ${item_help[24]} \
+            "25" "Item n° 25" "unavailable" ${item_help[25]}
+)
 retval=$?
+
 case $retval in
   0)
     echo "The user-built list is '$result'.";;

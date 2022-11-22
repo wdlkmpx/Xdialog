@@ -1,28 +1,6 @@
 #!/bin/sh
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
-
-case $1 in
-    cli|-cli|--cli)
-        DIALOG='dialog'
-        shift
-        ;;
-    *dialog*)
-        if [ -x $1 ] ; then
-            DIALOG=$1
-            shift
-        fi
-        ;;
-esac
-
-echo "$DIALOG"
-
-#================================
+. ./0common.sh || exit 1
 
 # This little script is aimed at easing the Linux kernel compilation and
 # installation. No guarantee is given on its suitability to your own system

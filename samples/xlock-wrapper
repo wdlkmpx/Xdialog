@@ -2,29 +2,8 @@
 # don't use --menubox, --menu is compatible with the curses dialog
 # --check "$CHECKER" is not supported by the ncurses dialog
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
+. ./0common.sh || exit 1
 
-case $1 in
-    cli|-cli|--cli)
-        DIALOG='dialog'
-        shift
-        ;;
-    *dialog*)
-        if [ -x $1 ] ; then
-            DIALOG=$1
-            shift
-        fi
-        ;;
-esac
-
-echo "$DIALOG"
-
-#================================
 
 TITLE="Screen saver"
 PROMPT="Please choose the mode:"

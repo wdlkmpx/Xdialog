@@ -2,22 +2,8 @@
 
 Xdialog_opts='--wrap --help "This is the help message...\nNot very helpful, indeed ! ;-)"'
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
+. ./0common.sh || exit 1
 
-case $1 in cli|-cli|--cli)
-    DIALOG='dialog'
-    Xdialog_opts=''
-    ;;
-esac
-
-echo "$DIALOG"
-
-#================================
 
 $DIALOG --title "YES/NO BOX" ${Xdialog_opts} \
         --yesno "Hi, this is a yes/no dialog box. You can use this to ask \

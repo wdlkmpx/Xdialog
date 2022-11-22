@@ -1,28 +1,7 @@
 #!/bin/sh
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
+. ./0common.sh || exit 1
 
-case $1 in
-    cli|-cli|--cli)
-        DIALOG='dialog'
-        shift
-        ;;
-    *dialog*)
-        if [ -x $1 ] ; then
-            DIALOG=$1
-            shift
-        fi
-        ;;
-esac
-
-echo "$DIALOG"
-
-#================================
 
 cat << EOF > /tmp/textbox.tmp.$$
 Hi, this is a text dialog box. It can be used to display text from a file.
@@ -41,7 +20,8 @@ EOF
 
 cat /etc/services | expand >> /tmp/textbox.tmp.$$
 
-$DIALOG --title "TEXT BOX" --textbox "/tmp/textbox.tmp.$$" 0 0
+$DIALOG --title "TEXT BOX" \
+        --textbox "/tmp/textbox.tmp.$$" 0 0
 
 case $? in
   0)

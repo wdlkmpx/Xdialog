@@ -1,37 +1,17 @@
 #!/bin/sh
 # this is not compatible with (c)dialog [ncurses]
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
+NO_NCURSES_COMPAT=1
+. ./0common.sh || exit 1
 
-case $1 in
-    cli|-cli|--cli)
-        DIALOG='dialog'
-        echo "this is not compatible with (c)dialog [ncurses]"
-        exit 0
-        ;;
-    *dialog*)
-        if [ -x $1 ] ; then
-            DIALOG=$1
-            shift
-        fi
-        ;;
-esac
-
-echo "$DIALOG"
-
-#================================
-
-NAME=`$DIALOG --stdout --wrap --title "Chain test" \
-	      --msgbox "This is a simple dialogs chaining demonstration" 0 0 \
-	      --buttons-style text --yesno "Continue ?" 0 0 \
-	      --buttons-style icon --inputbox "Please give me your name" 0 0 "" \
-	      --icon ./dialog-warning.png --rc-file ./bluebox.rc --buttons-style default \
-	      --msgbox "End of demo..." 0 0`
+NAME=$(
+$DIALOG --stdout --wrap --title "Chain test" \
+        --msgbox "This is a simple dialogs chaining demonstration" 0 0 \
+        --buttons-style text --yesno "Continue ?" 0 0 \
+        --buttons-style icon --inputbox "Please give me your name" 0 0 "" \
+        --icon ./dialog-warning.png --rc-file ./bluebox.rc --buttons-style default \
+        --msgbox "End of demo..." 0 0
+)
 
 case $? in
 	0)

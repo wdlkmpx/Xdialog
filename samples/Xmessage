@@ -1,27 +1,9 @@
 #!/bin/sh
-# this example doesn't work, needs fixing or it should be removed
+# this example doesn't work using cli options, needs fixing or it should be removed
+# this doesn't work with n curses dialog
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
-
-case $1 in
-    cli|-cli|--cli)
-        DIALOG='dialog'
-        shift
-        ;;
-    *dialog*)
-        if [ -x $1 ] ; then
-            DIALOG=$1
-            shift
-        fi
-        ;;
-esac
-
-echo "$DIALOG"
+NO_NCURSES_COMPAT=1
+. ./0common.sh || exit 1
 
 #================================
 

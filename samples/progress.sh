@@ -1,33 +1,12 @@
 #!/bin/sh
 # --progress is not compatible with (c)dialog [ncurses]
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
+NO_NCURSES_COMPAT=1
+. ./0common.sh || exit 1
 
-case $1 in
-    cli|-cli|--cli)
-        DIALOG='dialog'
-        echo "this is not compatible with (c)dialog [ncurses]"
-        exit 0
-        ;;
-    *dialog*)
-        if [ -x $1 ] ; then
-            DIALOG=$1
-            shift
-        fi
-        ;;
-esac
-
-echo "$DIALOG"
-
-#================================
+#====================================================
 
 ENTRIES=200
-
 (
 i=0
 while [ $i -le $ENTRIES ]
@@ -37,8 +16,7 @@ do
 done
 ) |
 $DIALOG --title "PROGRESS" \
-	--progress "Processing 200 entries..." \
-	8 60 $ENTRIES
+        --progress "Processing 200 entries..." 8 60 $ENTRIES
 
 #====================================================
 
@@ -52,8 +30,7 @@ echo "X" ; sleep 1
 echo "X" ; sleep 1
 ) |
 $DIALOG --title "PROGRESS" \
-	--progress "Hi, this is a progress widget" \
-	8 60 6
+        --progress "Hi, this is a progress widget" 8 60 6
 
 if [ "$?" = 255 ] ; then
 	echo ""

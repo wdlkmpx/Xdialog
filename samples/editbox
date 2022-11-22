@@ -2,30 +2,8 @@
 
 Xdialog_opts='--fixed-font --print ""'
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
+. ./0common.sh || exit 1
 
-case $1 in
-    cli|-cli|--cli)
-        DIALOG='dialog'
-        Xdialog_opts=
-        shift
-        ;;
-    *dialog*)
-        if [ -x $1 ] ; then
-            DIALOG=$1
-            shift
-        fi
-        ;;
-esac
-
-echo "$DIALOG"
-
-#================================
 
 cat << EOF > /tmp/editbox.tmp.$$
 Hi, this is an edit box. It can be used to edit text from a file.
@@ -50,7 +28,7 @@ Try to input some text below:
 EOF
 
 $DIALOG --title "EDIT BOX" ${Xdialog_opts} \
-	--editbox /tmp/editbox.tmp.$$ 0 0 2>/tmp/editbox.txt.$$
+        --editbox /tmp/editbox.tmp.$$ 0 0 2>/tmp/editbox.txt.$$
 
 case $? in
   0)

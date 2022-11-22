@@ -1,39 +1,25 @@
 #!/bin/sh
 # --2inputsbox/--password/-left is not supported by dialog (ncurses)
 
-DIALOG='Xdialog'
-if [ -x ./Xdialog ] ; then
-    DIALOG='./Xdialog'
-elif [ -x ../Xdialog ] ; then
-    DIALOG='../Xdialog'
-fi
+NO_NCURSES_COMPAT=1
+. ./0common.sh || exit 1
 
-case $1 in
-    cli|-cli|--cli)
-        DIALOG='dialog'
-        echo "this is not compatible with (c)dialog [ncurses]"
-        exit 0
-        ;;
-    *dialog*)
-        if [ -x $1 ] ; then
-            DIALOG=$1
-            shift
-        fi
-        ;;
-esac
 
-echo "$DIALOG"
-
-#================================
-
-LOGIN1=`$DIALOG	--stdout --separator "|" \
-		--title "Login" --backtitle "System login" \
-		--icon ./dialog-error.png --left --password \
-		--2inputsbox "Restricted access, authorized users only !\nPlease login..." 0 0 \
-			     "Your login name:" "root" \
-			     "Your password:" "" \
-		--no-close --no-cancel --msgbox "Thank you !" 0 0`
-
+LOGIN1=$(
+$DIALOG --stdout \
+        --separator "|" \
+        --title "Login" \
+        --backtitle "System login" \
+        --icon ./dialog-error.png \
+        --left \
+        --password \
+        --2inputsbox "Restricted access, authorized users only !\nPlease login..." 0 0 \
+            "Your login name:" "root" \
+            "Your password:" "" \
+        --no-close \
+        --no-cancel \
+        --msgbox "Thank you !" 0 0
+)
 ret=$?
 
 case $ret in

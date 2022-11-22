@@ -2,7 +2,7 @@
 
 # Project name and version
 PACKAGE="Xdialog"
-VERSION="2.6.5w"
+VERSION="2.7w"
 PACKAGE_URL=''
 
 # Flags that will be used in all makefiles that compile code...
@@ -35,6 +35,10 @@ w_main_func()
 	w_check_headers_required stdio.h
 }
 
+w_finish_func()
+{
+    printf ""
+}
 
 #=====================================================================
 # special scripts for optional features and various tasks
@@ -71,7 +75,6 @@ extra_packages_opts="$extra_packages_opts xdialog"
 opt_pkg_print_xdialog()
 {
 	echo "  --with-fixed-font=font_name  Sets the fixed font to be used"
-	echo "  --with-scanf-calls           Use scanf calls instead of non-blocking reads"
 	echo "  --with-print-command=cmd     Sets the printer command to be used "
 	echo "  --with-print-option=option   Sets the printer command option to be used"
 }
@@ -107,9 +110,6 @@ opt_configure_xdialog()
 			else
 				CFLAGS="$CFLAGS -DPRINTER_CMD_OPTION=\\\"$withval\\\""
 			fi
-			;;
-		--with-scanf-calls)
-			CFLAGS="$CFLAGS -DUSE_SCANF"
 			;;
 		esac
 	done
